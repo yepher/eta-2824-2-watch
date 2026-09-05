@@ -1,5 +1,7 @@
 # ETA 2824-2 — a Cade reference reconstruction
 
+see also [Printables](https://www.printables.com/model/1833588-eta-2824-2-watch-movement)
+
 An ETA 2824-2 movement and a simplified watch around it, reconstructed in
 [Cade](#the-cade-toolchain) from published references and explicitly labeled
 engineering estimates.
