@@ -14,6 +14,9 @@ Parts named `*_envelope` are provisional volumes, not real geometry. Read
 [ASSUMPTIONS.md](ASSUMPTIONS.md) and [GAPS.md](GAPS.md) before trusting any
 dimension, and [NOTICE.md](NOTICE.md) for trademark and third-party terms.
 
+![rendered watch](rendered/watch_render.jpeg)
+
+
 ## Layout
 
 | Path | What it is |
