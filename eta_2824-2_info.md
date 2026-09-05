@@ -265,6 +265,52 @@ ratio-constrained: `(12/36) * (10/40) = 1/12`. The date indicator alone retains
 its drawing-supported 31 internal teeth. Tooth blocks are visual envelopes, not
 production involute or cycloidal profiles.
 
+#### Derived train, 2026-09-05 (supersedes the 2026-09-05 rough hypothesis)
+
+The rough-envelope counts were replaced with a chain that closes and a module
+per mesh, so every wheel radius is now `m * z / 2` rather than an independent
+estimate. Only the escape wheel's 20 teeth carry secondary evidence; every other
+count is an `expert_estimate` constrained by the chain closing.
+
+Going train, with the second wheel turning once an hour:
+
+```text
+second 75 / third pinion 10   = 7.5   -> third   7.5 rev/h
+third  80 / fourth pinion 10  = 8     -> fourth  60  rev/h = 1 rev/min
+fourth 84 / escape pinion 7   = 12    -> escape 720  rev/h
+720 * 20 teeth * 2                    = 28,800 vibrations/hour
+```
+
+Modules step down toward the escapement so the wheels shrink as torque falls,
+which is what lets the train fit a 25.60 mm plate: barrel-second 0.100,
+second-third 0.085, third-fourth 0.070, fourth-escape 0.050.
+
+The fourth wheel is the CENTRE SECONDS wheel and sits on the movement axis. The
+cannon pinion is a tube around its arbor and is driven indirectly:
+
+```text
+second wheel (1 rev/h) -> dial pinion 12 -> idler 40 -> minute wheel 36
+                       -> cannon pinion 12          (1:1, an idler adds no ratio)
+cannon 12 / minute 36 * minute pinion 10 / hour 40  = 1/12
+```
+
+Automatic winding, module 0.120 from the rotor to the reduction wheel and 0.100
+from there to the ratchet:
+
+```text
+rotor pinion 40 -> reversing wheels 27 and 28, 34 each -> reduction wheel 29, 52
+reduction pinion 12 -> driving wheel 26, 42
+driving pinion 10   -> ratchet wheel 20, 63
+1 rotor turn = 0.03489 ratchet turns, so 28.7 turns of the weight per ratchet turn
+```
+
+The rotor pinion's 2.40 mm pitch radius is not a free choice: it is cut around
+the ball bearing, and it sets the scale of the whole module.
+
+Winding train: crown wheel 26 and ratchet wheel 63 on module 0.100, centre
+distance 4.45 mm. The 90-degree face-gear interface from the stem's winding
+pinion to the crown wheel is UNRESOLVED and deliberately not modelled.
+
 ### Hand-fitting diameters and normal H2 heights
 
 The drawing's asymmetric diameter tolerances are stated in thousandths of a
@@ -324,6 +370,249 @@ ETA 2824-2 components. Build the internal CAD model as a measured reconstruction
 This approach can recover practical assembly geometry, but pivots, jewel fits,
 spring geometry, escapement faces, and press fits need substantially tighter
 measurement and should not be reverse-engineered from catalog photographs.
+
+## Drawing-scaled dimensions from the ETA materials page
+
+Added 2026-09-05. This is a new and much stronger evidence class than the photo
+estimates most of this model was built on, and it changes several parts
+materially.
+
+Page 6 of the local ETA Technical Communication (footer
+`CT 2824-2 FDE 481688 22`, 10.05.2016) is the "Fournitures - Bestandteile -
+Materials" page. Every component is drawn there in plan *and* elevation at one
+common scale. Position `1 Var`, the main plate, is drawn in plan at the
+published movement diameter of 25.60mm, and that single published number
+calibrates the whole page. Every other silhouette on it therefore becomes a
+measurable dimension.
+
+Reproduce with:
+
+```sh
+python3 tools/scale_materials_page.py "references/ETA Caliber 2824-2 Watch Movement.pdf"
+```
+
+Confidence and limits. The embedded scan is 150 ppi, so the page is about
+0.13mm per pixel at life size. An outline spanning many pixels -- a diameter, an
+overall thickness -- is good to roughly +/-0.1mm. Individual teeth are at or
+below one pixel and **cannot** be counted except on the coarsest wheels, so
+tooth counts below are stated only where the count actually resolved. These are
+`drawing_scaled` values: better than a photo estimate, weaker than a dimensioned
+drawing, and never to be promoted to a manufacturing dimension.
+
+| Pos | Part | Plan / diameter | Elevation / height |
+| --- | --- | --- | --- |
+| 1 Var | Main plate | 25.60 (calibration) | - |
+| 2 | Winding pinion | 1.60 long | 1.45 dia |
+| 3 | Sliding pinion | 1.21 long | 1.50 dia |
+| 4 Var | Winding stem with crown | 17.13 overall length | crown 4.45 dia |
+| 5 | Setting lever | 7.02 x 3.53 | 1.45 |
+| 6 | Yoke | 5.86 x 3.19 | 1.74 |
+| 7 | Setting lever jumper | 8.86 x 2.66 | - |
+| 8 | Setting wheel assembly | 13.50 x 5.47 | - |
+| 9 | Escape wheel | 4.94 dia | 2.71 over pivots |
+| 10 | Third wheel | 6.78 dia | 3.29 over pivots |
+| 11 | Second wheel | 6.97 dia | 3.24 over pivots |
+| 12 Var | Centre / great wheel | 7.02 dia | 4.94 over pivots |
+| 13 Var | Train wheel bridge | 20.81 x 13.60 | - |
+| 14 Var | Barrel complete | **12.29 dia** | 3.29 over arbor |
+| 15 | Click spring | 6.10 x 3.24 | - |
+| 16 Var | Barrel bridge | 17.28 x 17.91 | - |
+| 17 | Click | 3.34 x 3.00 | 1.31 |
+| 18 | Click spring | 2.42 x 1.84 | - |
+| 19 | Crown wheel | **6.29 dia, 26 teeth** | **0.82** |
+| 20 | Ratchet wheel | **7.40 dia** | **0.53** |
+| 21 Var | Pallet fork | 3.48 x 3.92 | 1.45 |
+| 22 Var | Pallet bridge | 7.11 x 7.36 | 1.50 |
+| 23 | Balance complete | **10.50 dia** | 2.95 over pivots |
+| 24 Var | Balance cock with regulator | 8.23 x 15.44 | - |
+| 25 Var | Automatic device framework | 13.50 x 16.45 | - |
+| 26 | Automatic driving wheel | **5.86 dia** | 0.97 |
+| 27 | Reversing wheel | 4.50 dia | 1.60 |
+| 28 | Reversing wheel | 4.55 dia | 1.60 |
+| 29 | Reduction wheel | 4.94 dia | 1.65 |
+| 30 | Reduction wheel bridge | 10.65 x 5.76 | 1.50 |
+| 31 Var | Oscillating weight | **24.92** x 16.45 | - |
+| 31-2 | Ball bearing | 5.61 dia | 1.21 |
+
+### Complete measured table
+
+Every silhouette on the page, in page order. A part drawn in two views
+has both listed: which is plan and which is elevation is stated where it
+matters, and left open where the two are not distinguishable from the
+outline alone. All values in millimetres.
+
+| Pos | View 1 (w x h) | View 2 (w x h) | View 3 (w x h) |
+| --- | --- | --- | --- |
+| 1 Var | 25.60 x 25.60 | - | - |
+| 1-1 | 4.21 x 2.23 | 2.47 x 1.45 | - |
+| 1-2 | 2.47 x 0.92 | 2.42 x 2.47 | 2.76 x 1.45 |
+| 2 | 1.60 x 2.03 | 1.02 x 1.45 | - |
+| 3 | 0.92 x 2.95 | 1.02 x 1.50 | - |
+| 4 Var | 17.13 x 4.84 | 4.45 x 1.50 | - |
+| 5 | 7.02 x 1.45 | 6.97 x 3.53 | 1.02 x 1.50 |
+| 6 | 5.86 x 1.74 | 5.81 x 3.19 | - |
+| 7 | 8.86 x 2.66 | - | - |
+| 8 | 13.50 x 5.47 | - | - |
+| 9 | 4.94 x 2.71 | 4.94 x 4.94 | - |
+| 10 | 6.82 x 3.29 | 6.78 x 6.73 | - |
+| 11 | 7.07 x 3.24 | 6.97 x 6.97 | - |
+| 12 Var | 7.02 x 4.94 | 7.02 x 6.97 | - |
+| 13 Var | 20.81 x 13.60 | - | - |
+| 14 Var | 12.29 x 3.29 | 12.29 x 12.29 | - |
+| 15 | 6.10 x 3.24 | 1.98 x 1.50 | - |
+| 16 Var | 17.28 x 17.91 | - | - |
+| 17 | 3.48 x 1.31 | 3.34 x 3.00 | - |
+| 18 | 2.42 x 1.84 | 2.03 x 1.50 | - |
+| 19 | 6.44 x 0.82 | 6.29 x 6.24 | - |
+| 20 | 7.55 x 0.53 | 7.40 x 7.45 | - |
+| 21 Var | 3.58 x 1.45 | 3.48 x 3.92 | - |
+| 22 Var | 7.11 x 7.36 | 5.47 x 1.50 | - |
+| 23 | 10.55 x 2.95 | 10.50 x 10.55 | - |
+| 24 Var | 8.23 x 15.44 | - | - |
+| 24-1 Var | 8.18 x 13.84 | - | - |
+| 24-2 | 5.27 x 4.21 | - | - |
+| 24-3 | 4.94 x 3.68 | - | - |
+| 24-4 | 6.39 x 3.34 | - | - |
+| 24-5 | 1.45 x 0.97 | 1.45 x 1.36 | - |
+| 24-6 | 3.63 x 0.92 | 3.58 x 3.58 | - |
+| 25 Var | 13.50 x 16.45 | - | - |
+| 26 | 5.90 x 0.97 | 5.86 x 5.86 | - |
+| 27 | 4.65 x 1.60 | 4.50 x 4.45 | - |
+| 28 | 4.60 x 1.60 | 4.55 x 4.45 | - |
+| 29 | 5.08 x 1.65 | 4.94 x 4.98 | - |
+| 30 | 10.65 x 5.76 | 2.08 x 1.50 | - |
+| 31 Var | 24.92 x 16.45 | - | - |
+| 31-1 Var | 24.87 x 16.45 | - | - |
+| 31-2 | 5.71 x 1.21 | 5.61 x 5.61 | - |
+
+### What this changes
+
+The crown wheel resolved its own tooth count: 26 teeth at 6.29mm outside
+diameter gives module 0.23, not the 0.100 this model had been using for the
+winding train. That one correction cascades:
+
+- Crown wheel pitch radius 2.990, tip 3.220, root 2.700.
+- Ratchet wheel on the same module at 7.40 outside diameter is 31 teeth, pitch
+  radius 3.565. The model's earlier 63 teeth on module 0.100 is not supported.
+- Crown-to-ratchet centre distance 6.555.
+- Winding pinion at 1.45-1.60 outside diameter is 5 teeth on module 0.23,
+  pitch radius 0.575, tip radius 0.805.
+
+The crown wheel being modelled 2.5x too small is why the winding pinion could
+not reach it, and why that interface was recorded as unresolved in `ERRORS.md`.
+At 6.29mm the geometry closes.
+
+Parts materially undersized in the model before this measurement:
+
+| Part | Modelled | Drawing-scaled | Error |
+| --- | --- | --- | --- |
+| Barrel (14) | 7.60 dia | 12.29 | -38% |
+| Crown wheel (19) | 2.60 dia | 6.29 | -59% |
+| Ratchet wheel (20) | 6.50 dia | 7.40 | -12% |
+| Balance (23) | 9.40 dia | 10.50 | -10% |
+| Automatic driving wheel (26) | 4.20 dia | 5.86 | -28% |
+| Oscillating weight (31) | 24.40 dia | 24.92 | -2% |
+
+The barrel is the consequential one. At 12.29mm diameter it cannot sit at the
+model's current barrel centre without leaving the plate, so the barrel centre,
+the going-train layout that was solved against it, and the bridges that span it
+all have to be re-derived. That work is tracked in `ERRORS.md`.
+
+## Measured plate layout from the ETA materials page
+
+Added 2026-09-05, and this supersedes the numerically solved layout that the
+model used up to this point.
+
+Position `1 Var` on the materials page is not a stylised icon: it is an
+orthographic view of the main plate from the train side, drawn at exactly
+25.60mm across, with the jewels coloured. Bearing centres can therefore be
+measured directly off it rather than solved from assumed tooth counts.
+
+Method. Segment the red jewel fill and the dark shock settings into connected
+components, take each component's centroid, and scale by the same 25.60mm
+calibration used for the dimension table. The keyless slot is found the same
+way from the white through-openings. Reproduce with
+`tools/measure_plate_layout.py`.
+
+Orientation. The keyless slot breaks the plate rim at the top of the drawn
+view, so drawn-up is the movement's +X, the 3 o'clock stem direction. Rotating
+the view clockwise a quarter turn puts it in the project frame with no mirror;
+the check that this is the correct handedness rather than its mirror is the
+balance, which lands at 7-8 o'clock as it does on the real calibre. The
+measured slot centre sits on y = 0.012mm, which is an
+independent confirmation that the stem axis is the +X axis.
+
+### Bearing centres, project frame
+
+| Feature | X | Y | Radius from centre |
+| --- | --- | --- | --- |
+| Centre / fourth wheel, sweep seconds | +0.000 | +0.000 | 0.00 |
+| Barrel arbor | +2.834 | +5.705 | 6.37 |
+| Second (great) wheel | -4.075 | +5.957 | 7.22 |
+| Third wheel | -2.738 | +2.473 | 3.69 |
+| Escape wheel | -2.979 | -2.020 | 3.60 |
+| Pallet fork | -1.303 | -4.219 | 4.42 |
+| Balance staff | -2.388 | -6.567 | 6.99 |
+| Unidentified sixth plate jewel | -6.135 | +0.803 | 6.19 |
+| Keyless slot centre | +8.963 | +0.012 | - |
+
+The keyless slot measures 4.79 along X by 2.66 along Y, so it runs from
+X = 6.57 to X = 11.36 and opens through the plate rim. It is a **through-slot,
+not a blind pocket** -- which is the direct confirmation of the winding-pinion
+architecture: the pinion straddles the plate and stands proud on the train
+side, where the crown wheel meets it.
+
+The sixth jewel is recorded because it is there, not because it is understood.
+It is 3.79 from the third wheel and 5.56 from the second, which is the right
+order for a minute-train pivot in an indirect-seconds movement, but nothing in
+the available evidence names it. It is not part of the going train.
+
+### The going train closes on the measured centres
+
+Measured centre distances against the tooth counts that satisfy 28,800 vph and
+a one-hour second wheel:
+
+| Mesh | Teeth | Measured C | C from teeth | Delta |
+| --- | --- | --- | --- | --- |
+| Barrel great wheel -> second pinion | 74 / 12 | 6.914 | 6.953 | 0.039 |
+| Second wheel -> third pinion | 64 / 8 | 3.732 | 3.802 | 0.070 |
+| Third wheel -> fourth pinion | 75 / 10 | 3.689 | 3.744 | 0.055 |
+| Fourth wheel -> escape pinion | 96 / 6 | 3.599 | 3.652 | 0.053 |
+| Escape wheel -> pallet | - | 2.765 | - | - |
+| Pallet -> balance staff | - | 2.587 | - | - |
+
+Every delta is inside the +/-0.1mm the 150 ppi scan supports. Two independent
+routes -- diameters measured off the page, and tooth counts required by the
+beat rate -- agree across four meshes, which is the strongest evidence this
+model has for any part of its geometry.
+
+Rates that follow:
+
+- Fourth wheel at the centre: 1 turn per minute, carrying the sweep seconds.
+- Escape wheel: 16 turns per minute; 15 teeth gives 480 beats per minute,
+  **28,800 A/h**.
+- Third wheel: 1 turn per 7.5 minutes.
+- Second wheel: **1 turn per hour**, which is what lets the indirect minute
+  train drive the cannon pinion 1:1.
+- Barrel: 1 turn per 6.17 hours, so about **39 hours** at the 6.3 usable turns
+  a mainspring of this height gives -- against ETA's published 38 hours.
+
+The modules are then set by the measured centre distances rather than chosen:
+0.1611 barrel to second, 0.1038 second to third, 0.0870 third to fourth,
+0.0714 fourth to escape. Tip diameters computed from those modules land within
+0.12mm of the diameters measured independently off the same page.
+
+### Winding train placement
+
+The crown wheel is 6.555 from the barrel axis on module 0.23. Solving that
+circle for the position whose pitch circle crosses the stem axis inside the
+measured slot, and which clears every other wheel, gives the crown wheel centre
+at **(+8.788, +2.990)**, with the winding-pinion mesh at **X = +8.799** on the
+stem axis. That mesh point falls 0.16 from the centre of the slot ETA actually
+cut, which nothing in the solve was told about -- the slot was measured
+independently. Plan clearances from the crown wheel's 3.220 tip circle: 2.56 to
+the centre wheel, 5.00 to the third, 6.28 to the balance, and 0.30 to the plate
+edge.
 
 ## CAD visualization colors
 
@@ -548,6 +837,12 @@ uncertainty, reference temperature, datum, and date. Highest-value interfaces:
 6. Jewel/pivot centers and axial levels for the going train.
 7. Bridge locating features, screw axes, and bearing surfaces.
 8. Wheel pitch geometry, tooth counts, backlash, and endshake.
+
+Items 6 and 8 are now partly served by the drawing-scaled table above:
+outside diameters and overall heights are measured for the whole calibre,
+but tooth counts resolved only for the crown wheel, and no centre distance
+or axial level came from that page. Pitch geometry below module 0.15 and
+every axial level still need a real measurement or a dimensioned drawing.
 
 ## Source quality notes
 

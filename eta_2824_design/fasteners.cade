@@ -1,4 +1,5 @@
 import "./components.cade" as common
+import "./datums.cade" as datum
 
 part eta_pos_900_countersunk_screw_envelope() -> Solid<Exact> {
   common.slotted_countersunk_screw(
@@ -95,30 +96,63 @@ part eta_pos_907_minute_bridge_screw_envelope() -> Solid<Exact> {
   )
 }
 
+-- Where a head finishes, measured from each screw's own origin. A screw is
+-- placed at `surface - head_top()`, so its head lands flush on the part it
+-- clamps and its shank reaches the tapped hole below.
+fn head_top_900() -> Len {
+  0.355mm
+}
+
+fn head_top_901() -> Len {
+  0.45mm
+}
+
+fn head_top_902() -> Len {
+  0.41mm
+}
+
+fn head_top_903() -> Len {
+  0.44mm
+}
+
+fn head_top_904() -> Len {
+  0.39mm
+}
+
+fn head_top_905() -> Len {
+  0.405mm
+}
+
+fn head_top_906() -> Len {
+  0.5mm
+}
+
+fn head_top_907() -> Len {
+  0.5mm
+}
+
+-- Every screw in the movement, installed. One definition per screw class,
+-- placed wherever that class is used, so a change to the class -- a thread
+-- callout, a head profile, a driver slot -- propagates everywhere it is used.
+--
+-- Each is seated: the head finishes flush on the part it clamps and the shank
+-- runs into a tapped hole. The axes come from `datums.cade`, which the bridge
+-- feet and the plate's tapped holes read as well, so the three cannot drift.
+--
+-- Threads are deliberately not drawn: Cade states a thread as metadata rather
+-- than geometry (GAPS.md, GAP-2026-09-05-01), and the crest cylinder is the
+-- surface a machinist sees. Adding `thread = thread(...)` to these placements
+-- is the whole change when the fine-detail phase arrives.
 part fasteners_assembly() -> Assembly {
   together(
-    eta_pos_900_countersunk_screw_envelope()
-      |> place(
-        frame = frame(
-          origin = point(x = 9.3mm, y = -5.7mm, z = 1.72mm),
-          axis = Z,
-          angle = -18deg,
-        ),
-        color = rgb(r = 74, g = 81, b = 91),
-      ),
-    eta_pos_900_countersunk_screw_envelope()
-      |> place(
-        frame = frame(
-          origin = point(x = -8.6mm, y = -4.8mm, z = -0.48mm),
-          axis = Z,
-          angle = 37deg,
-        ),
-        color = rgb(r = 74, g = 81, b = 91),
-      ),
     eta_pos_901_bridge_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -1.8mm, y = 1.5mm, z = 2.55mm),
+          origin = point(
+            x = datum.train_bridge_screw_a_x(),
+            y = datum.train_bridge_screw_a_y(),
+            z = datum.train_bridge_top_z() - head_top_901(),
+          ),
           axis = Z,
           angle = -24deg,
         ),
@@ -127,7 +161,11 @@ part fasteners_assembly() -> Assembly {
     eta_pos_901_bridge_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 10.3mm, y = 2.8mm, z = 2.55mm),
+          origin = point(
+            x = datum.train_bridge_screw_b_x(),
+            y = datum.train_bridge_screw_b_y(),
+            z = datum.train_bridge_top_z() - head_top_901(),
+          ),
           axis = Z,
           angle = 12deg,
         ),
@@ -136,7 +174,11 @@ part fasteners_assembly() -> Assembly {
     eta_pos_901_bridge_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -7.6mm, y = -4.9mm, z = 2.75mm),
+          origin = point(
+            x = datum.barrel_bridge_screw_a_x(),
+            y = datum.barrel_bridge_screw_a_y(),
+            z = datum.barrel_bridge_top_z() - head_top_901(),
+          ),
           axis = Z,
           angle = -41deg,
         ),
@@ -145,7 +187,11 @@ part fasteners_assembly() -> Assembly {
     eta_pos_901_bridge_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -1.9mm, y = -3.1mm, z = 2.75mm),
+          origin = point(
+            x = datum.barrel_bridge_screw_b_x(),
+            y = datum.barrel_bridge_screw_b_y(),
+            z = datum.barrel_bridge_top_z() - head_top_901(),
+          ),
           axis = Z,
           angle = 29deg,
         ),
@@ -154,7 +200,11 @@ part fasteners_assembly() -> Assembly {
     eta_pos_901_bridge_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 2.9mm, y = -6.6mm, z = 2.75mm),
+          origin = point(
+            x = datum.balance_cock_screw_x(),
+            y = datum.balance_cock_screw_y(),
+            z = datum.train_bridge_underside_z() + 0.54mm - head_top_901(),
+          ),
           axis = Z,
           angle = -11deg,
         ),
@@ -163,7 +213,11 @@ part fasteners_assembly() -> Assembly {
     eta_pos_901_bridge_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 9.5mm, y = -2mm, z = 3.02mm),
+          origin = point(
+            x = datum.pallet_bridge_screw_x(),
+            y = datum.pallet_bridge_screw_y(),
+            z = datum.train_band_floor_z() + 0.34mm - head_top_901(),
+          ),
           axis = Z,
           angle = -33deg,
         ),
@@ -172,7 +226,11 @@ part fasteners_assembly() -> Assembly {
     eta_pos_902_crown_wheel_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 2.4mm, y = -6.9mm, z = 3.12mm),
+          origin = point(
+            x = 3.9137mm,
+            y = 1.131mm,
+            z = datum.crown_wheel_top_z() - head_top_902(),
+          ),
           axis = Z,
           angle = 17deg,
         ),
@@ -181,16 +239,33 @@ part fasteners_assembly() -> Assembly {
     eta_pos_903_ratchet_wheel_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -5.7mm, y = -3.2mm, z = 3.15mm),
+          origin = point(
+            x = 7.0603mm,
+            y = 4.2777mm,
+            z = datum.ratchet_wheel_top_z() - head_top_903(),
+          ),
           axis = Z,
           angle = -27deg,
         ),
         color = rgb(r = 82, g = 91, b = 103),
       ),
+    eta_pos_906_rotor_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = datum.rotor_top_z() - head_top_906()),
+          axis = Z,
+          angle = 8deg,
+        ),
+        color = rgb(r = 105, g = 113, b = 124),
+      ),
     eta_pos_904_automatic_framework_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -1.7mm, y = -2.4mm, z = 3.78mm),
+          origin = point(
+            x = datum.automatic_framework_screw_a_x(),
+            y = datum.automatic_framework_screw_a_y(),
+            z = datum.automatic_framework_top_z() - head_top_904(),
+          ),
           axis = Z,
           angle = -14deg,
         ),
@@ -199,7 +274,11 @@ part fasteners_assembly() -> Assembly {
     eta_pos_904_automatic_framework_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 6.3mm, y = -2.8mm, z = 3.78mm),
+          origin = point(
+            x = datum.automatic_framework_screw_b_x(),
+            y = datum.automatic_framework_screw_b_y(),
+            z = datum.automatic_framework_top_z() - head_top_904(),
+          ),
           axis = Z,
           angle = 34deg,
         ),
@@ -208,29 +287,98 @@ part fasteners_assembly() -> Assembly {
     eta_pos_905_automatic_bridge_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 4.8mm, y = 3mm, z = 4.02mm),
+          origin = point(
+            x = datum.automatic_bridge_screw_x(),
+            y = datum.automatic_bridge_screw_y(),
+            z = datum.automatic_bridge_top_z() - head_top_905(),
+          ),
           axis = Z,
           angle = -22deg,
         ),
         color = rgb(r = 92, g = 101, b = 112),
       ),
+    eta_pos_907_minute_bridge_screw_envelope()
+      |> rotate(ax = 1, ay = 0, az = 0, angle = 180deg)
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 3.9mm,
+            y = -1.6mm,
+            z = datum.minute_bridge_underside_z() + head_top_907(),
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 118, g = 126, b = 137),
+      ),
+    eta_pos_900_countersunk_screw_envelope()
+      |> rotate(ax = 1, ay = 0, az = 0, angle = 180deg)
+      |> place(
+        frame = frame(
+          origin = point(
+            x = -8.6mm,
+            y = -4.8mm,
+            z = datum.maintaining_plate_floor_z() + head_top_900(),
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 74, g = 81, b = 91),
+      ),
+    eta_pos_900_countersunk_screw_envelope()
+      |> rotate(ax = 1, ay = 0, az = 0, angle = 180deg)
+      |> place(
+        frame = frame(
+          origin = point(
+            x = -6.2mm,
+            y = -6.9mm,
+            z = datum.maintaining_plate_floor_z() + head_top_900(),
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 74, g = 81, b = 91),
+      ),
+  )
+}
+
+-- Kept as a named subset for previews of the winding train alone.
+part verified_retaining_fasteners_assembly() -> Assembly {
+  together(
+    eta_pos_902_crown_wheel_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 3.9137mm,
+            y = 1.131mm,
+            z = datum.crown_wheel_top_z() - head_top_902(),
+          ),
+          axis = Z,
+          angle = 17deg,
+        ),
+        color = rgb(r = 90, g = 99, b = 110),
+      ),
+    eta_pos_903_ratchet_wheel_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 7.0603mm,
+            y = 4.2777mm,
+            z = datum.ratchet_wheel_top_z() - head_top_903(),
+          ),
+          axis = Z,
+          angle = -27deg,
+        ),
+        color = rgb(r = 82, g = 91, b = 103),
+      ),
     eta_pos_906_rotor_screw_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = 4.58mm),
+          origin = point(x = 0mm, y = 0mm, z = datum.rotor_top_z() - head_top_906()),
           axis = Z,
           angle = 8deg,
         ),
         color = rgb(r = 105, g = 113, b = 124),
-      ),
-    eta_pos_907_minute_bridge_screw_envelope()
-      |> place(
-        frame = frame(
-          origin = point(x = 4.8mm, y = -3mm, z = -0.72mm),
-          axis = Z,
-          angle = -36deg,
-        ),
-        color = rgb(r = 118, g = 126, b = 137),
       ),
   )
 }

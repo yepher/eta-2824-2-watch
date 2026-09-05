@@ -1,33 +1,251 @@
 import "./components.cade" as common
+import "./datums.cade" as datum
+
+-- ETA positions 23 and 24: the timed balance, its hairspring, and the balance
+-- bridge that carries the regulator.
+--
+-- Geometry follows a photograph of a 2824-family balance-and-spring assembly:
+-- a plain three-arm glucydur-style rim, a flat ribbon hairspring of eleven
+-- coils lying under the bridge, a collet at its inner end, a stud at its outer
+-- end, and the roller table with its impulse jewel below the wheel.
+--
+-- Axial order on the staff, from the plate upward:
+--   roller table -> balance wheel -> hairspring -> collet -> upper pivot.
+-- MEASURED: position 23 is 10.50mm over the rim on the materials page, and the
+-- staff's centre is read off the coloured jewels in the plate view. Both
+-- replace expert estimates that had the balance 10% small and in the wrong
+-- place. At this size the rim passes over the fourth wheel and the escape
+-- wheel in plan, which is why the balance now sits ABOVE the train bridge
+-- rather than inside the train band -- see `balance_wheel_z`.
+fn balance_radius() -> Len {
+  5.25mm
+}
+
+fn balance_centre_x() -> Len {
+  datum.balance_staff_x()
+}
+
+fn balance_centre_y() -> Len {
+  datum.balance_staff_y()
+}
+
+-- Axial levels within the train band. The pallet fork and the roller share a
+-- level, because that is where the impulse is delivered.
+fn roller_z() -> Len {
+  datum.train_band_floor_z() + 0.08mm
+}
+
+-- A 10.50mm balance on a 25.60mm plate reaches over the fourth wheel by 1.72mm
+-- and over the escape wheel by 3.14mm in plan, so it cannot live inside the
+-- train band at all: it runs clear above the train bridge. That is what the
+-- real calibre does, and it is why the balance cock stands proud into the
+-- automatic module's band, which is relieved around it.
+fn balance_wheel_z() -> Len {
+  datum.train_bridge_top_z() + 0.115mm
+}
+
+fn hairspring_z() -> Len {
+  balance_wheel_z() + 0.16mm
+}
+
+fn balance_bridge_thickness() -> Len {
+  0.3mm
+}
+
+-- Derived from both sides: it has to clear the hairspring below and the
+-- rotor's rim above, and there is 0.08mm to spare at the top.
+fn balance_bridge_underside_z() -> Len {
+  hairspring_z() + 0.09mm
+}
+
+-- A Nivarox-type flat ribbon: thickness is radial, height is axial.
+--
+-- MODELLED, NOT MEASURED. A real hairspring for this calibre is about 0.030mm
+-- thick, and at that thickness the mesher raises the grid to n = 1024 and the
+-- spring alone takes 60 seconds to rebuild -- unusable in a live view, and the
+-- exact failure `docs/AUTHORING.md` section 8 warns about: a part too big for
+-- its own detail. 0.060mm rebuilds in under 3 seconds at n = 256 and reads
+-- correctly at every viewing scale. Recorded in GAPS.md; the real dimension
+-- belongs in `eta_2824-2_info.md`, not in the geometry.
+fn hairspring_ribbon_thickness() -> Len {
+  0.06mm
+}
+
+fn hairspring_ribbon_height() -> Len {
+  0.11mm
+}
+
+fn hairspring_coil_pitch() -> Len {
+  0.13mm
+}
+
+fn hairspring_inner_radius() -> Len {
+  0.55mm
+}
+
+-- A coil of the spring: a ribbon annulus with a 10deg gap, where the spiral
+-- steps out to the next coil. `phase` turns each coil's step on from the last
+-- so the steps walk around the spring instead of stacking into a ladder. Cade has no sweep and no helix, so a true
+-- Archimedean spiral cannot be written (GAPS.md); a stepped spiral of arcs
+-- joined by radial links is the honest approximation, and it carries the
+-- ribbon's real rectangular section rather than a round wire.
+fn hairspring_coil(inner_r: Len, phase: Angle) -> Solid<Exact> {
+  let ribbon = cut(
+    cylinder(
+      r = inner_r + hairspring_ribbon_thickness(),
+      h = hairspring_ribbon_height(),
+    ),
+    cylinder(r = inner_r, h = hairspring_ribbon_height() + 0.2mm),
+  )
+  let gap = intersect(
+    half_space(nx = -0.08716, ny = 0.99619, nz = 0, d = 0mm),
+    half_space(nx = -0.08716, ny = -0.99619, nz = 0, d = 0mm),
+  )
+
+  cut(ribbon, gap) |> rotate(ax = 0, ay = 0, az = 1, angle = phase)
+}
+
+-- The radial link that carries one coil out to the next.
+fn hairspring_link(inner_r: Len, phase: Angle) -> Solid<Exact> {
+  box(
+    x = hairspring_coil_pitch() + hairspring_ribbon_thickness(),
+    y = hairspring_ribbon_thickness(),
+    z = hairspring_ribbon_height(),
+  )
+    |> at(
+      dx = inner_r + hairspring_coil_pitch() / 2 + hairspring_ribbon_thickness() / 2,
+      dy = 0mm,
+      dz = 0mm,
+    )
+    |> rotate(ax = 0, ay = 0, az = 1, angle = phase)
+}
+
+fn coil_radius(n: Count) -> Len {
+  hairspring_inner_radius() + hairspring_coil_pitch() * n
+}
+
+part eta_pos_23_hairspring_envelope() -> Solid<Exact> {
+  let coils = union(
+    hairspring_coil(inner_r = coil_radius(n = 0), phase = 0deg),
+    hairspring_coil(inner_r = coil_radius(n = 1), phase = 137deg),
+    hairspring_coil(inner_r = coil_radius(n = 2), phase = 274deg),
+    hairspring_coil(inner_r = coil_radius(n = 3), phase = 411deg),
+    hairspring_coil(inner_r = coil_radius(n = 4), phase = 548deg),
+    hairspring_coil(inner_r = coil_radius(n = 5), phase = 685deg),
+    hairspring_coil(inner_r = coil_radius(n = 6), phase = 822deg),
+    hairspring_coil(inner_r = coil_radius(n = 7), phase = 959deg),
+    hairspring_coil(inner_r = coil_radius(n = 8), phase = 1096deg),
+    hairspring_coil(inner_r = coil_radius(n = 9), phase = 1233deg),
+    hairspring_coil(inner_r = coil_radius(n = 10), phase = 1370deg),
+  )
+  let links = union(
+    hairspring_link(inner_r = coil_radius(n = 0), phase = 0deg),
+    hairspring_link(inner_r = coil_radius(n = 1), phase = 137deg),
+    hairspring_link(inner_r = coil_radius(n = 2), phase = 274deg),
+    hairspring_link(inner_r = coil_radius(n = 3), phase = 411deg),
+    hairspring_link(inner_r = coil_radius(n = 4), phase = 548deg),
+    hairspring_link(inner_r = coil_radius(n = 5), phase = 685deg),
+    hairspring_link(inner_r = coil_radius(n = 6), phase = 822deg),
+    hairspring_link(inner_r = coil_radius(n = 7), phase = 959deg),
+    hairspring_link(inner_r = coil_radius(n = 8), phase = 1096deg),
+    hairspring_link(inner_r = coil_radius(n = 9), phase = 1233deg),
+  )
+  -- The terminal curve carries the outer coil out to the stud.
+  let terminal = box(
+    x = 0.55mm,
+    y = hairspring_ribbon_thickness(),
+    z = hairspring_ribbon_height(),
+  )
+    |> at(dx = -0.3mm, dy = coil_radius(n = 10) + 0.14mm, dz = 0mm)
+    |> rotate(ax = 0, ay = 0, az = 1, angle = 14deg + 1370deg)
+
+  union(coils, links, terminal)
+}
+
+-- The collet grips the staff and the spring's inner end grips the collet.
+part eta_pos_23_collet() -> Solid<Exact> {
+  cut(
+    cylinder(r = hairspring_inner_radius(), h = 0.16mm),
+    cylinder(r = 0.19mm, h = 0.4mm),
+  )
+}
+
+-- expert_estimate: staff diameters follow the jewel holes it runs in, 0.21mm
+-- at the pivots. The long body is what the wheel, collet and roller sit on.
+part eta_pos_23_balance_staff() -> Solid<Exact> {
+  union(
+    cylinder(r = 0.105mm, h = 1.15mm),
+    cylinder(r = 0.19mm, h = 0.62mm) |> at(dx = 0mm, dy = 0mm, dz = 0.12mm),
+    cylinder(r = 0.3mm, h = 0.14mm) |> at(dx = 0mm, dy = 0mm, dz = -0.16mm),
+    cone(r1 = 0.19mm, r2 = 0.09mm, h = 0.16mm) |> at(dx = 0mm, dy = 0mm, dz = 0.51mm),
+  )
+}
+
+-- The roller table carries the impulse jewel the pallet fork drives.
+part eta_pos_23_roller_table() -> Solid<Exact> {
+  cut(cylinder(r = 0.55mm, h = 0.12mm), cylinder(r = 0.11mm, h = 0.4mm))
+}
+
+part eta_pos_23_impulse_jewel() -> Solid<Exact> {
+  cylinder(r = 0.075mm, h = 0.24mm)
+}
 
 part eta_pos_23_timed_balance_envelope() -> Solid<Exact> {
   common.spoked_rim(
-    outer_r = 4.9mm,
-    rim_width = 0.42mm,
-    hub_r = 0.72mm,
-    bore_r = 0.12mm,
-    spoke_width = 0.22mm,
-    h = 0.24mm,
+    outer_r = balance_radius(),
+    rim_width = 0.4mm,
+    hub_r = 0.62mm,
+    bore_r = 0.2mm,
+    spoke_width = 0.42mm,
+    h = 0.26mm,
     spokes = 3,
   )
 }
 
-part eta_pos_23_hairspring_envelope() -> Solid<Exact> {
-  union(
-    torus(major = 1.15mm, minor = 0.035mm),
-    torus(major = 1.48mm, minor = 0.035mm),
-    torus(major = 1.81mm, minor = 0.035mm),
-    torus(major = 2.14mm, minor = 0.035mm),
-    box(x = 2.2mm, y = 0.07mm, z = 0.07mm) |> at(dx = 2.7mm, dy = 0mm, dz = 0mm),
-  )
-}
-
 part eta_pos_24_1_balance_bridge_envelope() -> Solid<Exact> {
-  box(x = 7.2mm, y = 2mm, z = 0.38mm)
+  -- The balance cock: a boss over the staff carrying the shock absorber and the
+  -- regulator index, a tapering neck, and a foot that reaches the plate with
+  -- the screw through it. Modelled about the staff, so local (0, 0) is the
+  -- balance axis and the foot lies at (3.6480mm, -5.3130mm).
+  let boss = cylinder(r = 1.95mm, h = balance_bridge_thickness())
+  let foot_lobe = cylinder(r = 0.95mm, h = balance_bridge_thickness())
+    |> at(dx = 3.648mm, dy = 0mm - 5.313mm, dz = 0mm)
+  let neck = box(x = 6.4448mm, y = 1.5mm, z = balance_bridge_thickness())
+    |> rotate(ax = 0, ay = 0, az = 1, angle = -55.526deg)
+    |> at(dx = 1.824mm, dy = 0mm - 2.6565mm, dz = 0mm)
+  let foot = common.bridge_foot(
+    r = datum.bridge_foot_radius(),
+    h = balance_bridge_underside_z() - datum.plate_train_face_z(),
+    hole_r = 0.24mm,
+  )
+    |> at(
+      dx = 3.648mm,
+      dy = 0mm - 5.313mm,
+      dz = 0mm - balance_bridge_thickness() / 2
+        - (balance_bridge_underside_z() - datum.plate_train_face_z()) / 2,
+    )
+  let jewel_and_index_bore = cylinder(
+    r = 1.68mm,
+    h = balance_bridge_thickness() + 0.4mm,
+  )
+  let screw_hole = common.screw_clearance_hole(
+    head_r = 0.5mm,
+    head_h = 0.18mm,
+    shank_r = 0.24mm,
+    depth = balance_bridge_thickness(),
+  )
+    |> at(dx = 3.648mm, dy = 0mm - 5.313mm, dz = 0mm)
+
+  cut(union(boss, foot_lobe, neck, foot), union(jewel_and_index_bore, screw_hole))
 }
 
 part eta_pos_24_2_stud_support_envelope() -> Solid<Exact> {
   box(x = 1.4mm, y = 0.8mm, z = 0.22mm)
+}
+
+-- The stud the hairspring's outer end is pinned into.
+part eta_pos_24_2_hairspring_stud() -> Solid<Exact> {
+  cut(cylinder(r = 0.17mm, h = 0.42mm), cylinder(r = 0.05mm, h = 0.6mm))
 }
 
 part eta_pos_24_3_lower_index_envelope() -> Solid<Exact> {
@@ -46,30 +264,63 @@ part eta_pos_24_6_upper_shock_absorber_envelope() -> Solid<Exact> {
   common.jewel_ring(r = 0.75mm, h = 0.25mm, bore_r = 0.12mm)
 }
 
+fn staff_x() -> Len {
+  balance_centre_x()
+}
+
+fn staff_y() -> Len {
+  balance_centre_y()
+}
+
 part balance_bridge_assembly() -> Assembly {
   together(
     eta_pos_24_1_balance_bridge_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 7.2mm, y = -3.4mm, z = 2.7mm),
+          origin = point(
+            x = staff_x(),
+            y = staff_y(),
+            z = balance_bridge_underside_z() + balance_bridge_thickness() / 2,
+          ),
           axis = Z,
-          angle = -63deg,
+          angle = 0deg,
         ),
         color = rgb(r = 183, g = 179, b = 170),
       ),
     eta_pos_24_2_stud_support_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 9.4mm, y = -5mm, z = 2.98mm),
+          origin = point(
+            x = 5.1mm,
+            y = -7.6mm,
+            z = balance_bridge_underside_z() + 0.44mm,
+          ),
           axis = Z,
           angle = -25deg,
         ),
         color = rgb(r = 142, g = 151, b = 161),
       ),
+    eta_pos_24_2_hairspring_stud()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = staff_x() - 1.5mm,
+            y = staff_y() + 1.35mm,
+            z = hairspring_z() + 0.12mm,
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 158, g = 166, b = 175),
+      ),
     eta_pos_24_3_lower_index_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 7.9mm, y = -3.6mm, z = 3mm),
+          origin = point(
+            x = staff_x(),
+            y = staff_y(),
+            z = balance_bridge_underside_z() + 0.09mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -78,7 +329,11 @@ part balance_bridge_assembly() -> Assembly {
     eta_pos_24_4_upper_index_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 7.9mm, y = -3.6mm, z = 3.16mm),
+          origin = point(
+            x = staff_x(),
+            y = staff_y(),
+            z = balance_bridge_underside_z() + 0.26mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -87,7 +342,11 @@ part balance_bridge_assembly() -> Assembly {
     eta_pos_24_5_regulator_corrector_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 7.9mm, y = -3.6mm, z = 3.45mm),
+          origin = point(
+            x = staff_x(),
+            y = staff_y(),
+            z = datum.base_movement_height() - 0.23mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -96,7 +355,11 @@ part balance_bridge_assembly() -> Assembly {
     eta_pos_24_6_upper_shock_absorber_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 7.9mm, y = -3.6mm, z = 3.34mm),
+          origin = point(
+            x = staff_x(),
+            y = staff_y(),
+            z = balance_bridge_underside_z() + 0.17mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -107,23 +370,59 @@ part balance_bridge_assembly() -> Assembly {
 
 part balance_assembly() -> Assembly {
   together(
+    eta_pos_23_balance_staff()
+      |> place(
+        frame = frame(
+          origin = point(x = staff_x(), y = staff_y(), z = balance_wheel_z() + 0.08mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 196, g = 200, b = 206),
+      ),
+    eta_pos_23_roller_table()
+      |> place(
+        frame = frame(
+          origin = point(x = staff_x(), y = staff_y(), z = roller_z()),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 196, g = 200, b = 206),
+      ),
+    eta_pos_23_impulse_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = staff_x() + 0.35mm, y = staff_y(), z = roller_z()),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
     eta_pos_23_timed_balance_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 7.9mm, y = -3.6mm, z = 2.25mm),
+          origin = point(x = staff_x(), y = staff_y(), z = balance_wheel_z()),
           axis = Z,
           angle = 0deg,
         ),
         color = rgb(r = 205, g = 169, b = 72),
       ),
-    eta_pos_23_hairspring_envelope()
+    eta_pos_23_collet()
       |> place(
         frame = frame(
-          origin = point(x = 7.9mm, y = -3.6mm, z = 2.48mm),
+          origin = point(x = staff_x(), y = staff_y(), z = hairspring_z() + 0.02mm),
           axis = Z,
           angle = 0deg,
         ),
-        color = rgb(r = 58, g = 92, b = 135),
+        color = rgb(r = 198, g = 166, b = 88),
+      ),
+    eta_pos_23_hairspring_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = staff_x(), y = staff_y(), z = hairspring_z()),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 176, g = 184, b = 196),
       ),
     balance_bridge_assembly(),
   )

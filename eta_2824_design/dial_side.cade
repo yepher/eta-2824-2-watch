@@ -1,10 +1,47 @@
 import "./components.cade" as common
+import "./datums.cade" as datum
+
+-- The minute train. The cannon pinion is not on the going train's arbor -- the
+-- centre carries the SECONDS wheel -- so the minute hand is driven indirectly:
+-- the second wheel, which turns once an hour, reaches through the plate to a
+-- pinion on the dial side, an idler carries the drive round the hour wheel, and
+-- the minute wheel turns the cannon pinion.
+--
+--   second dial pinion 12 -> idler 40 -> minute wheel 36 -> cannon pinion 12
+--
+-- An idler changes no ratio, and 12 into 12 is 1:1, so the cannon pinion turns
+-- once an hour exactly as the second wheel does.
+part eta_pos_12_1_minute_train_driving_pinion() -> Solid<Exact> {
+  common.toothed_disk(
+    root_r = 0.475mm,
+    tooth_depth = 0.225mm,
+    tooth_width = 0.14mm,
+    h = 0.24mm,
+    bore_r = 0.13mm,
+    teeth = 12,
+  )
+}
+
+part eta_pos_34_1_minute_train_idler() -> Solid<Exact> {
+  common.spoked_wheel(
+    root_r = 1.875mm,
+    rim_width = 0.24mm,
+    tooth_depth = 0.225mm,
+    tooth_width = 0.14mm,
+    hub_r = 0.44mm,
+    bore_r = 0.2mm,
+    spoke_width = 0.16mm,
+    h = 0.22mm,
+    teeth = 40,
+    spokes = 5,
+  )
+}
 
 part eta_pos_32_setting_wheel_envelope() -> Solid<Exact> {
   -- Expert estimate: 24 teeth.
   common.toothed_disk(
-    root_r = 1.36mm,
-    tooth_depth = 0.14mm,
+    root_r = 0.75mm,
+    tooth_depth = 0.12mm,
     tooth_width = 0.18mm,
     h = 0.25mm,
     bore_r = 0.2mm,
@@ -12,18 +49,30 @@ part eta_pos_32_setting_wheel_envelope() -> Solid<Exact> {
   )
 }
 
+-- expert_estimate: the cannon pinion reaches from the calendar band down
+-- through the dial to the minute-hand seat and no further. ETA gives the seat
+-- itself: 0.900 +0.006/-0.004mm, so r = 0.45mm.
+fn cannon_pinion_length() -> Len {
+  1.3mm
+}
+
+fn cannon_pinion_seat_radius() -> Len {
+  0.45mm
+}
+
 part eta_pos_33_cannon_pinion_envelope() -> Solid<Exact> {
   -- H2 0.90mm hand fitting with an estimated 12-tooth driving pinion.
   union(
     common.toothed_disk(
-      root_r = 0.38mm,
-      tooth_depth = 0.07mm,
+      root_r = 0.45mm,
+      tooth_depth = 0.08mm,
       tooth_width = 0.14mm,
       h = 0.22mm,
       bore_r = 0.18mm,
       teeth = 12,
     ),
-    common.stepped_arbor(r1 = 0.45mm, h1 = 1.6mm, r2 = 0.35mm, h2 = 2.2mm),
+    cylinder(r = cannon_pinion_seat_radius(), h = cannon_pinion_length())
+      |> at(dx = 0mm, dy = 0mm, dz = 0.11mm - cannon_pinion_length() / 2),
   )
 }
 
@@ -50,7 +99,7 @@ part eta_pos_34_minute_wheel_envelope() -> Solid<Exact> {
       bore_r = 0.2mm,
       teeth = 10,
     )
-      |> at(dx = 0mm, dy = 0mm, dz = 0.29mm),
+      |> at(dx = 0mm, dy = 0mm, dz = 0.15mm),
   )
 }
 
@@ -72,7 +121,7 @@ part eta_pos_36_date_indicator_envelope() -> Solid<Exact> {
     root_r = 8.71mm,
     tooth_depth = 0.3mm,
     tooth_width = 0.32mm,
-    h = 0.23mm,
+    h = 0.3mm,
     teeth = 31,
   )
 }
@@ -80,7 +129,7 @@ part eta_pos_36_date_indicator_envelope() -> Solid<Exact> {
 part eta_pos_37_hour_wheel_envelope() -> Solid<Exact> {
   -- Ratio-constrained 40 teeth: (12/36) * (10/40) = 1/12 hour-hand speed.
   common.toothed_disk(
-    root_r = 2.14mm,
+    root_r = 1.95mm,
     tooth_depth = 0.16mm,
     tooth_width = 0.16mm,
     h = 0.3mm,
@@ -93,7 +142,7 @@ part eta_pos_38_date_driving_wheel_envelope() -> Solid<Exact> {
   -- Expert-estimated 24-tooth wheel; the date finger is modeled separately.
   union(
     common.toothed_disk(
-      root_r = 1.86mm,
+      root_r = 1.7mm,
       tooth_depth = 0.14mm,
       tooth_width = 0.18mm,
       h = 0.28mm,
@@ -105,7 +154,22 @@ part eta_pos_38_date_driving_wheel_envelope() -> Solid<Exact> {
 }
 
 part eta_pos_39_minute_train_bridge_envelope() -> Solid<Exact> {
-  box(x = 5mm, y = 2.5mm, z = 0.3mm)
+  -- Local coordinates: the bridge is placed at (2.0, -0.65) turned -15deg, and
+  -- the cannon pinion runs on the centre axis through it.
+  cut(
+    box(x = 5mm, y = 2.5mm, z = datum.minute_bridge_thickness()),
+    union(
+      cylinder(r = cannon_pinion_seat_radius() + datum.running_clearance(), h = 0.6mm)
+        |> at(dx = -2.07mm, dy = 0.13mm, dz = 0mm),
+      common.screw_clearance_hole(
+        head_r = 0.47mm,
+        head_h = 0.19mm,
+        shank_r = 0.23mm,
+        depth = datum.minute_bridge_thickness(),
+      )
+        |> at(dx = 1.86mm, dy = -0.83mm, dz = 0mm),
+    ),
+  )
 }
 
 part eta_pos_40_date_jumper_envelope() -> Solid<Exact> {
@@ -129,7 +193,11 @@ part dial_side_assembly() -> Assembly {
     eta_pos_32_setting_wheel_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 5mm, y = 0mm, z = -0.22mm),
+          origin = point(
+            x = 6.957mm,
+            y = -1.379mm,
+            z = datum.calendar_band_floor_z() + 0.1mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -138,16 +206,46 @@ part dial_side_assembly() -> Assembly {
     eta_pos_33_cannon_pinion_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = -0.85mm),
+          origin = point(x = 0mm, y = 0mm, z = datum.calendar_band_floor_z() + 0.1mm),
           axis = Z,
           angle = 0deg,
         ),
         color = rgb(r = 133, g = 143, b = 154),
       ),
+    eta_pos_12_1_minute_train_driving_pinion()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 2.7065mm,
+            y = 5.4152mm,
+            z = datum.calendar_band_floor_z() + 0.1mm,
+          ),
+          axis = Z,
+          angle = 285.976deg,
+        ),
+        color = rgb(r = 150, g = 158, b = 168),
+      ),
+    eta_pos_34_1_minute_train_idler()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 3.4221mm,
+            y = 2.9156mm,
+            z = datum.calendar_band_floor_z() + 0.1mm,
+          ),
+          axis = Z,
+          angle = 110.476deg,
+        ),
+        color = rgb(r = 199, g = 160, b = 55),
+      ),
     eta_pos_34_minute_wheel_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 3.4mm, y = -2.2mm, z = -0.3mm),
+          origin = point(
+            x = 2.35mm,
+            y = -0.73mm,
+            z = datum.calendar_band_floor_z() + 0.1mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -156,7 +254,11 @@ part dial_side_assembly() -> Assembly {
     eta_pos_35_date_corrector_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 7mm, y = 1.8mm, z = -0.34mm),
+          origin = point(
+            x = 0.64mm,
+            y = 7.28mm,
+            z = datum.calendar_band_floor_z() + 0.1mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -165,7 +267,11 @@ part dial_side_assembly() -> Assembly {
     eta_pos_36_date_indicator_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = -0.72mm),
+          origin = point(
+            x = 0mm,
+            y = 0mm,
+            z = (datum.date_indicator_floor_z() + datum.date_indicator_top_z()) / 2,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -174,7 +280,7 @@ part dial_side_assembly() -> Assembly {
     eta_pos_37_hour_wheel_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = -0.38mm),
+          origin = point(x = 0mm, y = 0mm, z = datum.calendar_band_floor_z() + 0.25mm),
           axis = Z,
           angle = 0deg,
         ),
@@ -183,7 +289,11 @@ part dial_side_assembly() -> Assembly {
     eta_pos_38_date_driving_wheel_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 6.5mm, y = -2.7mm, z = -0.32mm),
+          origin = point(
+            x = 3.36mm,
+            y = -5.82mm,
+            z = datum.calendar_band_floor_z() + 0.12mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -192,7 +302,11 @@ part dial_side_assembly() -> Assembly {
     eta_pos_39_minute_train_bridge_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 3.8mm, y = -2.4mm, z = -0.62mm),
+          origin = point(
+            x = 2mm,
+            y = -0.65mm,
+            z = (datum.minute_bridge_underside_z() + datum.minute_bridge_top_z()) / 2,
+          ),
           axis = Z,
           angle = -15deg,
         ),
@@ -201,7 +315,11 @@ part dial_side_assembly() -> Assembly {
     eta_pos_40_date_jumper_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -7.5mm, y = -3.5mm, z = -0.33mm),
+          origin = point(
+            x = -6.33mm,
+            y = -2.95mm,
+            z = (datum.date_indicator_floor_z() + datum.date_indicator_top_z()) / 2,
+          ),
           axis = Z,
           angle = 25deg,
         ),
@@ -210,7 +328,12 @@ part dial_side_assembly() -> Assembly {
     eta_pos_41_maintaining_plate_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -7.4mm, y = -3.5mm, z = -0.55mm),
+          origin = point(
+            x = -7.4mm,
+            y = -3.5mm,
+            z = (datum.maintaining_plate_floor_z() + datum.maintaining_plate_top_z())
+              / 2,
+          ),
           axis = Z,
           angle = 25deg,
         ),
@@ -219,7 +342,7 @@ part dial_side_assembly() -> Assembly {
     eta_pos_42_dial_support_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = -0.88mm),
+          origin = point(x = 0mm, y = 0mm, z = datum.dial_support_thickness() / 2),
           axis = Z,
           angle = 0deg,
         ),
@@ -228,7 +351,11 @@ part dial_side_assembly() -> Assembly {
     eta_pos_43_key_bolt_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 11.7mm, y = 2mm, z = -0.28mm),
+          origin = point(
+            x = 11.7mm,
+            y = 2mm,
+            z = datum.calendar_band_floor_z() + 0.08mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),

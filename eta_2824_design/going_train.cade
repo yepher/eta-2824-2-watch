@@ -1,188 +1,351 @@
 import "./components.cade" as common
+import "./datums.cade" as datum
 
-part eta_pos_9_escape_wheel_envelope() -> Solid<Exact> {
-  -- Published secondary evidence: 20 escape teeth. The 7-leaf pinion is an
-  -- expert estimate constrained by the 28,800-vph train hypothesis below.
-  union(
-    common.spoked_wheel(
-      root_r = 1.38mm,
-      rim_width = 0.2mm,
-      tooth_depth = 0.12mm,
-      tooth_width = 0.16mm,
-      hub_r = 0.34mm,
-      bore_r = 0.1mm,
-      spoke_width = 0.1mm,
-      h = 0.18mm,
-      teeth = 20,
-      spokes = 5,
-    ),
-    common.toothed_disk(
-      root_r = 0.29mm,
-      tooth_depth = 0.06mm,
-      tooth_width = 0.14mm,
-      h = 0.34mm,
-      bore_r = 0.1mm,
-      teeth = 7,
-    )
-      |> at(dx = 0mm, dy = 0mm, dz = 0.26mm),
-  )
+-- ETA positions 9 to 13: the going train.
+--
+-- Re-derived 2026-09-05 (second time) on MEASURED bearing centres. Position
+-- 1 Var on page 6 of the ETA technical communication is an orthographic view
+-- of the main plate at the published 25.60mm diameter with the jewels
+-- coloured, so the centres are read off the drawing rather than solved from
+-- assumed tooth counts. `tools/measure_plate_layout.py` reproduces them and
+-- `datums.cade` holds them.
+--
+-- The tooth counts are then the ones that close 28,800 A/h with the second
+-- wheel turning once an hour, and the module of each mesh falls out of the
+-- measured centre distance rather than being chosen:
+--
+--   barrel 74              / second pinion 12       C 6.9136  module 0.16078
+--   second 64              / third pinion 8         C 3.7317  module 0.10366
+--   third 75               / fourth pinion 10       C 3.6895  module 0.08681
+--   fourth 96              / escape pinion 6        C 3.5993  module 0.07057
+--
+-- second 64 / third pinion 8   = 8      -> third  1 turn per 7.5 min
+-- third  75 / fourth pinion 10 = 7.5    -> fourth 1 turn per minute
+-- fourth 96 / escape pinion 6  = 16     -> escape 16 turns per minute
+-- 16 turns/min * 15 teeth * 2           = 28,800 A/h
+-- barrel 74 / second pinion 12          -> 1 barrel turn per 6.17h, about
+--                                          39h at 6.3 usable turns
+--
+-- The tip diameters these modules produce land within 0.07mm of the
+-- diameters measured independently off the same page, which is the strongest
+-- cross-check in the model: two unrelated routes to the same geometry.
+--
+-- The fourth wheel is the CENTRE SECONDS wheel and sits on the movement
+-- axis. The cannon pinion is a tube around its arbor.
+--
+-- Each mesh is phased. `polar` puts a tooth at 0deg, so a wheel is placed
+-- turned to lay a tooth on its line of centres and the pinion it drives is
+-- turned half a tooth pitch off it. A wheel's disc phase (its placement
+-- angle) and its pinion phase are independent, which is what lets every
+-- mesh in the chain be phased at once.
+fn module_barrel_second() -> Len {
+  0.16078mm
 }
 
-part eta_pos_10_intermediate_wheel_envelope() -> Solid<Exact> {
-  -- Expert estimate: 84 wheel teeth / 7 pinion leaves.
+fn module_second_third() -> Len {
+  0.10366mm
+}
+
+fn module_third_fourth() -> Len {
+  0.08681mm
+}
+
+fn module_fourth_escape() -> Len {
+  0.07057mm
+}
+
+part eta_pos_12_second_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
+  -- 64 teeth on module 0.10366 driving the third pinion. Its own 12-leaf
+  -- pinion on module 0.16078 is driven by the barrel's great wheel and sits
+  -- one plane below the disc, which is where the barrel is.
   union(
     common.spoked_wheel(
-      root_r = 1.73mm,
-      rim_width = 0.2mm,
-      tooth_depth = 0.12mm,
-      tooth_width = 0.1mm,
-      hub_r = 0.4mm,
-      bore_r = 0.11mm,
-      spoke_width = 0.13mm,
-      h = 0.22mm,
-      teeth = 84,
+      root_r = 3.1875mm,
+      rim_width = 0.1866mm,
+      tooth_depth = 0.2332mm,
+      tooth_width = 0.1451mm,
+      hub_r = 0.72mm,
+      bore_r = 0.105mm,
+      spoke_width = 0.1451mm,
+      h = datum.train_wheel_thickness(),
+      teeth = 64,
       spokes = 6,
     ),
     common.toothed_disk(
-      root_r = 0.29mm,
-      tooth_depth = 0.06mm,
-      tooth_width = 0.14mm,
-      h = 0.38mm,
-      bore_r = 0.11mm,
-      teeth = 7,
+      root_r = 0.7637mm,
+      tooth_depth = 0.3618mm,
+      tooth_width = 0.2251mm,
+      h = 0.46mm,
+      bore_r = 0.105mm,
+      teeth = 12,
     )
-      |> at(dx = 0mm, dy = 0mm, dz = 0.3mm),
+      |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
+      |> at(dx = 0mm, dy = 0mm, dz = 0mm - 0.19mm),
   )
 }
 
-part eta_pos_11_third_wheel_envelope() -> Solid<Exact> {
-  -- Expert estimate: 75 wheel teeth / 10 pinion leaves.
+part eta_pos_11_third_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
+  -- 75 teeth on module 0.08681 driving the fourth pinion; its own 8-leaf
+  -- pinion on module 0.10366 is driven by the second wheel, one plane below.
   union(
     common.spoked_wheel(
-      root_r = 2.36mm,
-      rim_width = 0.24mm,
-      tooth_depth = 0.14mm,
-      tooth_width = 0.13mm,
-      hub_r = 0.48mm,
-      bore_r = 0.12mm,
-      spoke_width = 0.16mm,
-      h = 0.22mm,
+      root_r = 3.1469mm,
+      rim_width = 0.16mm,
+      tooth_depth = 0.1953mm,
+      tooth_width = 0.1215mm,
+      hub_r = 0.63mm,
+      bore_r = 0.105mm,
+      spoke_width = 0.1215mm,
+      h = datum.train_wheel_thickness(),
       teeth = 75,
       spokes = 6,
     ),
     common.toothed_disk(
-      root_r = 0.42mm,
-      tooth_depth = 0.08mm,
-      tooth_width = 0.15mm,
-      h = 0.38mm,
-      bore_r = 0.12mm,
-      teeth = 10,
+      root_r = 0.2851mm,
+      tooth_depth = 0.2332mm,
+      tooth_width = 0.1451mm,
+      h = 0.4mm,
+      bore_r = 0.05mm,
+      teeth = 8,
     )
-      |> at(dx = 0mm, dy = 0mm, dz = 0.3mm),
+      |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
+      |> at(dx = 0mm, dy = 0mm, dz = 0mm - 0.19mm),
   )
 }
 
-part eta_pos_12_second_wheel_envelope() -> Solid<Exact> {
-  -- Expert estimate: 80 wheel teeth / 10 pinion leaves.
+part eta_pos_10_centre_seconds_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
+  -- The centre seconds wheel: 96 teeth on module 0.07057 driving the escape
+  -- pinion. Turns once a minute and carries the seconds hand on the arbor
+  -- through the movement centre. Its 10-leaf pinion on module 0.08681 is
+  -- driven by the third wheel one plane below.
   union(
     common.spoked_wheel(
-      root_r = 2.84mm,
-      rim_width = 0.28mm,
-      tooth_depth = 0.16mm,
-      tooth_width = 0.15mm,
+      root_r = 3.2993mm,
+      rim_width = 0.16mm,
+      tooth_depth = 0.1588mm,
+      tooth_width = 0.0988mm,
       hub_r = 0.54mm,
-      bore_r = 0.13mm,
-      spoke_width = 0.18mm,
-      h = 0.24mm,
-      teeth = 80,
-      spokes = 6,
+      bore_r = 0.105mm,
+      spoke_width = 0.12mm,
+      h = datum.train_wheel_thickness(),
+      teeth = 96,
+      spokes = 5,
     ),
     common.toothed_disk(
-      root_r = 0.42mm,
-      tooth_depth = 0.08mm,
-      tooth_width = 0.15mm,
-      h = 0.42mm,
-      bore_r = 0.13mm,
+      root_r = 0.3255mm,
+      tooth_depth = 0.1953mm,
+      tooth_width = 0.1215mm,
+      h = 0.4mm,
+      bore_r = 0.105mm,
       teeth = 10,
     )
-      |> at(dx = 0mm, dy = 0mm, dz = 0.33mm),
+      |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
+      |> at(dx = 0mm, dy = 0mm, dz = 0mm - 0.19mm),
+  )
+}
+
+part eta_pos_9_escape_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
+  -- Measured: position 9 is 4.94mm over the tips, so 2.47mm tip radius. The
+  -- 15 teeth are the count 28,800 A/h requires of a Swiss lever escapement
+  -- at 16 escape turns per minute. A club tooth's radius is not set by a
+  -- module -- these teeth meet the pallet stones, not another wheel -- so it
+  -- follows the pallet geometry in escapement.cade.
+  -- The 6-leaf pinion is on module 0.07057 and is cut on the arbor, so
+  -- it is drawn nearly solid rather than bored for one.
+  union(
+    common.spoked_wheel(
+      root_r = 2.1mm,
+      rim_width = 0.18mm,
+      tooth_depth = 0.37mm,
+      tooth_width = 0.11mm,
+      hub_r = 0.34mm,
+      bore_r = 0.105mm,
+      spoke_width = 0.12mm,
+      h = datum.train_wheel_thickness(),
+      teeth = 15,
+      spokes = 5,
+    ),
+    common.toothed_disk(
+      root_r = 0.1235mm,
+      tooth_depth = 0.1588mm,
+      tooth_width = 0.0988mm,
+      h = 0.4mm,
+      bore_r = 0.05mm,
+      teeth = 6,
+    )
+      |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
+      |> at(dx = 0mm, dy = 0mm, dz = 0mm - 0.19mm),
   )
 }
 
 part eta_pos_13_train_bridge_envelope() -> Solid<Exact> {
-  let bridge_blank = union(
-    cylinder(r = 2mm, h = 0.35mm) |> at(dx = -5.4mm, dy = -1.3mm, dz = 0mm),
-    cylinder(r = 1.8mm, h = 0.35mm) |> at(dx = 0.1mm, dy = -1.3mm, dz = 0mm),
-    cylinder(r = 1.6mm, h = 0.35mm) |> at(dx = 2.4mm, dy = 2.4mm, dz = 0mm),
-    cylinder(r = 1.5mm, h = 0.35mm) |> at(dx = 5.3mm, dy = -0.2mm, dz = 0mm),
-    box(x = 11mm, y = 2.1mm, z = 0.35mm) |> at(dx = 0mm, dy = -1.2mm, dz = 0mm),
-    box(x = 2.2mm, y = 5mm, z = 0.35mm) |> at(dx = 1.2mm, dy = 0.7mm, dz = 0mm),
-    box(x = 4mm, y = 1.8mm, z = 0.35mm) |> at(dx = 3.5mm, dy = 1mm, dz = 0mm),
+  -- Spans the four upper pivots and stands on two feet that reach the plate,
+  -- with the screw's clearance hole through each foot. The feet were solved
+  -- against the placed geometry: each clears every wheel's tip circle, the
+  -- barrel, the balance and the crown wheel by at least 1.0mm. Local
+  -- coordinates are relative to the bridge's placement at (-2.2820mm, 0.8683mm).
+  let bosses = union(
+    cylinder(r = 1.05mm, h = datum.train_bridge_thickness())
+      |> at(dx = 0mm - 1.793mm, dy = 5.0887mm, dz = 0mm),
+    cylinder(r = 1.05mm, h = datum.train_bridge_thickness())
+      |> at(dx = 0mm - 0.456mm, dy = 1.6047mm, dz = 0mm),
+    cylinder(r = 1.05mm, h = datum.train_bridge_thickness())
+      |> at(dx = 2.282mm, dy = 0mm - 0.8683mm, dz = 0mm),
+    cylinder(r = 1.05mm, h = datum.train_bridge_thickness())
+      |> at(dx = 0mm - 0.697mm, dy = 0mm - 2.8883mm, dz = 0mm),
+    cylinder(r = 0.95mm, h = datum.train_bridge_thickness())
+      |> at(dx = 0mm - 5.518mm, dy = 1.3517mm, dz = 0mm),
+    cylinder(r = 0.95mm, h = datum.train_bridge_thickness())
+      |> at(dx = 6.182mm, dy = 0mm - 4.2883mm, dz = 0mm),
   )
-  let bearing_seats = union(
-    cylinder(r = 0.48mm, h = 0.55mm) |> at(dx = -5.4mm, dy = -1.3mm, dz = 0mm),
-    cylinder(r = 0.48mm, h = 0.55mm) |> at(dx = 0.1mm, dy = -1.3mm, dz = 0mm),
-    cylinder(r = 0.48mm, h = 0.55mm) |> at(dx = 2.4mm, dy = 2.4mm, dz = 0mm),
-    cylinder(r = 0.48mm, h = 0.55mm) |> at(dx = 5.3mm, dy = -0.2mm, dz = 0mm),
+  let spans = union(
+    box(x = 5.2764mm, y = 1.4mm, z = datum.train_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = 45.092deg)
+      |> at(dx = 0mm - 3.6555mm, dy = 3.2202mm, dz = 0mm),
+    box(x = 3.7317mm, y = 1.4mm, z = datum.train_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = -69.005deg)
+      |> at(dx = 0mm - 1.1245mm, dy = 3.3467mm, dz = 0mm),
+    box(x = 3.6895mm, y = 1.4mm, z = datum.train_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = -42.089deg)
+      |> at(dx = 0.913mm, dy = 0.3682mm, dz = 0mm),
+    box(x = 5.1871mm, y = 1.4mm, z = datum.train_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = -41.248deg)
+      |> at(dx = 4.232mm, dy = 0mm - 2.5783mm, dz = 0mm),
+    box(x = 4.4995mm, y = 1.4mm, z = datum.train_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = -93.07deg)
+      |> at(dx = 0mm - 0.5765mm, dy = 0mm - 0.6418mm, dz = 0mm),
   )
-  let screw_clearances = union(
-    cylinder(r = 0.24mm, h = 0.55mm) |> at(dx = -6mm, dy = -2.3mm, dz = 0mm),
-    cylinder(r = 0.24mm, h = 0.55mm) |> at(dx = 6.1mm, dy = -1mm, dz = 0mm),
+  let jewel_seats = union(
+    cylinder(
+      r = 0.48mm + datum.jewel_seat_clearance(),
+      h = datum.train_bridge_thickness() + 0.4mm,
+    )
+      |> at(dx = 0mm - 1.793mm, dy = 5.0887mm, dz = 0mm),
+    cylinder(
+      r = 0.48mm + datum.jewel_seat_clearance(),
+      h = datum.train_bridge_thickness() + 0.4mm,
+    )
+      |> at(dx = 0mm - 0.456mm, dy = 1.6047mm, dz = 0mm),
+    cylinder(
+      r = 0.48mm + datum.jewel_seat_clearance(),
+      h = datum.train_bridge_thickness() + 0.4mm,
+    )
+      |> at(dx = 2.282mm, dy = 0mm - 0.8683mm, dz = 0mm),
+    cylinder(
+      r = 0.48mm + datum.jewel_seat_clearance(),
+      h = datum.train_bridge_thickness() + 0.4mm,
+    )
+      |> at(dx = 0mm - 0.697mm, dy = 0mm - 2.8883mm, dz = 0mm),
+  )
+  let feet = union(
+    common.bridge_foot(
+      r = datum.bridge_foot_radius(),
+      h = datum.train_bridge_underside_z() - datum.plate_train_face_z(),
+      hole_r = 0.24mm,
+    )
+      |> at(
+        dx = 0mm - 5.518mm,
+        dy = 1.3517mm,
+        dz = 0mm - datum.train_bridge_thickness() / 2
+          - (datum.train_bridge_underside_z() - datum.plate_train_face_z()) / 2,
+      ),
+    common.bridge_foot(
+      r = datum.bridge_foot_radius(),
+      h = datum.train_bridge_underside_z() - datum.plate_train_face_z(),
+      hole_r = 0.24mm,
+    )
+      |> at(
+        dx = 6.182mm,
+        dy = 0mm - 4.2883mm,
+        dz = 0mm - datum.train_bridge_thickness() / 2
+          - (datum.train_bridge_underside_z() - datum.plate_train_face_z()) / 2,
+      ),
+  )
+  let screw_holes = union(
+    common.screw_clearance_hole(
+      head_r = 0.5mm,
+      head_h = 0.18mm,
+      shank_r = 0.24mm,
+      depth = datum.train_bridge_thickness(),
+    )
+      |> at(dx = 0mm - 5.518mm, dy = 1.3517mm, dz = 0mm),
+    common.screw_clearance_hole(
+      head_r = 0.5mm,
+      head_h = 0.18mm,
+      shank_r = 0.24mm,
+      depth = datum.train_bridge_thickness(),
+    )
+      |> at(dx = 6.182mm, dy = 0mm - 4.2883mm, dz = 0mm),
   )
 
-  cut(bridge_blank, union(bearing_seats, screw_clearances))
+  cut(union(bosses, spans, feet), union(jewel_seats, screw_holes))
 }
 
 part eta_pos_13_train_bridge_jewel() -> Solid<Exact> {
-  common.jewel_ring(r = 0.48mm, h = 0.3mm, bore_r = 0.105mm)
+  common.jewel_ring(r = 0.48mm, h = 0.3mm, bore_r = 0.115mm)
 }
 
 part going_train_pivot_arbor() -> Solid<Exact> {
-  cylinder(r = 0.085mm, h = 1.85mm)
+  cylinder(
+    r = 0.105mm,
+    h = datum.train_bridge_underside_z() - datum.plate_train_face_z() + 0.5mm,
+  )
+}
+
+part escape_wheel_assembly() -> Assembly {
+  eta_pos_9_escape_wheel_envelope(pinion_phase = 64.14deg)
+    |> place(
+      frame = frame(
+        origin = point(
+          x = 0mm - 2.979mm,
+          y = 0mm - 2.02mm,
+          z = datum.train_level_1_z(),
+        ),
+        axis = Z,
+        angle = 0deg,
+      ),
+      color = rgb(r = 214, g = 172, b = 64),
+    )
 }
 
 part going_train_assembly() -> Assembly {
   together(
-    eta_pos_9_escape_wheel_envelope()
+    escape_wheel_assembly(),
+    eta_pos_10_centre_seconds_wheel_envelope(pinion_phase = 301.771deg)
       |> place(
         frame = frame(
-          origin = point(x = 9.5mm, y = 3.6mm, z = 1.55mm),
+          origin = point(x = 0mm, y = 0mm, z = datum.train_level_4_z()),
           axis = Z,
-          angle = 0deg,
-        ),
-        color = rgb(r = 214, g = 172, b = 64),
-      ),
-    eta_pos_10_intermediate_wheel_envelope()
-      |> place(
-        frame = frame(
-          origin = point(x = 6.6mm, y = 6.2mm, z = 1.55mm),
-          axis = Z,
-          angle = 0deg,
+          angle = 214.14deg,
         ),
         color = rgb(r = 203, g = 158, b = 52),
       ),
-    eta_pos_11_third_wheel_envelope()
+    eta_pos_11_third_wheel_envelope(pinion_phase = 175.583deg)
       |> place(
         frame = frame(
-          origin = point(x = 4.3mm, y = 2.5mm, z = 1.55mm),
+          origin = point(x = 0mm - 2.738mm, y = 2.473mm, z = datum.train_level_3_z()),
           axis = Z,
-          angle = 0deg,
+          angle = 317.911deg,
         ),
         color = rgb(r = 224, g = 184, b = 74),
       ),
-    eta_pos_12_second_wheel_envelope()
+    eta_pos_12_second_wheel_envelope(pinion_phase = 81.917deg)
       |> place(
         frame = frame(
-          origin = point(x = -1.2mm, y = 2.5mm, z = 1.55mm),
+          origin = point(x = 0mm - 4.075mm, y = 5.957mm, z = datum.train_level_2_z()),
           axis = Z,
-          angle = 0deg,
+          angle = 290.995deg,
         ),
         color = rgb(r = 194, g = 147, b = 38),
       ),
     eta_pos_13_train_bridge_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 4.2mm, y = 3.8mm, z = 2.15mm),
+          origin = point(
+            x = 0mm - 2.282mm,
+            y = 0.8683mm,
+            z = (datum.train_bridge_underside_z() + datum.train_bridge_top_z()) / 2,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -191,7 +354,11 @@ part going_train_assembly() -> Assembly {
     eta_pos_13_train_bridge_jewel()
       |> place(
         frame = frame(
-          origin = point(x = -1.2mm, y = 2.5mm, z = 2.15mm),
+          origin = point(
+            x = 0mm - 4.075mm,
+            y = 5.957mm,
+            z = datum.train_bridge_underside_z() + 0.15mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -200,7 +367,11 @@ part going_train_assembly() -> Assembly {
     eta_pos_13_train_bridge_jewel()
       |> place(
         frame = frame(
-          origin = point(x = 4.3mm, y = 2.5mm, z = 2.15mm),
+          origin = point(
+            x = 0mm - 2.738mm,
+            y = 2.473mm,
+            z = datum.train_bridge_underside_z() + 0.15mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -209,7 +380,11 @@ part going_train_assembly() -> Assembly {
     eta_pos_13_train_bridge_jewel()
       |> place(
         frame = frame(
-          origin = point(x = 6.6mm, y = 6.2mm, z = 2.15mm),
+          origin = point(
+            x = 0mm,
+            y = 0mm,
+            z = datum.train_bridge_underside_z() + 0.15mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -218,7 +393,11 @@ part going_train_assembly() -> Assembly {
     eta_pos_13_train_bridge_jewel()
       |> place(
         frame = frame(
-          origin = point(x = 9.5mm, y = 3.6mm, z = 2.15mm),
+          origin = point(
+            x = 0mm - 2.979mm,
+            y = 0mm - 2.02mm,
+            z = datum.train_bridge_underside_z() + 0.15mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -227,7 +406,11 @@ part going_train_assembly() -> Assembly {
     going_train_pivot_arbor()
       |> place(
         frame = frame(
-          origin = point(x = -1.2mm, y = 2.5mm, z = 1.4mm),
+          origin = point(
+            x = 0mm - 4.075mm,
+            y = 5.957mm,
+            z = (datum.plate_train_face_z() + datum.train_bridge_underside_z()) / 2,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -236,7 +419,11 @@ part going_train_assembly() -> Assembly {
     going_train_pivot_arbor()
       |> place(
         frame = frame(
-          origin = point(x = 4.3mm, y = 2.5mm, z = 1.4mm),
+          origin = point(
+            x = 0mm - 2.738mm,
+            y = 2.473mm,
+            z = (datum.plate_train_face_z() + datum.train_bridge_underside_z()) / 2,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -245,7 +432,11 @@ part going_train_assembly() -> Assembly {
     going_train_pivot_arbor()
       |> place(
         frame = frame(
-          origin = point(x = 6.6mm, y = 6.2mm, z = 1.4mm),
+          origin = point(
+            x = 0mm,
+            y = 0mm,
+            z = (datum.plate_train_face_z() + datum.train_bridge_underside_z()) / 2,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -254,7 +445,11 @@ part going_train_assembly() -> Assembly {
     going_train_pivot_arbor()
       |> place(
         frame = frame(
-          origin = point(x = 9.5mm, y = 3.6mm, z = 1.4mm),
+          origin = point(
+            x = 0mm - 2.979mm,
+            y = 0mm - 2.02mm,
+            z = (datum.plate_train_face_z() + datum.train_bridge_underside_z()) / 2,
+          ),
           axis = Z,
           angle = 0deg,
         ),

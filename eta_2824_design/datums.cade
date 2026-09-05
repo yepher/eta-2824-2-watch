@@ -1,0 +1,848 @@
+-- Datums and the axial budget for the ETA 2824-2 reconstruction.
+--
+-- This file holds no geometry that ships. Every entry is a named quantity that
+-- the subsystem files call, so a level moves in one edit instead of eighty, and
+-- so no leaf part carries an unexplained coordinate literal.
+--
+-- Convention, as stated in ASSUMPTIONS.md:
+--   origin   movement centre, on the DIAL SEAT plane
+--   +X       toward 3 o'clock and the winding stem
+--   +Y       toward 12 o'clock
+--   +Z       from the dial side toward the rotor
+--
+-- The datum choice matters: with z = 0 at the dial seat the whole movement
+-- occupies 0 <= z <= 4.60mm, so the published overall height stops being a
+-- number in a document and becomes a constraint the model can be checked
+-- against. `movement_stack_diagnostic` in this file is that check.
+--
+-- Evidence classes used below: `published` (ETA manufacturing information),
+-- `comparative` (another calibre in the same base family, identified as such),
+-- `derived` (arithmetic on the two above), `expert_estimate` (horological
+-- practice, constrained by neighbouring geometry).
+-- ---------------------------------------------------------------- envelope
+-- published: ETA manufacturing information for the 2824-2.
+fn movement_diameter() -> Len {
+  26mm
+}
+
+-- published: the casing seat, 25.60mm.
+fn casing_diameter() -> Len {
+  25.6mm
+}
+
+-- published: overall height over the oscillating weight.
+fn movement_height() -> Len {
+  4.6mm
+}
+
+-- comparative: the ETA 2801-2 is this calibre's base ebauche without the
+-- automatic module and is 3.35mm high. It fixes the plane at which the
+-- automatic works mount, which no photograph of a 2824-2 can give.
+fn base_movement_height() -> Len {
+  3.35mm
+}
+
+-- derived: everything the automatic module is allowed to occupy.
+fn automatic_module_height() -> Len {
+  movement_height() - base_movement_height()
+}
+
+fn movement_radius() -> Len {
+  movement_diameter() / 2
+}
+
+fn casing_radius() -> Len {
+  casing_diameter() / 2
+}
+
+-- expert_estimate: the main plate is turned down from the 26.00mm blank to
+-- clear the 25.60mm casing seat.
+fn main_plate_radius() -> Len {
+  casing_radius()
+}
+
+-- ------------------------------------------------------------- dial side
+-- The datum plane itself. The dial rests here, on its feet and on the date
+-- indicator maintaining plate.
+fn dial_seat_z() -> Len {
+  0mm
+}
+
+-- expert_estimate: the calendar platform, the date indicator and the hour
+-- wheel all live between the dial seat and the plate. 0.85mm is the shallowest
+-- stack that takes a 0.30mm date ring, its maintaining plate, and the hour
+-- wheel running under it with working clearance.
+fn dial_side_height() -> Len {
+  0.85mm
+}
+
+-- expert_estimate: a pressed and printed date ring at this diameter.
+fn date_indicator_thickness() -> Len {
+  0.3mm
+}
+
+-- expert_estimate: the ring runs on the plate, under the maintaining plate.
+fn date_indicator_seat_z() -> Len {
+  dial_side_height() - date_indicator_thickness() - running_clearance()
+}
+
+-- expert_estimate: thin, and its top face is what the dial actually sits on.
+fn maintaining_plate_thickness() -> Len {
+  0.2mm
+}
+
+-- ------------------------------------------------------------ main plate
+-- expert_estimate: thick enough to counterbore for the barrel and still leave
+-- a floor for the barrel arbor's lower bearing, and to carry the keyless works
+-- in a pocket in its dial-side face.
+fn main_plate_thickness() -> Len {
+  1.3mm
+}
+
+fn plate_dial_face_z() -> Len {
+  dial_side_height()
+}
+
+fn plate_train_face_z() -> Len {
+  plate_dial_face_z() + main_plate_thickness()
+}
+
+fn plate_mid_z() -> Len {
+  plate_dial_face_z() + main_plate_thickness() / 2
+}
+
+-- The setting lever, yoke, jumper and corrector lie in a shallow pocket in the
+-- dial-side face. The two PINIONS do not: they sit in the measured through-slot
+-- (see `keyless_slot_*` above), which is why the stem axis is no longer derived
+-- from this pocket's floor.
+fn keyless_pocket_depth() -> Len {
+  0.55mm
+}
+
+fn keyless_pocket_floor_z() -> Len {
+  plate_dial_face_z() + keyless_pocket_depth()
+}
+
+-- The winding pinion is measured at 1.45-1.60mm over its teeth, which on the
+-- winding train's module 0.23 is 5 teeth: pitch radius 0.575, tip 0.805.
+fn winding_pinion_pitch_radius() -> Len {
+  winding_module() * 5 / 2
+}
+
+fn winding_pinion_tip_radius() -> Len {
+  winding_pinion_pitch_radius() + winding_module()
+}
+
+-- DERIVED FROM THE MESH, not from the plate. The winding pinion straddles the
+-- plate in the keyless slot and stands proud of the train side, where the
+-- crown wheel's underside teeth meet it at 90 degrees. A face-gear mesh runs
+-- with the pinion's pitch cylinder tangent to the crown wheel's pitch plane,
+-- so the crown wheel's axial position sets the stem height and everything
+-- downstream -- the crown, the case tube, the plate slot -- reads this number.
+--
+-- This replaces the earlier derivation from a blind pocket floor, which put
+-- the stem 0.6mm too low and left the winding pinion unable to reach the crown
+-- wheel at all. See ERRORS.md E1.
+fn stem_axis_z() -> Len {
+  crown_wheel_pitch_plane_z() - winding_pinion_pitch_radius()
+}
+
+-- expert_estimate: the barrel is taller than the space above the plate, so the
+-- plate is counterbored for it. The remaining floor carries the lower pivot.
+fn barrel_recess_depth() -> Len {
+  1mm
+}
+
+fn barrel_recess_floor_z() -> Len {
+  plate_train_face_z() - barrel_recess_depth()
+}
+
+-- ------------------------------------------- measured plate layout
+-- Every bearing centre in this block is MEASURED, not solved. Position 1 Var
+-- on page 6 of the ETA technical communication is an orthographic view of the
+-- main plate from the train side, drawn at the published 25.60mm movement
+-- diameter with the jewels coloured, so the centres can be read straight off
+-- it. `tools/measure_plate_layout.py` reproduces the measurement, and
+-- `eta_2824-2_info.md` records the orientation check and the agreement with
+-- the tooth counts the beat rate independently requires.
+--
+-- Evidence class: drawing_scaled, good to about +/-0.1mm because the embedded
+-- scan is 150 ppi. Better than a photo estimate, weaker than a dimensioned
+-- drawing, and never a manufacturing dimension. Superseded the numerically
+-- solved layout on 2026-09-05.
+--
+-- The keyless slot's measured centre lands on y = 0.012mm, which is an
+-- independent confirmation that the stem axis is the +X axis.
+fn barrel_centre_x() -> Len {
+  2.834mm
+}
+
+fn barrel_centre_y() -> Len {
+  5.705mm
+}
+
+fn second_wheel_x() -> Len {
+  0mm - 4.075mm
+}
+
+fn second_wheel_y() -> Len {
+  5.957mm
+}
+
+fn third_wheel_x() -> Len {
+  0mm - 2.738mm
+}
+
+fn third_wheel_y() -> Len {
+  2.473mm
+}
+
+-- The fourth wheel carries the sweep seconds and is on the movement axis.
+fn fourth_wheel_x() -> Len {
+  0mm
+}
+
+fn fourth_wheel_y() -> Len {
+  0mm
+}
+
+fn escape_wheel_x() -> Len {
+  0mm - 2.979mm
+}
+
+fn escape_wheel_y() -> Len {
+  0mm - 2.02mm
+}
+
+fn pallet_fork_x() -> Len {
+  0mm - 1.303mm
+}
+
+fn pallet_fork_y() -> Len {
+  0mm - 4.219mm
+}
+
+fn balance_staff_x() -> Len {
+  0mm - 2.388mm
+}
+
+fn balance_staff_y() -> Len {
+  0mm - 6.567mm
+}
+
+-- A sixth jewel is present in the plate at this centre. It is 3.79 from the
+-- third wheel and 5.56 from the second, which is the right order for a
+-- minute-train pivot in an indirect-seconds movement, but no available source
+-- names it. Recorded because it is there, not because it is understood; it is
+-- not part of the going train and nothing is placed on it yet.
+fn unidentified_plate_jewel_x() -> Len {
+  0mm - 6.135mm
+}
+
+fn unidentified_plate_jewel_y() -> Len {
+  0.803mm
+}
+
+-- ---------------------------------------------- keyless slot in the plate
+-- Measured from the same view: a THROUGH-slot, not a blind pocket. This is the
+-- direct evidence for the winding-pinion architecture -- the winding pinion
+-- straddles the plate in this slot and stands proud on the train side, where
+-- the crown wheel's underside teeth meet it at 90 degrees.
+fn keyless_slot_centre_x() -> Len {
+  8.963mm
+}
+
+fn keyless_slot_length() -> Len {
+  4.79mm
+}
+
+fn keyless_slot_half_width() -> Len {
+  1.33mm
+}
+
+fn keyless_slot_inner_x() -> Len {
+  keyless_slot_centre_x() - keyless_slot_length() / 2
+}
+
+fn keyless_slot_outer_x() -> Len {
+  keyless_slot_centre_x() + keyless_slot_length() / 2
+}
+
+-- ------------------------------------------------- going train and barrel
+-- The train needs FOUR mesh planes, not two.
+--
+-- Consecutive wheels in a train always overlap in plan -- that is what a mesh
+-- is -- so a wheel's disc and the pinion it drives share a plane and everything
+-- else has to be somewhere else. On the measured layout the overlaps go
+-- further than that: each wheel's rim also passes over the PREVIOUS wheel's
+-- pinion, because the wheels are large relative to their centre distances.
+-- Writing out every plan overlap that is not a mesh gives a graph whose
+-- barrel/second/third/fourth mesh groups form a clique of four, so four
+-- distinct planes are the minimum. The escape wheel's disc conflicts only with
+-- the third and fourth discs, so it returns to plane 1 beside the barrel,
+-- which is also where it belongs physically -- low, against the pallet fork.
+--
+--   plane 1  barrel great wheel + second pinion + escape wheel
+--   plane 2  second wheel + third pinion
+--   plane 3  third wheel + fourth pinion
+--   plane 4  fourth wheel + escape pinion
+--
+-- Pinions are tall and may span two planes; it is the DISC thickness that sets
+-- the spacing. Four planes at 0.19 with 0.15 discs leaves 0.04 between
+-- neighbours and still lands the bridge under the 3.35mm base movement.
+fn train_wheel_thickness() -> Len {
+  0.15mm
+}
+
+fn train_plane_pitch() -> Len {
+  0.19mm
+}
+
+fn train_band_floor_z() -> Len {
+  plate_train_face_z() + endshake()
+}
+
+fn train_level_1_z() -> Len {
+  train_band_floor_z() + 0.12mm
+}
+
+fn train_level_2_z() -> Len {
+  train_level_1_z() + train_plane_pitch()
+}
+
+fn train_level_3_z() -> Len {
+  train_level_2_z() + train_plane_pitch()
+}
+
+fn train_level_4_z() -> Len {
+  train_level_3_z() + train_plane_pitch()
+}
+
+fn train_band_ceiling_z() -> Len {
+  train_level_4_z() + train_wheel_thickness() / 2
+}
+
+-- expert_estimate: a bridge this thin still needs a jewel seat, so its
+-- thickness is set by the jewel, not by stiffness.
+fn train_bridge_thickness() -> Len {
+  0.34mm
+}
+
+fn train_bridge_underside_z() -> Len {
+  train_band_ceiling_z() + endshake() + 0.01mm
+}
+
+fn train_bridge_top_z() -> Len {
+  train_bridge_underside_z() + train_bridge_thickness()
+}
+
+-- expert_estimate: drum floor, mainspring height and lid for a 38-hour
+-- reserve at this diameter.
+fn barrel_height() -> Len {
+  1.25mm
+}
+
+fn barrel_floor_z() -> Len {
+  barrel_recess_floor_z() + endshake()
+}
+
+fn barrel_ceiling_z() -> Len {
+  barrel_floor_z() + barrel_height()
+}
+
+fn barrel_bridge_thickness() -> Len {
+  0.4mm
+}
+
+fn barrel_bridge_underside_z() -> Len {
+  barrel_ceiling_z() + 0.17mm
+}
+
+fn barrel_bridge_top_z() -> Len {
+  barrel_bridge_underside_z() + barrel_bridge_thickness()
+}
+
+-- ------------------------------------------------------- winding on top
+-- The winding train is module 0.23, which is measured rather than chosen: the
+-- crown wheel is the one wheel on the materials page coarse enough for its
+-- teeth to resolve, and it counts 26 teeth on a 6.29mm outside diameter. The
+-- model previously ran this train on module 0.100, which made the crown wheel
+-- 59% undersize and is why the winding pinion could not reach it.
+fn winding_module() -> Len {
+  0.23mm
+}
+
+fn crown_wheel_pitch_radius() -> Len {
+  2.99mm
+}
+
+fn crown_wheel_tip_radius() -> Len {
+  crown_wheel_pitch_radius() + winding_module()
+}
+
+fn ratchet_wheel_pitch_radius() -> Len {
+  3.565mm
+}
+
+fn ratchet_wheel_tip_radius() -> Len {
+  ratchet_wheel_pitch_radius() + winding_module()
+}
+
+-- Derived: the crown wheel sits on the circle of this radius about the barrel
+-- axis. The position on that circle is the one whose pitch circle crosses the
+-- stem axis inside the measured keyless slot while clearing every other wheel,
+-- and it lands 0.14mm from the measured slot's centre -- which the solve was
+-- never told about.
+fn crown_wheel_centre_x() -> Len {
+  8.8003mm
+}
+
+fn crown_wheel_centre_y() -> Len {
+  2.9899mm
+}
+
+-- Measured: 7.40mm over the tips and 0.53mm thick. On module 0.23 that is 31
+-- teeth. The model's earlier 63 teeth on module 0.100 is not supported.
+fn ratchet_wheel_thickness() -> Len {
+  0.53mm
+}
+
+fn ratchet_wheel_top_z() -> Len {
+  base_movement_height()
+}
+
+fn ratchet_wheel_seat_z() -> Len {
+  ratchet_wheel_top_z() - ratchet_wheel_thickness()
+}
+
+-- Measured: 0.82mm thick, and it is one disc rather than a rim under a boss.
+-- A single 0.82 disc is what makes the two meshes possible at once: its upper
+-- part is coplanar with the ratchet wheel it drives, and its underside reaches
+-- far enough down to meet the winding pinion inside the plate. The barrel
+-- bridge is relieved around it, which is why the assembled views show the
+-- crown wheel standing in an opening rather than sitting on the bridge.
+fn crown_wheel_thickness() -> Len {
+  0.82mm
+}
+
+fn crown_wheel_top_z() -> Len {
+  base_movement_height()
+}
+
+fn crown_wheel_seat_z() -> Len {
+  crown_wheel_top_z() - crown_wheel_thickness()
+}
+
+-- The 90-degree interface to the stem. The crown wheel's underside carries a
+-- band of teeth standing down from the disc; the winding pinion runs with its
+-- pitch cylinder tangent to their pitch plane, one addendum below the face.
+fn crown_wheel_bevel_depth() -> Len {
+  0.28mm
+}
+
+fn crown_wheel_bevel_floor_z() -> Len {
+  crown_wheel_seat_z() - crown_wheel_bevel_depth()
+}
+
+fn crown_wheel_pitch_plane_z() -> Len {
+  crown_wheel_seat_z() - winding_module()
+}
+
+-- ---------------------------------------------------------- automatic
+-- The plane the automatic module bolts to, and its ceiling.
+fn automatic_seat_z() -> Len {
+  base_movement_height()
+}
+
+fn automatic_top_z() -> Len {
+  movement_height()
+}
+
+-- expert_estimate: the reversing and reduction wheels run inside openings in
+-- the framework rather than on top of it, which is how the module fits in
+-- 1.25mm at all.
+fn automatic_framework_thickness() -> Len {
+  0.3mm
+}
+
+fn automatic_framework_top_z() -> Len {
+  automatic_seat_z() + automatic_framework_thickness()
+}
+
+fn automatic_bridge_thickness() -> Len {
+  0.2mm
+}
+
+-- Set from the reverser level, not from the framework: the reversing wheels
+-- stand proud of the framework, so the bridge has to clear them, not it.
+fn automatic_bridge_underside_z() -> Len {
+  automatic_seat_z() + 0.48mm
+}
+
+fn automatic_bridge_top_z() -> Len {
+  automatic_bridge_underside_z() + automatic_bridge_thickness()
+}
+
+-- expert_estimate: the weight's rim carries the mass and is the thickest part
+-- of the rotor; its top face is the top of the movement.
+fn rotor_rim_thickness() -> Len {
+  0.6mm
+}
+
+fn rotor_top_z() -> Len {
+  automatic_top_z()
+}
+
+fn rotor_rim_floor_z() -> Len {
+  rotor_top_z() - rotor_rim_thickness()
+}
+
+-- expert_estimate: the ball bearing is the only part of the rotor that reaches
+-- down past the bridge, into the centre of the framework.
+fn rotor_bearing_height() -> Len {
+  0.6mm
+}
+
+fn rotor_bearing_top_z() -> Len {
+  rotor_top_z() - 0.15mm
+}
+
+fn rotor_bearing_floor_z() -> Len {
+  rotor_bearing_top_z() - rotor_bearing_height()
+}
+
+-- expert_estimate: the swept envelope has to clear the case bore, so it is
+-- smaller than the movement.
+fn rotor_radius() -> Len {
+  12.2mm
+}
+
+-- ------------------------------------------------ shared feature sizes
+-- Sizes that more than one subsystem has to agree on. A feature owned by a
+-- single subsystem stays in that subsystem's file.
+-- expert_estimate: ETA states the stem thread as S 0.90; the body is turned
+-- below the thread, and this is the running diameter in the plate.
+fn stem_radius() -> Len {
+  0.28mm
+}
+
+fn stem_hole_radius() -> Len {
+  stem_radius() + running_clearance()
+}
+
+-- Measured: position 14 Var is 12.29mm over the great wheel's tooth tips, so
+-- the tip radius is 6.145mm. The great wheel is 74 teeth meshing the second
+-- wheel's 12-leaf pinion at the measured 6.914mm centre distance, which puts
+-- the module at 0.1611 and the root radius at 5.76mm.
+fn barrel_tip_radius() -> Len {
+  6.145mm
+}
+
+-- The DRUM is turned smaller than the tooth root, because the second wheel's
+-- pinion has to reach the great wheel's teeth and would otherwise foul the
+-- drum below them.
+fn barrel_radius() -> Len {
+  5.7mm
+}
+
+-- The counterbore clears the DRUM, not the tooth tips: at this diameter a
+-- recess taking the tips would break into the centre bore, and on the real
+-- plate the teeth run over the surface in a shallower relief. The barrel
+-- centre is 6.370 from the movement axis, so this recess stops 0.62 short of
+-- it -- the constraint that now sets `centre_bore_radius`.
+fn barrel_recess_radius() -> Len {
+  barrel_radius() + running_clearance()
+}
+
+-- The centre-seconds arbor, the cannon pinion and the hour wheel tube all pass
+-- through the plate on the centre axis. Derived, not chosen: the measured
+-- barrel centre and drum radius leave 0.62mm of plate between the barrel
+-- recess and the movement axis, so the through-bore cannot exceed that less a
+-- wall. The hour wheel's larger tube needs a counterbore from the dial face,
+-- which is a dial-side feature and is not this dimension.
+fn centre_bore_radius() -> Len {
+  0.55mm
+}
+
+-- ------------------------------------------------- dial-side sub-levels
+-- Read from the dial seat upward, toward the plate.
+-- expert_estimate: the dial support ring is what the dial actually rests on,
+-- so its dial-side face is the datum plane itself.
+fn dial_support_thickness() -> Len {
+  0.2mm
+}
+
+fn dial_support_top_z() -> Len {
+  dial_seat_z() + dial_support_thickness()
+}
+
+-- expert_estimate: the dial-side bridge sits between the dial and the wheels
+-- it carries, so it is the first thing above the dial support.
+fn minute_bridge_underside_z() -> Len {
+  dial_support_top_z() - 0.1mm
+}
+
+fn minute_bridge_thickness() -> Len {
+  0.3mm
+}
+
+fn minute_bridge_top_z() -> Len {
+  minute_bridge_underside_z() + minute_bridge_thickness()
+}
+
+-- expert_estimate: the calendar and motion wheels share one band between the
+-- dial-side bridge and the plate.
+fn calendar_band_floor_z() -> Len {
+  minute_bridge_top_z() + endshake()
+}
+
+fn calendar_band_ceiling_z() -> Len {
+  plate_dial_face_z() - endshake()
+}
+
+-- expert_estimate: the date ring runs against the plate's dial face, at the
+-- outside of the calendar band, and the maintaining plate holds it there.
+fn date_indicator_top_z() -> Len {
+  calendar_band_ceiling_z() - running_clearance()
+}
+
+fn date_indicator_floor_z() -> Len {
+  date_indicator_top_z() - date_indicator_thickness()
+}
+
+fn maintaining_plate_top_z() -> Len {
+  date_indicator_floor_z() - running_clearance()
+}
+
+fn maintaining_plate_floor_z() -> Len {
+  maintaining_plate_top_z() - maintaining_plate_thickness()
+}
+
+-- ------------------------------------------------------- screw axes
+-- Every screw axis in the movement, in one place. A bridge's foot, its
+-- clearance hole, the tapped hole in the plate and the screw itself all read
+-- the same pair of numbers, so they cannot drift apart.
+--
+-- The positions were re-solved on 2026-09-05 against the measured layout: each
+-- clears every wheel's tip circle, the barrel, the balance rim, the crown wheel
+-- and the keyless slot by at least 0.15mm beyond its own head, and sits inside
+-- the 25.60mm casing seat. The two bridges' feet also bracket the pivots they
+-- carry rather than hanging off one end.
+fn train_bridge_screw_a_x() -> Len {
+  0mm - 7.8mm
+}
+
+fn train_bridge_screw_a_y() -> Len {
+  2.22mm
+}
+
+fn train_bridge_screw_b_x() -> Len {
+  3.9mm
+}
+
+fn train_bridge_screw_b_y() -> Len {
+  0mm - 3.42mm
+}
+
+fn barrel_bridge_screw_a_x() -> Len {
+  4.14mm
+}
+
+fn barrel_bridge_screw_a_y() -> Len {
+  0mm - 1.2mm
+}
+
+fn barrel_bridge_screw_b_x() -> Len {
+  9.66mm
+}
+
+fn barrel_bridge_screw_b_y() -> Len {
+  7.02mm
+}
+
+fn balance_cock_screw_x() -> Len {
+  1.26mm
+}
+
+fn balance_cock_screw_y() -> Len {
+  0mm - 11.88mm
+}
+
+fn pallet_bridge_screw_x() -> Len {
+  0.42mm
+}
+
+fn pallet_bridge_screw_y() -> Len {
+  0mm - 7.14mm
+}
+
+fn automatic_framework_screw_a_x() -> Len {
+  9.966mm
+}
+
+fn automatic_framework_screw_a_y() -> Len {
+  -0.289mm
+}
+
+fn automatic_framework_screw_b_x() -> Len {
+  -5.607mm
+}
+
+fn automatic_framework_screw_b_y() -> Len {
+  -4.972mm
+}
+
+fn automatic_bridge_screw_x() -> Len {
+  8.5mm
+}
+
+fn automatic_bridge_screw_y() -> Len {
+  -3mm
+}
+
+-- A bridge stands on feet turned from the same blank, not on air.
+fn bridge_foot_radius() -> Len {
+  0.5mm
+}
+
+-- ------------------------------------------------------- allowances
+-- Nominal size and allowance are separate parameters, per CLAUDE.md Phase 4.
+-- These are provisional values from the engineering guides, not ETA limits.
+-- expert_estimate: axial freedom of a wheel between its two bearings.
+fn endshake() -> Len {
+  0.03mm
+}
+
+-- expert_estimate: side clearance between two bodies that move relative to
+-- each other and do not transmit load.
+fn running_clearance() -> Len {
+  0.05mm
+}
+
+-- expert_estimate: a fixed body against a fixed body.
+fn static_clearance() -> Len {
+  0.1mm
+}
+
+-- expert_estimate: diametral running fit of a pivot in its jewel hole.
+fn pivot_running_fit() -> Len {
+  0.02mm
+}
+
+-- A jewel is a press fit in its seat. The model draws the seat at its nominal
+-- bore plus this clearance rather than at the interference, so the assembly has
+-- no accidental solid overlap; the press allowance is a manufacturing note in
+-- eta_2824-2_info.md, not geometry.
+fn jewel_seat_clearance() -> Len {
+  0.02mm
+}
+
+-- expert_estimate: clearance hole around a screw shank through a bridge.
+fn screw_clearance() -> Len {
+  0.04mm
+}
+
+-- expert_estimate: radial gap left at a gear mesh so tooth flanks are not
+-- forced. Applied to the sum of the tip radii, not buried in a centre distance.
+fn gear_backlash() -> Len {
+  0.02mm
+}
+
+-- ------------------------------------------------------- diagnostics
+-- The movement must fit between the dial seat and the published overall
+-- height. This part is the slab that is legal; `movement_stack_diagnostic`
+-- below must have the same volume as the movement's own bounding cylinder
+-- intersected with it, which is to say: nothing may stick out of it.
+part legal_movement_envelope() -> Solid<Exact> {
+  cylinder(r = movement_radius(), h = movement_height())
+    |> at(dx = 0mm, dy = 0mm, dz = movement_height() / 2)
+}
+
+-- A visible picture of the budget. Each band is its own part so it can carry
+-- its own colour, and the stack is drawn at half radius so the movement can be
+-- viewed through it.
+fn band_radius() -> Len {
+  6mm
+}
+
+part band_dial_side() -> Solid<Exact> {
+  cylinder(r = band_radius(), h = dial_side_height())
+}
+
+part band_main_plate() -> Solid<Exact> {
+  cylinder(r = band_radius(), h = main_plate_thickness())
+}
+
+part band_train() -> Solid<Exact> {
+  cylinder(r = band_radius(), h = train_bridge_top_z() - plate_train_face_z())
+}
+
+part band_winding() -> Solid<Exact> {
+  cylinder(r = band_radius(), h = base_movement_height() - train_bridge_top_z())
+}
+
+part band_automatic() -> Solid<Exact> {
+  cylinder(r = band_radius(), h = automatic_module_height())
+}
+
+part datum_stack_preview() -> Assembly {
+  together(
+    band_dial_side()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = dial_side_height() / 2),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 208, g = 196, b = 168, a = 120),
+      ),
+    band_main_plate()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = plate_mid_z()),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 176, g = 172, b = 160, a = 120),
+      ),
+    band_train()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 0mm,
+            y = 0mm,
+            z = (plate_train_face_z() + train_bridge_top_z()) / 2,
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 214, g = 176, b = 72, a = 120),
+      ),
+    band_winding()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 0mm,
+            y = 0mm,
+            z = (train_bridge_top_z() + base_movement_height()) / 2,
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 150, g = 158, b = 168, a = 120),
+      ),
+    band_automatic()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 0mm,
+            y = 0mm,
+            z = (base_movement_height() + movement_height()) / 2,
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 120, g = 146, b = 178, a = 120),
+      ),
+  )
+}

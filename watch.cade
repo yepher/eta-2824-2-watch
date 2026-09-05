@@ -1,6 +1,7 @@
 -- ETA 2824-2 watch reconstruction entry point. Revision: ETA rotor-side orientation reconciled.
 -- Every imported entry has a unique name because qualified `main` currently
 -- triggers the recursion diagnostic recorded in GAPS.md.
+import "./eta_2824_design/datums.cade" as datums
 import "./eta_2824_design/movement.cade" as movement
 import "./eta_2824_design/case.cade" as watch_case
 import "./eta_2824_design/fasteners.cade" as fasteners
@@ -13,8 +14,14 @@ import "./eta_2824_design/balance.cade" as balance
 import "./eta_2824_design/automatic_winding.cade" as automatic
 import "./eta_2824_design/dial_side.cade" as dial_side
 
+-- The axial budget the whole movement is being rebuilt onto: dial seat at
+-- z = 0, rotor top at the published 4.60mm. See eta_2824_design/datums.cade.
+part datum_budget_preview() -> Assembly {
+  datums.datum_stack_preview()
+}
+
 part movement_preview() -> Assembly {
-  movement.eta_2824_2_rough_assembly()
+  together(movement.eta_2824_2_rough_assembly(), watch_case.crown_assembly())
 }
 
 part main_plate_preview() -> Assembly {
@@ -22,7 +29,21 @@ part main_plate_preview() -> Assembly {
 }
 
 part keyless_works_preview() -> Assembly {
-  setting.hand_setting_assembly()
+  together(setting.hand_setting_assembly(), watch_case.crown_assembly())
+}
+
+part date_setting_preview() -> Assembly {
+  together(
+    setting.keyless_state_assembly(stem_x = 0.3mm, sliding_x = 8mm, yoke_x = 8mm),
+    watch_case.crown_position_assembly(crown_x = 20.3mm),
+  )
+}
+
+part hand_setting_preview() -> Assembly {
+  together(
+    setting.keyless_state_assembly(stem_x = 0.8mm, sliding_x = 8.5mm, yoke_x = 8.5mm),
+    watch_case.crown_position_assembly(crown_x = 20.8mm),
+  )
 }
 
 part going_train_preview() -> Assembly {
@@ -33,8 +54,16 @@ part barrel_and_winding_preview() -> Assembly {
   barrel.barrel_and_winding_assembly()
 }
 
+part manual_winding_path_preview() -> Assembly {
+  together(
+    plate.main_plate_assembly(),
+    setting.hand_setting_assembly(),
+    barrel.barrel_and_winding_assembly(),
+  )
+}
+
 part escapement_preview() -> Assembly {
-  escapement.escapement_assembly()
+  together(train.escape_wheel_assembly(), escapement.escapement_assembly())
 }
 
 part balance_preview() -> Assembly {
@@ -58,7 +87,7 @@ part dial_and_calendar_preview() -> Assembly {
 }
 
 part installed_fasteners_preview() -> Assembly {
-  fasteners.fasteners_assembly()
+  fasteners.verified_retaining_fasteners_assembly()
 }
 
 part case_and_hands_preview() -> Assembly {

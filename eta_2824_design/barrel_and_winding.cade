@@ -1,19 +1,40 @@
 import "./components.cade" as common
+import "./going_train.cade" as train
+import "./datums.cade" as datum
 
+-- ETA positions 14 to 20: the barrel, its bridge and the winding train.
+--
+-- Rebuilt 2026-09-05 on measured geometry. The barrel measures 12.29mm over
+-- the great wheel and sits at a measured centre, and the winding train is
+-- module 0.23 rather than the 0.100 this file used to assume -- the crown
+-- wheel is the one wheel on the materials page whose teeth resolve, and it
+-- counts 26 on 6.29mm. See eta_2824-2_info.md.
 part eta_pos_14_barrel_envelope() -> Solid<Exact> {
-  -- Expert estimate: 80-tooth great wheel around the mainspring drum.
+  -- The great wheel: 74 teeth on module 0.16078, pitch radius 5.9489mm, driving
+  -- the second wheel's 12-leaf pinion at the measured 6.9136mm centre
+  -- distance. The drum is turned below the tooth root so the second wheel's
+  -- pinion can reach the teeth without fouling the drum under them.
   union(
     common.toothed_disk(
-      root_r = 4.32mm,
-      tooth_depth = 0.18mm,
-      tooth_width = 0.18mm,
-      h = 0.24mm,
+      root_r = 5.7479mm,
+      tooth_depth = 0.3618mm,
+      tooth_width = 0.2251mm,
+      h = datum.train_wheel_thickness(),
       bore_r = 0.45mm,
-      teeth = 80,
+      teeth = 74,
     )
-      |> at(dx = 0mm, dy = 0mm, dz = -0.5mm),
-    common.bored_disk(r = 4.05mm, h = 1mm, bore_r = 0.45mm),
-    common.bored_disk(r = 1mm, h = 1.25mm, bore_r = 0.45mm),
+      |> at(
+        dx = 0mm,
+        dy = 0mm,
+        dz = datum.train_level_1_z()
+          - (datum.barrel_floor_z() + datum.barrel_ceiling_z()) / 2,
+      ),
+    common.bored_disk(
+      r = datum.barrel_radius(),
+      h = datum.barrel_height() - 0.28mm,
+      bore_r = 0.45mm,
+    ),
+    common.bored_disk(r = 1mm, h = datum.barrel_height(), bore_r = 0.45mm),
   )
 }
 
@@ -22,21 +43,105 @@ part eta_pos_15_stop_lever_envelope() -> Solid<Exact> {
 }
 
 part eta_pos_16_barrel_bridge_envelope() -> Solid<Exact> {
-  let bridge_blank = union(
-    cylinder(r = 3.2mm, h = 0.4mm) |> at(dx = -1.1mm, dy = 0.1mm, dz = 0mm),
-    cylinder(r = 2mm, h = 0.4mm) |> at(dx = 3mm, dy = -1mm, dz = 0mm),
-    cylinder(r = 1.6mm, h = 0.4mm) |> at(dx = 6.8mm, dy = -3.5mm, dz = 0mm),
-    box(x = 8.5mm, y = 2.5mm, z = 0.4mm) |> at(dx = 1.7mm, dy = -0.6mm, dz = 0mm),
-    box(x = 5mm, y = 1.8mm, z = 0.4mm) |> at(dx = 5mm, dy = -2.3mm, dz = 0mm),
+  -- Carries the barrel arbor and stands on two feet that reach the plate.
+  -- It is relieved by the parts that pass through it rather than trimmed by
+  -- hand: the crown wheel stands in an opening through the bridge and the
+  -- ratchet wheel is countersunk into its top face, both cut with the wheels'
+  -- own clearance cylinders, so the relief follows if either wheel moves.
+  -- Local coordinates are relative to the placement at (6.3586mm, 3.6287mm).
+  let blank = union(
+    cylinder(r = 2.4mm, h = datum.barrel_bridge_thickness())
+      |> at(dx = 0mm - 3.5246mm, dy = 2.0763mm, dz = 0mm),
+    cylinder(r = 0.95mm, h = datum.barrel_bridge_thickness())
+      |> at(dx = 0mm - 2.2186mm, dy = 0mm - 4.8287mm, dz = 0mm),
+    cylinder(r = 0.95mm, h = datum.barrel_bridge_thickness())
+      |> at(dx = 3.3014mm, dy = 3.3913mm, dz = 0mm),
+    box(x = 6.9515mm, y = 2mm, z = datum.barrel_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = 10.904deg)
+      |> at(dx = 0mm - 0.1116mm, dy = 2.7338mm, dz = 0mm),
+    box(x = 4.1208mm, y = 1.8mm, z = datum.barrel_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = -102.042deg)
+      |> at(dx = 2.8716mm, dy = 1.3763mm, dz = 0mm),
+    box(x = 6.2669mm, y = 1.6mm, z = datum.barrel_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = -138.042deg)
+      |> at(dx = 0.1116mm, dy = 0mm - 2.7337mm, dz = 0mm),
+    box(x = 6.555mm, y = 1.6mm, z = datum.barrel_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = -24.469deg)
+      |> at(dx = 0mm - 0.5415mm, dy = 0.7188mm, dz = 0mm),
   )
-  let arbor_and_screw_clearances = union(
-    cylinder(r = 0.5mm, h = 0.6mm) |> at(dx = -1.1mm, dy = 0.1mm, dz = 0mm),
-    cylinder(r = 0.28mm, h = 0.6mm) |> at(dx = -3mm, dy = -1.6mm, dz = 0mm),
-    cylinder(r = 0.28mm, h = 0.6mm) |> at(dx = 2.7mm, dy = 0.2mm, dz = 0mm),
-    cylinder(r = 0.28mm, h = 0.6mm) |> at(dx = 7.5mm, dy = -3.3mm, dz = 0mm),
+  let feet = union(
+    common.bridge_foot(
+      r = datum.bridge_foot_radius(),
+      h = datum.barrel_bridge_underside_z() - datum.plate_train_face_z(),
+      hole_r = 0.24mm,
+    )
+      |> at(
+        dx = 0mm - 2.2186mm,
+        dy = 0mm - 4.8287mm,
+        dz = 0mm - datum.barrel_bridge_thickness() / 2
+          - (datum.barrel_bridge_underside_z() - datum.plate_train_face_z()) / 2,
+      ),
+    common.bridge_foot(
+      r = datum.bridge_foot_radius(),
+      h = datum.barrel_bridge_underside_z() - datum.plate_train_face_z(),
+      hole_r = 0.24mm,
+    )
+      |> at(
+        dx = 3.3014mm,
+        dy = 3.3913mm,
+        dz = 0mm - datum.barrel_bridge_thickness() / 2
+          - (datum.barrel_bridge_underside_z() - datum.plate_train_face_z()) / 2,
+      ),
   )
+  let clearances = union(
+    cylinder(r = 0.5mm, h = datum.barrel_bridge_thickness() + 0.4mm)
+      |> at(dx = 0mm - 3.5246mm, dy = 2.0763mm, dz = 0mm),
+    -- the crown wheel stands through the bridge
+    cylinder(
+      r = datum.crown_wheel_tip_radius() + datum.running_clearance(),
+      h = datum.barrel_bridge_thickness() + 0.4mm,
+    )
+      |> at(dx = 2.4417mm, dy = 0mm - 0.6388mm, dz = 0mm),
+    -- and the ratchet wheel is countersunk into the top face
+    cylinder(
+      r = datum.ratchet_wheel_tip_radius() + datum.running_clearance(),
+      h = 0.6mm,
+    )
+      |> at(
+        dx = 0mm - 3.5246mm,
+        dy = 2.0763mm,
+        dz = datum.ratchet_wheel_seat_z() - datum.endshake()
+          - (datum.barrel_bridge_underside_z() + datum.barrel_bridge_top_z()) / 2
+          + 0.3mm,
+      ),
+    common.screw_clearance_hole(
+      head_r = 0.5mm,
+      head_h = 0.18mm,
+      shank_r = 0.24mm,
+      depth = datum.barrel_bridge_thickness(),
+    )
+      |> at(dx = 0mm - 2.2186mm, dy = 0mm - 4.8287mm, dz = 0mm),
+    common.screw_clearance_hole(
+      head_r = 0.5mm,
+      head_h = 0.18mm,
+      shank_r = 0.24mm,
+      depth = datum.barrel_bridge_thickness(),
+    )
+      |> at(dx = 3.3014mm, dy = 3.3913mm, dz = 0mm),
+  )
+  -- Two bridges cannot share a volume. Rather than trim this outline by hand
+  -- and have it drift, the barrel bridge is relieved by the train bridge's
+  -- own solid, placed in this bridge's frame. Move either and the relief
+  -- follows.
+  let train_bridge_relief = train.eta_pos_13_train_bridge_envelope()
+    |> at(
+      dx = 0mm - 8.6406mm,
+      dy = 0mm - 2.7604mm,
+      dz = (datum.train_bridge_underside_z() + datum.train_bridge_top_z()) / 2
+        - (datum.barrel_bridge_underside_z() + datum.barrel_bridge_top_z()) / 2,
+    )
 
-  cut(bridge_blank, arbor_and_screw_clearances)
+  cut(union(blank, feet), union(clearances, train_bridge_relief))
 }
 
 part eta_pos_16_barrel_bridge_jewel() -> Solid<Exact> {
@@ -44,39 +149,110 @@ part eta_pos_16_barrel_bridge_jewel() -> Solid<Exact> {
 }
 
 part eta_pos_17_click_envelope() -> Solid<Exact> {
-  box(x = 2mm, y = 0.65mm, z = 0.18mm)
+  -- Pivots on a post in the barrel bridge; its beak drops between the ratchet
+  -- wheel's teeth. Modelled with the pivot at the origin and the beak along +X.
+  let body = union(
+    cylinder(r = 0.42mm, h = 0.2mm),
+    box(x = 0.9mm, y = 0.4mm, z = 0.2mm) |> at(dx = 0.45mm, dy = 0mm, dz = 0mm),
+    cylinder(r = 0.2mm, h = 0.2mm) |> at(dx = 0.9mm, dy = 0mm, dz = 0mm),
+  )
+
+  cut(body, cylinder(r = 0.17mm, h = 0.4mm))
 }
 
 part eta_pos_18_click_spring_envelope() -> Solid<Exact> {
-  box(x = 3mm, y = 0.3mm, z = 0.14mm)
+  -- A blade anchored to the barrel bridge, bearing on the click's tail.
+  union(
+    box(x = 1.5mm, y = 0.18mm, z = 0.14mm),
+    box(x = 0.6mm, y = 0.18mm, z = 0.14mm)
+      |> at(dx = 0.9mm, dy = 0.24mm, dz = 0mm)
+      |> rotate(ax = 0, ay = 0, az = 1, angle = 28deg),
+  )
 }
 
-part eta_pos_19_crown_wheel_envelope() -> Solid<Exact> {
-  -- Expert estimate: 26 radial teeth; count remains unverified.
-  common.toothed_disk(
-    root_r = 1.82mm,
-    tooth_depth = 0.18mm,
-    tooth_width = 0.22mm,
-    h = 0.35mm,
-    bore_r = 0.28mm,
+part eta_pos_19_crown_wheel_envelope(bevel_phase: Angle) -> Solid<Exact> {
+  -- 26 teeth on module 0.23, pitch radius 2.9900mm, meshing the ratchet wheel at
+  -- the 6.5550mm centre distance the two measured diameters require.
+  --
+  -- One 0.82mm disc does both jobs. Its upper part is coplanar with the
+  -- ratchet wheel it drives; the band of teeth standing down from its
+  -- underside is the 90-degree face-gear interface to the stem's winding
+  -- pinion, which reaches up through the plate to meet it. The stem's height
+  -- is derived from that mesh, not the other way round -- see
+  -- `datum.stem_axis_z`.
+  let wheel = common.toothed_disk(
+    root_r = 2.7025mm,
+    tooth_depth = 0.5175mm,
+    tooth_width = 0.322mm,
+    h = datum.crown_wheel_thickness(),
+    bore_r = 0.44mm,
     teeth = 26,
   )
+  let underside_tooth = box(
+    x = 0.42mm,
+    y = 0.322mm,
+    z = datum.crown_wheel_bevel_depth(),
+  )
+    |> rotate(ax = 0, ay = 1, az = 0, angle = 0deg - 26deg)
+    |> at(
+      dx = 2.99mm,
+      dy = 0mm,
+      dz = 0mm - datum.crown_wheel_thickness() / 2
+        - datum.crown_wheel_bevel_depth() / 2
+        + 0.03mm,
+    )
+    |> polar(n = 26, axis = Z)
+    |> rotate(ax = 0, ay = 0, az = 1, angle = bevel_phase)
+  -- The crown-wheel screw's head finishes flush in a counterbore.
+  let head_recess = cylinder(r = 0.6mm, h = 0.24mm)
+    |> at(dx = 0mm, dy = 0mm, dz = datum.crown_wheel_thickness() / 2 - 0.11mm)
+
+  cut(union(wheel, underside_tooth), head_recess)
 }
 
 part eta_pos_20_ratchet_wheel_envelope() -> Solid<Exact> {
-  -- Expert estimate: 63 teeth; the left-hand retaining screw is ETA-supported.
+  -- Measured 7.40mm over the tips and 0.53mm thick; on module 0.23 that is 31
+  -- teeth, pitch radius 3.5650mm. Rides on the barrel arbor and is held by
+  -- the left-hand-threaded ratchet screw, position 903.
   common.spoked_wheel(
-    root_r = 3.24mm,
-    rim_width = 0.34mm,
-    tooth_depth = 0.16mm,
-    tooth_width = 0.16mm,
-    hub_r = 0.72mm,
+    root_r = 3.2775mm,
+    rim_width = 0.42mm,
+    tooth_depth = 0.5175mm,
+    tooth_width = 0.322mm,
+    hub_r = 0.78mm,
     bore_r = 0.36mm,
-    spoke_width = 0.24mm,
-    h = 0.35mm,
-    teeth = 63,
+    spoke_width = 0.3mm,
+    h = datum.ratchet_wheel_thickness(),
+    teeth = 31,
     spokes = 5,
   )
+    |> cut(
+      cylinder(r = 0.66mm, h = 0.26mm)
+        |> at(dx = 0mm, dy = 0mm, dz = datum.ratchet_wheel_thickness() / 2 - 0.12mm),
+    )
+}
+
+-- The crown wheel core: the post the crown wheel turns on. It seats in the
+-- MAIN PLATE, not the bridge, because the bridge is open around the crown
+-- wheel to let the wheel reach down to the winding pinion.
+part crown_wheel_arbor() -> Solid<Exact> {
+  cut(
+    cylinder(r = 0.4mm, h = datum.crown_wheel_top_z() - datum.plate_train_face_z()),
+    cylinder(
+      r = 0.24mm,
+      h = datum.crown_wheel_top_z() - datum.plate_train_face_z() + 0.4mm,
+    ),
+  )
+}
+
+-- The click's pivot post, standing on the barrel bridge.
+part click_post() -> Solid<Exact> {
+  cylinder(r = 0.15mm, h = 0.42mm)
+}
+
+part barrel_arbor_upper_pivot() -> Solid<Exact> {
+  -- Bored for the ratchet screw that clamps the ratchet wheel to it.
+  cut(cylinder(r = 0.34mm, h = 1.1mm), cylinder(r = 0.24mm, h = 1.5mm))
 }
 
 part barrel_and_winding_assembly() -> Assembly {
@@ -84,25 +260,37 @@ part barrel_and_winding_assembly() -> Assembly {
     eta_pos_14_barrel_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -5.7mm, y = -3.2mm, z = 1.55mm),
+          origin = point(
+            x = 2.834mm,
+            y = 5.705mm,
+            z = (datum.barrel_floor_z() + datum.barrel_ceiling_z()) / 2,
+          ),
           axis = Z,
-          angle = 0deg,
+          angle = 177.911deg,
         ),
         color = rgb(r = 197, g = 158, b = 69),
       ),
     eta_pos_15_stop_lever_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -1.4mm, y = -5.3mm, z = 1.45mm),
+          origin = point(
+            x = 0mm - 1.4mm,
+            y = 0mm - 5.3mm,
+            z = datum.train_band_floor_z() + 0.09mm,
+          ),
           axis = Z,
-          angle = -34deg,
+          angle = 146deg,
         ),
         color = rgb(r = 125, g = 134, b = 145),
       ),
     eta_pos_16_barrel_bridge_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -4.6mm, y = -3.3mm, z = 2.35mm),
+          origin = point(
+            x = 6.3586mm,
+            y = 3.6287mm,
+            z = (datum.barrel_bridge_underside_z() + datum.barrel_bridge_top_z()) / 2,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -111,7 +299,11 @@ part barrel_and_winding_assembly() -> Assembly {
     eta_pos_16_barrel_bridge_jewel()
       |> place(
         frame = frame(
-          origin = point(x = -5.7mm, y = -3.2mm, z = 2.35mm),
+          origin = point(
+            x = 2.834mm,
+            y = 5.705mm,
+            z = datum.barrel_bridge_underside_z() + 0.15mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -120,38 +312,93 @@ part barrel_and_winding_assembly() -> Assembly {
     eta_pos_17_click_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -1.2mm, y = -7mm, z = 2.65mm),
+          origin = point(
+            x = 4.7665mm,
+            y = 9.0522mm,
+            z = datum.ratchet_wheel_seat_z() + 0.12mm,
+          ),
           axis = Z,
-          angle = 35deg,
+          angle = -158deg,
         ),
         color = rgb(r = 151, g = 160, b = 170),
       ),
     eta_pos_18_click_spring_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -0.5mm, y = -8mm, z = 2.66mm),
+          origin = point(
+            x = 6.2343mm,
+            y = 8.3616mm,
+            z = datum.ratchet_wheel_seat_z() + 0.09mm,
+          ),
           axis = Z,
-          angle = 18deg,
+          angle = -118deg,
         ),
         color = rgb(r = 100, g = 112, b = 126),
       ),
-    eta_pos_19_crown_wheel_envelope()
+    eta_pos_19_crown_wheel_envelope(bevel_phase = 121.827deg)
       |> place(
         frame = frame(
-          origin = point(x = 2.4mm, y = -6.9mm, z = 2.72mm),
+          origin = point(
+            x = 8.8003mm,
+            y = 2.9899mm,
+            z = datum.crown_wheel_seat_z() + datum.crown_wheel_thickness() / 2,
+          ),
           axis = Z,
-          angle = 0deg,
+          angle = 155.531deg,
         ),
         color = rgb(r = 205, g = 165, b = 58),
       ),
     eta_pos_20_ratchet_wheel_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -5.7mm, y = -3.2mm, z = 2.75mm),
+          origin = point(
+            x = 2.834mm,
+            y = 5.705mm,
+            z = datum.ratchet_wheel_seat_z() + datum.ratchet_wheel_thickness() / 2,
+          ),
+          axis = Z,
+          angle = 341.337deg,
+        ),
+        color = rgb(r = 211, g = 171, b = 63),
+      ),
+    click_post()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 4.7665mm,
+            y = 9.0522mm,
+            z = datum.barrel_bridge_top_z() + 0.09mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
-        color = rgb(r = 211, g = 171, b = 63),
+        color = rgb(r = 128, g = 137, b = 148),
+      ),
+    crown_wheel_arbor()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 8.8003mm,
+            y = 2.9899mm,
+            z = (datum.plate_train_face_z() + datum.crown_wheel_top_z()) / 2,
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 124, g = 132, b = 142),
+      ),
+    barrel_arbor_upper_pivot()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 2.834mm,
+            y = 5.705mm,
+            z = (datum.barrel_ceiling_z() + datum.ratchet_wheel_top_z()) / 2,
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 124, g = 132, b = 142),
       ),
   )
 }

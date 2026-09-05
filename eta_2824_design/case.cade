@@ -1,49 +1,357 @@
-part case_middle_envelope() -> Solid<Exact> {
-  let case_and_lugs = union(cylinder(r = 18.5mm, h = 7mm), lug_pair_envelope())
-  let movement_cavity = cylinder(r = 13.4mm, h = 7.2mm)
-  let stem_passage = cylinder(r = 0.55mm, h = 11mm)
+import "./components.cade" as common
+import "./datums.cade" as datum
+
+-- The case: middle with integrated lugs, screw-down back, gasket, crystal,
+-- dial and hand stack.
+--
+-- Levels come from the movement datum. The dial hangs just below the dial seat
+-- at z = 0, the movement fills 0 .. 4.60, and the back closes above it.
+--
+-- The back SCREWS into the middle and compresses an O-ring against a seat
+-- machined in the middle, which is what makes the joint water-resistant. Cade
+-- has no helix, so the thread is stated as metadata on the placement and the
+-- crest cylinders are modelled plain -- see docs/AUTHORING.md section 5 and
+-- GAPS.md. The gasket is a torus, squashed 12% radially at assembly.
+-- ------------------------------------------------------------- envelope
+-- expert_estimate: a 37.00mm case around a 26.80mm movement bore leaves 5.1mm
+-- of wall for the caseback thread, the gasket seat and the lug roots.
+fn case_radius() -> Len {
+  18.5mm
+}
+
+fn case_bore_radius() -> Len {
+  13.4mm
+}
+
+-- Derived, not chosen: the back's inner face has to clear the top of the
+-- movement, so the middle is as tall as the crystal, the dial-to-movement
+-- stack, the 4.60mm movement, the rotor clearance and the back.
+fn case_middle_height() -> Len {
+  7.8mm
+}
+
+fn case_front_face_z() -> Len {
+  -1.85mm
+}
+
+fn case_back_face_z() -> Len {
+  case_front_face_z() + case_middle_height()
+}
+
+fn case_mid_z() -> Len {
+  (case_front_face_z() + case_back_face_z()) / 2
+}
+
+fn crystal_thickness() -> Len {
+  1mm
+}
+
+fn dial_thickness() -> Len {
+  0.4mm
+}
+
+fn hand_stack_clearance() -> Len {
+  0.05mm
+}
+
+fn dial_underside_z() -> Len {
+  0mm - dial_thickness()
+}
+
+-- ------------------------------------------------------- caseback thread
+-- expert_estimate: M32 x 0.5 is a common caseback thread at this case size.
+-- The modelled cylinder is the crest cylinder: nominal on the back's male
+-- thread, and the ISO 68-1 basic minor diameter on the middle's female one.
+fn caseback_thread_diameter() -> Len {
+  32mm
+}
+
+fn caseback_thread_pitch() -> Len {
+  0.5mm
+}
+
+fn caseback_male_radius() -> Len {
+  caseback_thread_diameter() / 2
+}
+
+fn caseback_female_radius() -> Len {
+  (caseback_thread_diameter() - 1.0825 * caseback_thread_pitch()) / 2
+}
+
+fn caseback_thread_depth() -> Len {
+  2.2mm
+}
+
+-- The back seats INSIDE the case opening, flush with the back face, the way a
+-- screw-down back does. Its rim is the spigot that carries the thread; the
+-- spigot is drawn as a plain cylinder with a slip fit, and the thread callout
+-- goes on this placement when the fine-detail phase arrives.
+fn caseback_body_radius() -> Len {
+  caseback_female_radius() - 0.08mm
+}
+
+fn caseback_body_thickness() -> Len {
+  1.1mm
+}
+
+fn caseback_spigot_outer_radius() -> Len {
+  caseback_female_radius() - 0.02mm
+}
+
+fn caseback_spigot_inner_radius() -> Len {
+  14.4mm
+}
+
+fn caseback_spigot_height() -> Len {
+  0.75mm
+}
+
+fn caseback_body_mid_z() -> Len {
+  case_back_face_z() - caseback_body_thickness() / 2
+}
+
+fn caseback_spigot_bottom_z() -> Len {
+  case_back_face_z() - caseback_body_thickness() - caseback_spigot_height()
+}
+
+-- ------------------------------------------------------------- gasket
+-- expert_estimate: a 0.90mm section O-ring on a 33.4mm centreline, seated in a
+-- groove in the middle and compressed by the back's shoulder.
+fn gasket_section_radius() -> Len {
+  0.45mm
+}
+
+fn gasket_centre_radius() -> Len {
+  15.2mm
+}
+
+-- Compressed 12% on assembly, which is what a static face seal wants.
+fn gasket_compressed_section() -> Len {
+  gasket_section_radius() * 0.88
+}
+
+-- The O-ring is squashed between the spigot's end face and its groove, so its
+-- compressed section is drawn just touching that face rather than inside it.
+fn gasket_seat_z() -> Len {
+  caseback_spigot_bottom_z() - gasket_compressed_section()
+}
+
+-- --------------------------------------------------------------- lugs
+-- expert_estimate: 20.00mm between the lug faces, the standard this case is
+-- drawn to until a strap or bracelet is specified.
+fn lug_spacing() -> Len {
+  20mm
+}
+
+fn lug_width() -> Len {
+  3.6mm
+}
+
+fn lug_reach() -> Len {
+  5mm
+}
+
+fn spring_bar_radius() -> Len {
+  0.65mm
+}
+
+-- Where the lugs sit: the inner face of each lug of a pair.
+fn lug_inner_x() -> Len {
+  lug_spacing() / 2
+}
+
+fn lug_centre_x() -> Len {
+  lug_inner_x() + lug_width() / 2
+}
+
+fn lug_root_y() -> Len {
+  17mm
+}
+
+fn lug_tip_y() -> Len {
+  lug_root_y() + lug_reach()
+}
+
+-- One lug: a tapering blade that leaves the case flank, curves down and ends
+-- in a rounded tip, with the spring-bar hole drilled ACROSS the pair.
+part case_lug() -> Solid<Exact> {
+  -- A lug is a blade that leaves the case flank, narrows as it goes, curves
+  -- down to the strap and ends in a rounded tip. Cade has no sweep, so the
+  -- curvature is cut in rather than swept: two large cylinders waist the
+  -- flanks, one scoops the underside and one rolls the top edge back toward
+  -- the case. That is four cuts instead of a loft, and it is what makes the
+  -- lug read as turned rather than milled.
+  let blade = union(
+    box(x = lug_width(), y = lug_reach() + 2.6mm, z = 3.4mm)
+      |> at(dx = 0mm, dy = 0mm - 1.3mm, dz = 0mm),
+    cylinder(r = 1.7mm, h = lug_width())
+      |> rotate(ax = 0, ay = 1, az = 0, angle = 90deg)
+      |> at(dx = 0mm, dy = lug_reach() - 0.4mm, dz = 0mm),
+  )
+  -- The flanks are waisted: each cylinder takes 0.45mm out of the lug at the
+  -- tip and nothing at the root.
+  let flank = cylinder(r = 9mm, h = 5mm)
+  let flanks = union(
+    flank
+      |> at(dx = 9mm + lug_width() / 2 - 0.45mm, dy = lug_reach() + 0.6mm, dz = 0mm),
+    flank
+      |> at(
+        dx = 0mm - 9mm - lug_width() / 2 + 0.45mm,
+        dy = lug_reach() + 0.6mm,
+        dz = 0mm,
+      ),
+  )
+  let scoop = cylinder(r = 4.6mm, h = lug_width() + 0.6mm)
     |> rotate(ax = 0, ay = 1, az = 0, angle = 90deg)
-    |> at(dx = 15.6mm, dy = 0mm, dz = -0.55mm)
+    |> at(dx = 0mm, dy = lug_reach() + 1.2mm, dz = 3.9mm)
+  let top_chamfer = cylinder(r = 5.2mm, h = lug_width() + 0.6mm)
+    |> rotate(ax = 0, ay = 1, az = 0, angle = 90deg)
+    |> at(dx = 0mm, dy = lug_reach() + 1.8mm, dz = 0mm - 4.6mm)
+  let spring_bar_hole = cylinder(r = spring_bar_radius(), h = lug_width() + 1.2mm)
+    |> rotate(ax = 0, ay = 1, az = 0, angle = 90deg)
+    |> at(dx = 0mm, dy = lug_reach() - 0.4mm, dz = 0mm)
 
-  cut(case_and_lugs, union(movement_cavity, stem_passage))
+  cut(blade, union(flanks, scoop, top_chamfer, spring_bar_hole))
 }
 
-part caseback_envelope() -> Solid<Exact> {
-  cylinder(r = 18mm, h = 1.2mm)
-}
-
-part dial_envelope() -> Solid<Exact> {
-  let dial_blank = cylinder(r = 13mm, h = 0.4mm)
-  let center_clearance = cylinder(r = 1.03mm, h = 0.6mm)
-  let date_window = box(x = 3.3mm, y = 2mm, z = 0.6mm)
-    |> at(dx = 10.5mm, dy = 0mm, dz = 0mm)
-
-  cut(cut(dial_blank, center_clearance), date_window)
-}
-
-part crystal_envelope() -> Solid<Exact> {
-  cylinder(r = 17.2mm, h = 1mm)
-}
-
-part lug_pair_envelope() -> Solid<Exact> {
-  let lug = cut(
-    box(x = 3.8mm, y = 5.5mm, z = 3mm),
-    cylinder(r = 0.65mm, h = 4.2mm) |> rotate(ax = 1, ay = 0, az = 0, angle = 90deg),
+part case_lugs() -> Solid<Exact> {
+  let pair = union(
+    case_lug() |> at(dx = lug_centre_x(), dy = 0mm, dz = 0mm),
+    case_lug() |> at(dx = 0mm - lug_centre_x(), dy = 0mm, dz = 0mm),
   )
 
   union(
-    lug |> at(dx = 11.9mm, dy = 18.5mm, dz = -0.2mm),
-    lug |> at(dx = -11.9mm, dy = 18.5mm, dz = -0.2mm),
-    lug |> at(dx = 11.9mm, dy = -18.5mm, dz = -0.2mm),
-    lug |> at(dx = -11.9mm, dy = -18.5mm, dz = -0.2mm),
+    pair |> at(dx = 0mm, dy = lug_root_y(), dz = 0mm),
+    pair
+      |> rotate(ax = 0, ay = 0, az = 1, angle = 180deg)
+      |> at(dx = 0mm, dy = 0mm - lug_root_y(), dz = 0mm),
   )
 }
 
+part case_middle_envelope() -> Solid<Exact> {
+  -- The band, with a bevel top and bottom so the flank reads as turned.
+  let band = union(
+    cylinder(r = case_radius(), h = case_middle_height() - 1.6mm),
+    cone(r1 = case_radius() - 0.9mm, r2 = case_radius(), h = 0.8mm)
+      |> at(dx = 0mm, dy = 0mm, dz = 0mm - case_middle_height() / 2 + 0.4mm),
+    cone(r1 = case_radius(), r2 = case_radius() - 1.1mm, h = 0.8mm)
+      |> at(dx = 0mm, dy = 0mm, dz = case_middle_height() / 2 - 0.4mm),
+  )
+  let body = union(band, case_lugs())
+  -- The movement bore, open to the front.
+  let movement_bore = cylinder(r = case_bore_radius(), h = case_middle_height())
+    |> at(dx = 0mm, dy = 0mm, dz = 0mm - 0.7mm)
+  -- The crystal seat, a step in the front face.
+  let crystal_seat = cylinder(r = 17.2mm, h = crystal_thickness() + 0.4mm)
+    |> at(
+      dx = 0mm,
+      dy = 0mm,
+      dz = 0mm - case_middle_height() / 2 + crystal_thickness() / 2 - 0.2mm,
+    )
+  -- The threaded opening for the back, its gasket groove, and the shoulder the
+  -- gasket is compressed against.
+  let back_thread = cylinder(
+    r = caseback_female_radius(),
+    h = caseback_thread_depth() + 0.4mm,
+  )
+    |> at(
+      dx = 0mm,
+      dy = 0mm,
+      dz = case_middle_height() / 2 - caseback_thread_depth() / 2 + 0.2mm,
+    )
+  let gasket_groove = torus(
+    major = gasket_centre_radius(),
+    minor = gasket_section_radius() + 0.03mm,
+  )
+    |> at(dx = 0mm, dy = 0mm, dz = gasket_seat_z() - case_mid_z())
+  let stem_passage = cylinder(r = 0.55mm, h = 11mm)
+    |> rotate(ax = 0, ay = 1, az = 0, angle = 90deg)
+    |> at(dx = 15.6mm, dy = 0mm, dz = datum.stem_axis_z() - case_mid_z())
+
+  cut(
+    body,
+    union(movement_bore, crystal_seat, back_thread, gasket_groove, stem_passage),
+  )
+}
+
+-- The back screws in: a disc that sits flush in the case opening, on a rim
+-- spigot whose end face compresses the O-ring. Modelled about its own body
+-- mid-plane, +Z outward.
+part caseback_envelope() -> Solid<Exact> {
+  let body = cylinder(r = caseback_body_radius(), h = caseback_body_thickness())
+  -- The spigot is a RING, not a disc: the back is a dish, and a solid boss here
+  -- would fill the movement cavity.
+  let spigot = cut(
+    cylinder(r = caseback_spigot_outer_radius(), h = caseback_spigot_height()),
+    cylinder(r = caseback_spigot_inner_radius(), h = caseback_spigot_height() + 0.2mm),
+  )
+    |> at(
+      dx = 0mm,
+      dy = 0mm,
+      dz = 0mm - caseback_body_thickness() / 2 - caseback_spigot_height() / 2,
+    )
+  -- Six wrench notches in the rim, and a shallow dish in the outer face.
+  let notch = box(x = 1.6mm, y = 2.4mm, z = caseback_body_thickness() + 0.4mm)
+    |> at(dx = caseback_body_radius(), dy = 0mm, dz = 0mm)
+    |> polar(n = 6, axis = Z)
+  -- The dish is hollowed from the INNER face, which is what gives the
+  -- oscillating weight its running clearance.
+  let dish = cylinder(r = 13.2mm, h = 0.34mm)
+    |> at(dx = 0mm, dy = 0mm, dz = 0mm - caseback_body_thickness() / 2 + 0.17mm)
+
+  cut(union(body, spigot), union(notch, dish))
+}
+
+-- The O-ring, drawn at its compressed section.
+part caseback_gasket() -> Solid<Exact> {
+  torus(major = gasket_centre_radius(), minor = gasket_compressed_section())
+}
+
+part dial_envelope() -> Solid<Exact> {
+  let dial_blank = cylinder(r = 13mm, h = dial_thickness())
+  let center_clearance = cylinder(r = 1.03mm, h = dial_thickness() + 0.2mm)
+  let date_window = box(x = 3.3mm, y = 2mm, z = dial_thickness() + 0.2mm)
+    |> at(dx = 10.5mm, dy = 0mm, dz = 0mm)
+
+  cut(dial_blank, union(center_clearance, date_window))
+}
+
+part crystal_envelope() -> Solid<Exact> {
+  cylinder(r = 17.15mm, h = crystal_thickness())
+}
+
 part crown_envelope() -> Solid<Exact> {
-  let crown_blank = cylinder(r = 2.8mm, h = 2.2mm)
-  let stem_socket = cylinder(r = 0.48mm, h = 2.4mm)
+  let knurled_band = common.toothed_disk(
+    root_r = 2.55mm,
+    tooth_depth = 0.15mm,
+    tooth_width = 0.18mm,
+    h = 1.7mm,
+    bore_r = 0.48mm,
+    teeth = 48,
+  )
+    |> at(dx = 0mm, dy = 0mm, dz = 0.25mm)
+  let outer_cap = cylinder(r = 2.45mm, h = 0.7mm)
+    |> at(dx = 0mm, dy = 0mm, dz = -0.95mm)
+  let crown_blank = union(knurled_band, outer_cap)
+  let stem_socket = cylinder(r = 0.48mm, h = 2.8mm)
 
   cut(crown_blank, stem_socket) |> rotate(ax = 0, ay = 1, az = 0, angle = 90deg)
+}
+
+part crown_position_assembly(crown_x: Len) -> Assembly {
+  crown_envelope()
+    |> place(
+      frame = frame(
+        origin = point(x = crown_x, y = 0mm, z = datum.stem_axis_z()),
+        axis = Z,
+        angle = 0deg,
+      ),
+      color = rgb(r = 145, g = 151, b = 160),
+    )
+}
+
+part crown_assembly() -> Assembly {
+  crown_position_assembly(crown_x = 20mm)
 }
 
 part hour_hand_envelope() -> Solid<Exact> {
@@ -79,7 +387,11 @@ part hand_stack_assembly() -> Assembly {
     hour_hand_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = -1.44mm),
+          origin = point(
+            x = 0mm,
+            y = 0mm,
+            z = dial_underside_z() - hand_stack_clearance() - 0.03mm,
+          ),
           axis = Z,
           angle = 55deg,
         ),
@@ -88,7 +400,11 @@ part hand_stack_assembly() -> Assembly {
     minute_hand_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = -1.52mm),
+          origin = point(
+            x = 0mm,
+            y = 0mm,
+            z = dial_underside_z() - hand_stack_clearance() - 0.11mm,
+          ),
           axis = Z,
           angle = -60deg,
         ),
@@ -97,7 +413,11 @@ part hand_stack_assembly() -> Assembly {
     seconds_hand_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = -1.6mm),
+          origin = point(
+            x = 0mm,
+            y = 0mm,
+            z = dial_underside_z() - hand_stack_clearance() - 0.18mm,
+          ),
           axis = Z,
           angle = 180deg,
         ),
@@ -111,25 +431,38 @@ part watch_case_assembly() -> Assembly {
     case_middle_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = 1.8mm),
+          origin = point(x = 0mm, y = 0mm, z = case_mid_z()),
           axis = Z,
           angle = 0deg,
         ),
-        color = rgb(r = 155, g = 161, b = 169),
+        color = rgb(r = 176, g = 181, b = 189),
+      ),
+    caseback_gasket()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = gasket_seat_z()),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 28, g = 28, b = 30),
       ),
     caseback_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = 5.9mm),
+          origin = point(x = 0mm, y = 0mm, z = caseback_body_mid_z()),
           axis = Z,
           angle = 0deg,
         ),
-        color = rgba(r = 202, g = 226, b = 238, a = 72),
+        color = rgb(r = 168, g = 173, b = 181),
       ),
     dial_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = -1.18mm),
+          origin = point(
+            x = 0mm,
+            y = 0mm,
+            z = dial_underside_z() + dial_thickness() / 2,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -138,36 +471,76 @@ part watch_case_assembly() -> Assembly {
     crystal_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = -2.2mm),
+          origin = point(
+            x = 0mm,
+            y = 0mm,
+            z = case_front_face_z() - crystal_thickness() / 2 + 0.35mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
         color = rgba(r = 202, g = 226, b = 238, a = 72),
       ),
-    crown_envelope()
-      |> place(
-        frame = frame(
-          origin = point(x = 19.6mm, y = 0mm, z = 1.25mm),
-          axis = Z,
-          angle = 0deg,
-        ),
-        color = rgb(r = 145, g = 151, b = 160),
-      ),
+    crown_assembly(),
     hand_stack_assembly(),
   )
 }
 
+-- Diagnostics. Both must report 0.000 mm^3.
 part case_movement_interference_diagnostic() -> Solid<Exact> {
-  let movement = cylinder(r = 13mm, h = 4.6mm) |> at(dx = 0mm, dy = 0mm, dz = 2.3mm)
-  let case = case_middle_envelope() |> at(dx = 0mm, dy = 0mm, dz = 1.8mm)
+  let movement = datum.legal_movement_envelope()
+  let case = case_middle_envelope() |> at(dx = 0mm, dy = 0mm, dz = case_mid_z())
 
   intersect(movement, case)
 }
 
 part rotor_case_interference_diagnostic() -> Solid<Exact> {
-  let rotor_sweep = cylinder(r = 12.2mm, h = 0.55mm)
-    |> at(dx = 0mm, dy = 0mm, dz = 4.2mm)
-  let case = case_middle_envelope() |> at(dx = 0mm, dy = 0mm, dz = 1.8mm)
+  let rotor_sweep = cylinder(r = datum.rotor_radius(), h = datum.rotor_rim_thickness())
+    |> at(
+      dx = 0mm,
+      dy = 0mm,
+      dz = datum.rotor_rim_floor_z() + datum.rotor_rim_thickness() / 2,
+    )
+  let case = case_middle_envelope() |> at(dx = 0mm, dy = 0mm, dz = case_mid_z())
 
   intersect(rotor_sweep, case)
+}
+
+-- The strap attachment interface CLAUDE.md asks for: a marker on each
+-- spring-bar axis, so a future strap or bracelet can be placed without
+-- remodelling the case. No strap solids are drawn.
+part strap_attachment_marker() -> Solid<Exact> {
+  cylinder(r = 0.5mm, h = lug_spacing())
+    |> rotate(ax = 0, ay = 1, az = 0, angle = 90deg)
+}
+
+part strap_attachment_interfaces() -> Assembly {
+  together(
+    strap_attachment_marker()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 0mm,
+            y = lug_root_y() + lug_reach() - 0.4mm,
+            z = case_mid_z(),
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 120, g = 126, b = 134),
+      ),
+    strap_attachment_marker()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = 0mm,
+            y = 0mm - lug_root_y() - lug_reach() + 0.4mm,
+            z = case_mid_z(),
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 120, g = 126, b = 134),
+      ),
+  )
 }

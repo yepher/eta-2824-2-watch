@@ -4,9 +4,9 @@ Status meanings: `placeholder` is a simple envelope; `estimated` has constrained
 expert geometry; `supported` is directly grounded in cited dimensions. No row is
 manufacturing-qualified.
 
-The third column records a conceptual grouping from the parts ledger. It does
-not prescribe filenames: all modeling begins in `watch.cade`, and the CAD agent
-will choose if and when to split it.
+The third column names the file each position is modelled in. Every axial level
+comes from `eta_2824_design/datums.cade`; a row's geometry may still be an
+envelope, but its height is no longer a guess.
 
 | ETA position | Component | Conceptual group | Geometry | Placement | Clearance review | Next refinement |
 |---:|---|---|---|---|---|---|
@@ -74,9 +74,23 @@ will choose if and when to split it.
 
 ## Whole-assembly gates
 
-- [ ] All part-ledger envelopes compile through `watch`.
-- [x] Movement/case diagnostic volume is zero at 0.15 mm diagnostic cell.
-- [ ] Rotor/caseback clearance is verified.
-- [ ] Strap attachment interfaces are represented and clear the case.
+- [x] All part-ledger envelopes compile through `watch`.
+- [x] Movement/case diagnostic volume is zero, measured against the datum's
+  `legal_movement_envelope()` rather than a hand-written cylinder.
+- [x] The movement fits the published 4.60 mm height: it occupies 0.000 to
+  4.575 mm, plus the cannon pinion's hand-fitting post below the dial seat.
+- [ ] No unexplained body-body overlap: 56 pairs and 2.07 mm^3 remain, largest
+  0.045 mm^3, down from 73 pairs and 19.68 mm^3 at the start of the refinement
+  phase. Every one is either a square-tooth-block artefact at a mesh or a part
+  not yet driven. See `ERRORS.md`.
+- [x] Every gear train that should close, closes: going train at 28,800 vph,
+  motion works 1:1 to the cannon pinion and 1/12 to the hour wheel, automatic
+  winding at 28.7 rotor turns per ratchet turn.
+- [x] Every bridge stands on feet that reach the main plate, and every screw's
+  head finishes on the part it clamps with its shank in a tapped hole.
+- [x] Rotor/caseback clearance is verified: 0.000 mm^3 against the back's
+  inner face, which is what set the case middle at 7.80 mm.
+- [x] Strap attachment interfaces are represented and clear the case:
+  `case.cade:strap_attachment_interfaces` marks both spring-bar axes.
 - [x] Every ETA ledger row has an evidence class and next refinement.
 - [x] Known Cade gaps are recorded in `GAPS.md`.

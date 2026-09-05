@@ -1,26 +1,137 @@
-part eta_pos_21_pallet_fork_envelope() -> Solid<Exact> {
-  let hub = cut(cylinder(r = 0.52mm, h = 0.22mm), cylinder(r = 0.11mm, h = 0.42mm))
-  let arms = union(
-    box(x = 2.3mm, y = 0.28mm, z = 0.22mm)
-      |> at(dx = -0.9mm, dy = -0.42mm, dz = 0mm)
-      |> rotate(ax = 0, ay = 0, az = 1, angle = 14deg),
-    box(x = 2.3mm, y = 0.28mm, z = 0.22mm)
-      |> at(dx = -0.9mm, dy = 0.42mm, dz = 0mm)
-      |> rotate(ax = 0, ay = 0, az = 1, angle = -14deg),
-    box(x = 2.6mm, y = 0.32mm, z = 0.22mm) |> at(dx = 1.45mm, dy = 0mm, dz = 0mm),
-  )
-  let fork_slot = box(x = 0.9mm, y = 0.16mm, z = 0.42mm)
-    |> at(dx = 2.5mm, dy = 0mm, dz = 0mm)
+import "./components.cade" as common
+import "./datums.cade" as datum
 
-  cut(union(hub, arms), fork_slot)
+-- ETA positions 21 and 22: the pallet fork, its stones, and the pallet bridge.
+--
+-- Rebuilt 2026-09-05 (second time) on MEASURED centres. The fork pivots at
+-- (-1.303, -4.219), 2.765mm from the escape wheel and
+-- 2.587mm from the balance staff.
+--
+-- Those two directions are NOT opposite: from the fork's pivot the escape
+-- wheel lies at 127.3deg and the balance at 245.2deg, 117.9deg apart. This is an
+-- ANGLED lever, not a straight one -- the pallet arms and the horn leave the
+-- pivot at an angle to each other rather than end to end. The measurement says
+-- so, and it is what keeps the balance clear of the barrel on a plate this
+-- crowded. The straight lever the previous version assumed was a consequence
+-- of the earlier guessed centres.
+--
+-- It is modelled in its own frame with the pivot at the origin and the escape
+-- wheel along local +X, then placed turned to 127.313deg.
+--
+-- The escapement is drawn released, not locked: the stones sit on a 1.47mm
+-- circle about the escape wheel while its teeth reach 1.45mm, so there is a
+-- stated 0.02mm gap rather than a solid overlap. An escapement is an
+-- intermittent contact and cannot be drawn engaged and clear at the same time.
+fn pallet_pivot_x() -> Len {
+  datum.pallet_fork_x()
+}
+
+fn pallet_pivot_y() -> Len {
+  datum.pallet_fork_y()
+}
+
+fn pallet_arm_length() -> Len {
+  1.3832mm
+}
+
+-- Half the splay between the two arms. It is not chosen: the stones sit
+-- 60deg apart on the escape wheel, which is 2.5 tooth spaces of a 15-tooth
+-- wheel, and that subtends this angle at the fork's pivot.
+fn pallet_arm_angle() -> Angle {
+  58.158deg
+}
+
+fn fork_horn_length() -> Len {
+  1.9666mm
+}
+
+-- The horn's direction in the fork's own frame: toward the balance staff.
+fn fork_horn_angle() -> Angle {
+  117.885deg
+}
+
+fn pallet_fork_thickness() -> Len {
+  0.18mm
+}
+
+part eta_pos_21_pallet_fork_envelope() -> Solid<Exact> {
+  let hub = cut(
+    cylinder(r = 0.34mm, h = pallet_fork_thickness()),
+    cylinder(r = 0.11mm, h = pallet_fork_thickness() + 0.2mm),
+  )
+  let arm = box(x = pallet_arm_length(), y = 0.24mm, z = pallet_fork_thickness())
+    |> at(dx = pallet_arm_length() / 2, dy = 0mm, dz = 0mm)
+  let arms = union(
+    arm |> rotate(ax = 0, ay = 0, az = 1, angle = pallet_arm_angle()),
+    arm |> rotate(ax = 0, ay = 0, az = 1, angle = 0deg - pallet_arm_angle()),
+  )
+  -- The horn reaches the roller. Its slot takes the impulse jewel.
+  let horn = box(x = fork_horn_length(), y = 0.3mm, z = pallet_fork_thickness())
+    |> at(dx = fork_horn_length() / 2, dy = 0mm, dz = 0mm)
+    |> rotate(ax = 0, ay = 0, az = 1, angle = fork_horn_angle())
+  let slot = box(x = 0.5mm, y = 0.19mm, z = pallet_fork_thickness() + 0.2mm)
+    |> at(dx = fork_horn_length() + 0.05mm, dy = 0mm, dz = 0mm)
+    |> rotate(ax = 0, ay = 0, az = 1, angle = fork_horn_angle())
+  -- Pockets for the two pallet stones, so a stone is set into the fork rather
+  -- than sharing its volume.
+  let stone_pocket = box(x = 0.44mm, y = 0.22mm, z = pallet_fork_thickness() + 0.2mm)
+  let pockets = union(
+    stone_pocket
+      |> at(dx = pallet_arm_length() - 0.12mm, dy = 0mm, dz = 0mm)
+      |> rotate(ax = 0, ay = 0, az = 1, angle = pallet_arm_angle()),
+    stone_pocket
+      |> at(dx = pallet_arm_length() - 0.12mm, dy = 0mm, dz = 0mm)
+      |> rotate(ax = 0, ay = 0, az = 1, angle = 0deg - pallet_arm_angle()),
+  )
+
+  cut(union(hub, arms, horn), union(slot, pockets))
 }
 
 part eta_pos_21_pallet_stone_envelope() -> Solid<Exact> {
-  box(x = 0.48mm, y = 0.24mm, z = 0.18mm)
+  box(x = 0.42mm, y = 0.2mm, z = 0.18mm)
 }
 
 part eta_pos_22_pallet_bridge_envelope() -> Solid<Exact> {
-  box(x = 3.6mm, y = 1.7mm, z = 0.32mm)
+  -- Carries the fork's upper pivot and stands on one foot at the screw, which
+  -- is at (1.7230mm, -2.9210mm) in the bridge's own frame.
+  let body = union(
+    cylinder(r = 0.62mm, h = 0.12mm),
+    cylinder(r = 0.85mm, h = 0.12mm) |> at(dx = 1.723mm, dy = 0mm - 2.921mm, dz = 0mm),
+    box(x = 3.3913mm, y = 0.9mm, z = 0.12mm)
+      |> rotate(ax = 0, ay = 0, az = 1, angle = -59.465deg)
+      |> at(dx = 0.8615mm, dy = 0mm - 1.4605mm, dz = 0mm),
+  )
+  let foot = common.bridge_foot(
+    r = datum.bridge_foot_radius(),
+    h = pallet_bridge_underside_z() - datum.plate_train_face_z(),
+    hole_r = 0.24mm,
+  )
+    |> at(
+      dx = 1.723mm,
+      dy = 0mm - 2.921mm,
+      dz = 0mm - 0.06mm
+        - (pallet_bridge_underside_z() - datum.plate_train_face_z()) / 2,
+    )
+  let bores = union(
+    cylinder(r = 0.17mm, h = 0.5mm),
+    common.screw_clearance_hole(
+      head_r = 0.5mm,
+      head_h = 0.18mm,
+      shank_r = 0.24mm,
+      depth = 0.12mm,
+    )
+      |> at(dx = 1.723mm, dy = 0mm - 2.921mm, dz = 0mm),
+  )
+
+  cut(union(body, foot), bores)
+}
+
+fn pallet_bridge_underside_z() -> Len {
+  datum.train_band_floor_z() + 0.22mm
+}
+
+fn pallet_fork_z() -> Len {
+  datum.train_band_floor_z() + 0.11mm
 }
 
 part escapement_assembly() -> Assembly {
@@ -28,36 +139,44 @@ part escapement_assembly() -> Assembly {
     eta_pos_21_pallet_fork_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 7.3mm, y = 1.1mm, z = 1.72mm),
+          origin = point(
+            x = pallet_pivot_x(),
+            y = pallet_pivot_y(),
+            z = pallet_fork_z(),
+          ),
           axis = Z,
-          angle = -62deg,
+          angle = 127.313deg,
         ),
         color = rgb(r = 148, g = 156, b = 166),
       ),
     eta_pos_21_pallet_stone_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 6.2mm, y = 1.99mm, z = 1.72mm),
+          origin = point(x = 0mm - 0.8108mm, y = 0mm - 2.9264mm, z = pallet_fork_z()),
           axis = Z,
-          angle = -48deg,
+          angle = 69.155deg,
         ),
         color = rgba(r = 190, g = 20, b = 62, a = 220),
       ),
     eta_pos_21_pallet_stone_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 7.18mm, y = 2.51mm, z = 1.72mm),
+          origin = point(x = 0mm - 2.6799mm, y = 0mm - 4.3509mm, z = pallet_fork_z()),
           axis = Z,
-          angle = -76deg,
+          angle = 185.471deg,
         ),
         color = rgba(r = 190, g = 20, b = 62, a = 220),
       ),
     eta_pos_22_pallet_bridge_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 8.2mm, y = 0.5mm, z = 2.2mm),
+          origin = point(
+            x = pallet_pivot_x(),
+            y = pallet_pivot_y(),
+            z = pallet_bridge_underside_z() + 0.06mm,
+          ),
           axis = Z,
-          angle = -60deg,
+          angle = 0deg,
         ),
         color = rgb(r = 181, g = 178, b = 170),
       ),

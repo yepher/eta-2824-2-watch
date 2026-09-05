@@ -219,3 +219,23 @@ fn slotted_shouldered_screw(
 
   body
 }
+
+-- A bridge foot: the post that carries a bridge down to the plate, with the
+-- screw's clearance hole through it.
+fn bridge_foot(r: Len, h: Len, hole_r: Len) -> Solid<Exact> {
+  cut(cylinder(r = r, h = h), cylinder(r = hole_r, h = h + 0.4mm))
+}
+
+-- A countersink and shank hole for a screw whose head finishes flush.
+fn screw_clearance_hole(
+  head_r: Len,
+  head_h: Len,
+  shank_r: Len,
+  depth: Len,
+) -> Solid<Exact> {
+  union(
+    cylinder(r = head_r, h = head_h + 0.2mm)
+      |> at(dx = 0mm, dy = 0mm, dz = depth / 2 - head_h / 2 + 0.1mm),
+    cylinder(r = shank_r, h = depth + 0.4mm),
+  )
+}

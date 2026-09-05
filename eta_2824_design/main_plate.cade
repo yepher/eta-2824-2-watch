@@ -1,21 +1,239 @@
 import "./components.cade" as common
+import "./datums.cade" as datum
+
+-- ETA position 1, main plate, assembled.
+--
+-- Rebuilt on the dial-seat datum. The plate is modelled about its own
+-- mid-plane and placed at `datum.plate_mid_z()`, so every feature below is
+-- stated as a depth from one of its two faces rather than as an absolute
+-- height. Local +Z is the train side, local -Z is the dial side.
+fn half_thickness() -> Len {
+  datum.main_plate_thickness() / 2
+}
+
+fn dial_face_local_z() -> Len {
+  0mm - half_thickness()
+}
+
+fn train_face_local_z() -> Len {
+  half_thickness()
+}
+
+-- The stem axis in the plate's own frame.
+fn stem_local_z() -> Len {
+  datum.stem_axis_z() - datum.plate_mid_z()
+}
+
+-- ETA drawing Z0091446 gives the dial-foot holes for the 2801-2/2804-2/2824-2
+-- family: diameter 0.736-0.750mm at (+11.60, +3.78) and (-11.60, -3.78).
+-- This is the one interface in the plate with drawing-supported geometry.
+fn dial_foot_radius() -> Len {
+  0.375mm
+}
+
+fn dial_foot_depth() -> Len {
+  0.55mm
+}
+
+-- The lever pocket in the dial-side face. The PINIONS are not in it: they sit
+-- in the measured through-slot, whose size and position come from
+-- `datum.keyless_slot_*`.
+fn lever_pocket_half_width() -> Len {
+  2.6mm
+}
+
+fn lever_pocket_inner_x() -> Len {
+  3.9mm
+}
 
 part eta_pos_1_main_plate_envelope() -> Solid<Exact> {
-  let plate_blank = cylinder(r = 12.8mm, h = 0.8mm)
-  let center_and_bearing_seats = union(
-    cylinder(r = 1.1mm, h = 1mm),
-    cylinder(r = 0.48mm, h = 1mm) |> at(dx = -1.2mm, dy = 2.5mm, dz = 0mm),
-    cylinder(r = 0.48mm, h = 1mm) |> at(dx = 4.3mm, dy = 2.5mm, dz = 0mm),
-    cylinder(r = 0.48mm, h = 1mm) |> at(dx = 6.6mm, dy = 6.2mm, dz = 0mm),
-    cylinder(r = 0.48mm, h = 1mm) |> at(dx = 9.5mm, dy = 3.6mm, dz = 0mm),
-    cylinder(r = 0.5mm, h = 1mm) |> at(dx = -5.7mm, dy = -3.2mm, dz = 0mm),
-    cylinder(r = 0.75mm, h = 1mm) |> at(dx = 7.9mm, dy = -3.6mm, dz = 0mm),
+  let plate_blank = cylinder(
+    r = datum.main_plate_radius(),
+    h = datum.main_plate_thickness(),
   )
-  let stem_passage = cylinder(r = 0.52mm, h = 7.5mm)
-    |> rotate(ax = 0, ay = 1, az = 0, angle = -90deg)
-    |> at(dx = 9.6mm, dy = 0mm, dz = 0mm)
+  -- Centre: the seconds arbor, the cannon pinion and the hour-wheel tube all
+  -- pass through here.
+  let centre_bore = cylinder(
+    r = datum.centre_bore_radius(),
+    h = datum.main_plate_thickness() + 0.4mm,
+  )
+  -- The barrel is taller than the space above the plate, so the plate is
+  -- counterbored for it from the train side. The floor that remains carries
+  -- the barrel arbor's lower bearing.
+  let barrel_recess = cylinder(
+    r = datum.barrel_recess_radius(),
+    h = datum.barrel_recess_depth() + 0.2mm,
+  )
+    |> at(
+      dx = datum.barrel_centre_x(),
+      dy = datum.barrel_centre_y(),
+      dz = train_face_local_z() - datum.barrel_recess_depth() / 2 + 0.1mm,
+    )
+  -- The keyless works. The slot the two pinions live in is a THROUGH-cut,
+  -- measured off the plate view on page 6 of the technical communication: the
+  -- winding pinion straddles the plate here and stands proud of the train-side
+  -- face, where the crown wheel's underside teeth meet it. The levers lie in a
+  -- shallower pocket in the dial face around it.
+  --
+  -- The lever pocket stays clear of the barrel: the barrel counterbore comes
+  -- down to this radius, and a pocket reaching under it would open the plate
+  -- straight into the barrel.
+  let pocket_floor_local_z = dial_face_local_z() + datum.keyless_pocket_depth() / 2
+    - 0.1mm
+  let keyless_slot = box(
+    x = datum.keyless_slot_length(),
+    y = datum.keyless_slot_half_width() * 2,
+    z = datum.main_plate_thickness() + 0.4mm,
+  )
+    |> at(dx = datum.keyless_slot_centre_x(), dy = 0mm, dz = 0mm)
+  let lever_pocket = box(
+    x = 10mm,
+    y = lever_pocket_half_width() * 2,
+    z = datum.keyless_pocket_depth() + 0.2mm,
+  )
+    |> at(
+      dx = lever_pocket_inner_x() + 5mm,
+      dy = 0mm - 1.1mm,
+      dz = pocket_floor_local_z,
+    )
+  -- The stem runs in the plate outboard of that pocket, on the pocket's axis.
+  let stem_passage = cylinder(r = datum.stem_hole_radius(), h = 30mm)
+    |> rotate(ax = 0, ay = 1, az = 0, angle = 90deg)
+    |> at(dx = 0mm, dy = 0mm, dz = stem_local_z())
+  -- Drawing-supported dial feet, blind from the dial side.
+  let dial_foot = cylinder(
+    r = dial_foot_radius() + 0.12mm,
+    h = dial_foot_depth() + 0.2mm,
+  )
+  let dial_feet = union(
+    dial_foot
+      |> at(
+        dx = 11.6mm,
+        dy = 3.78mm,
+        dz = dial_face_local_z() + dial_foot_depth() / 2 - 0.1mm,
+      ),
+    dial_foot
+      |> at(
+        dx = 0mm - 11.6mm,
+        dy = 0mm - 3.78mm,
+        dz = dial_face_local_z() + dial_foot_depth() / 2 - 0.1mm,
+      ),
+  )
+  -- Train, escapement and barrel bearings, all at MEASURED centres now: they
+  -- are read off the coloured jewels in the plate view on page 6 rather than
+  -- solved. `datums.cade` holds them and `tools/measure_plate_layout.py`
+  -- reproduces the measurement.
+  let bearing_seat = cylinder(
+    r = 0.48mm + datum.jewel_seat_clearance(),
+    h = datum.main_plate_thickness() + 0.4mm,
+  )
+  let bearing_seats = union(
+    bearing_seat
+      |> at(dx = datum.second_wheel_x(), dy = datum.second_wheel_y(), dz = 0mm),
+    bearing_seat
+      |> at(dx = datum.third_wheel_x(), dy = datum.third_wheel_y(), dz = 0mm),
+    bearing_seat
+      |> at(dx = datum.escape_wheel_x(), dy = datum.escape_wheel_y(), dz = 0mm),
+    bearing_seat
+      |> at(dx = datum.pallet_fork_x(), dy = datum.pallet_fork_y(), dz = 0mm),
+    -- A sixth jewel is present in the plate at this centre and nothing in the
+    -- model is placed on it yet. Its seat is cut because the drawing shows it.
+    bearing_seat
+      |> at(
+        dx = datum.unidentified_plate_jewel_x(),
+        dy = datum.unidentified_plate_jewel_y(),
+        dz = 0mm,
+      ),
+    -- balance, in its shock-absorber seat
+    cylinder(
+      r = 0.75mm + datum.jewel_seat_clearance(),
+      h = datum.main_plate_thickness() + 0.4mm,
+    )
+      |> at(dx = datum.balance_staff_x(), dy = datum.balance_staff_y(), dz = 0mm),
+    -- barrel arbor, through the floor the counterbore leaves
+    cylinder(
+      r = 0.5mm + datum.jewel_seat_clearance(),
+      h = datum.main_plate_thickness() + 0.4mm,
+    )
+      |> at(dx = datum.barrel_centre_x(), dy = datum.barrel_centre_y(), dz = 0mm),
+    -- The crown wheel's core seats in the plate, not in the barrel bridge: the
+    -- bridge is open around the crown wheel so the wheel can reach down through
+    -- it to the winding pinion.
+    cylinder(r = 0.42mm, h = datum.main_plate_thickness() + 0.4mm)
+      |> at(
+        dx = datum.crown_wheel_centre_x(),
+        dy = datum.crown_wheel_centre_y(),
+        dz = 0mm,
+      ),
+  )
+  -- Tapped holes for every screw that lands in the plate. Drawn at the shank's
+  -- clearance rather than at a thread minor diameter: the thread is a callout,
+  -- not geometry (GAPS.md).
+  let tapped_hole = cylinder(r = 0.22mm, h = datum.main_plate_thickness() + 0.4mm)
+  let tapped_holes = union(
+    tapped_hole
+      |> at(
+        dx = datum.train_bridge_screw_a_x(),
+        dy = datum.train_bridge_screw_a_y(),
+        dz = 0mm,
+      ),
+    tapped_hole
+      |> at(
+        dx = datum.train_bridge_screw_b_x(),
+        dy = datum.train_bridge_screw_b_y(),
+        dz = 0mm,
+      ),
+    tapped_hole
+      |> at(
+        dx = datum.barrel_bridge_screw_a_x(),
+        dy = datum.barrel_bridge_screw_a_y(),
+        dz = 0mm,
+      ),
+    tapped_hole
+      |> at(
+        dx = datum.barrel_bridge_screw_b_x(),
+        dy = datum.barrel_bridge_screw_b_y(),
+        dz = 0mm,
+      ),
+    tapped_hole
+      |> at(
+        dx = datum.balance_cock_screw_x(),
+        dy = datum.balance_cock_screw_y(),
+        dz = 0mm,
+      ),
+    tapped_hole
+      |> at(
+        dx = datum.pallet_bridge_screw_x(),
+        dy = datum.pallet_bridge_screw_y(),
+        dz = 0mm,
+      ),
+    tapped_hole
+      |> at(
+        dx = datum.automatic_framework_screw_a_x(),
+        dy = datum.automatic_framework_screw_a_y(),
+        dz = 0mm,
+      ),
+    tapped_hole
+      |> at(
+        dx = datum.automatic_framework_screw_b_x(),
+        dy = datum.automatic_framework_screw_b_y(),
+        dz = 0mm,
+      ),
+  )
 
-  cut(plate_blank, union(center_and_bearing_seats, stem_passage))
+  cut(
+    plate_blank,
+    union(
+      centre_bore,
+      barrel_recess,
+      keyless_slot,
+      lever_pocket,
+      stem_passage,
+      dial_feet,
+      bearing_seats,
+      tapped_holes,
+    ),
+  )
 }
 
 part eta_pos_1_1_dial_fastener_envelope() -> Solid<Exact> {
@@ -39,12 +257,26 @@ part eta_pos_1_barrel_plate_jewel() -> Solid<Exact> {
   common.jewel_ring(r = 0.5mm, h = 0.3mm, bore_r = 0.14mm)
 }
 
+-- A jewel is pressed into its seat flush with the face it works from, so its
+-- centre sits half its own height below that face.
+fn train_jewel_z() -> Len {
+  datum.plate_train_face_z() - 0.15mm
+}
+
+fn barrel_jewel_z() -> Len {
+  datum.barrel_recess_floor_z() - 0.15mm
+}
+
+fn balance_jewel_z() -> Len {
+  datum.plate_train_face_z() - 0.125mm
+}
+
 part main_plate_assembly() -> Assembly {
   together(
     eta_pos_1_main_plate_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = 0.4mm),
+          origin = point(x = 0mm, y = 0mm, z = datum.plate_mid_z()),
           axis = Z,
           angle = 0deg,
         ),
@@ -53,7 +285,11 @@ part main_plate_assembly() -> Assembly {
     eta_pos_1_1_dial_fastener_envelope()
       |> place(
         frame = frame(
-          origin = point(x = -12.1mm, y = 0mm, z = 0.9mm),
+          origin = point(
+            x = 0mm - 11.6mm,
+            y = 0mm - 3.78mm,
+            z = datum.plate_dial_face_z() + 0.2mm,
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -62,7 +298,11 @@ part main_plate_assembly() -> Assembly {
     eta_pos_1_2_lower_shock_absorber_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 7.9mm, y = -3.6mm, z = 0.4mm),
+          origin = point(
+            x = datum.balance_staff_x(),
+            y = datum.balance_staff_y(),
+            z = balance_jewel_z(),
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -71,7 +311,11 @@ part main_plate_assembly() -> Assembly {
     eta_pos_1_train_plate_jewel()
       |> place(
         frame = frame(
-          origin = point(x = -1.2mm, y = 2.5mm, z = 0.4mm),
+          origin = point(
+            x = datum.second_wheel_x(),
+            y = datum.second_wheel_y(),
+            z = train_jewel_z(),
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -80,7 +324,11 @@ part main_plate_assembly() -> Assembly {
     eta_pos_1_train_plate_jewel()
       |> place(
         frame = frame(
-          origin = point(x = 4.3mm, y = 2.5mm, z = 0.4mm),
+          origin = point(
+            x = datum.third_wheel_x(),
+            y = datum.third_wheel_y(),
+            z = train_jewel_z(),
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -89,7 +337,11 @@ part main_plate_assembly() -> Assembly {
     eta_pos_1_train_plate_jewel()
       |> place(
         frame = frame(
-          origin = point(x = 6.6mm, y = 6.2mm, z = 0.4mm),
+          origin = point(
+            x = datum.escape_wheel_x(),
+            y = datum.escape_wheel_y(),
+            z = train_jewel_z(),
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -98,7 +350,26 @@ part main_plate_assembly() -> Assembly {
     eta_pos_1_train_plate_jewel()
       |> place(
         frame = frame(
-          origin = point(x = 9.5mm, y = 3.6mm, z = 0.4mm),
+          origin = point(
+            x = datum.pallet_fork_x(),
+            y = datum.pallet_fork_y(),
+            z = train_jewel_z(),
+          ),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    -- The sixth plate jewel. Present on the drawing, unexplained, and carrying
+    -- nothing in the model yet -- see `datum.unidentified_plate_jewel_x`.
+    eta_pos_1_train_plate_jewel()
+      |> place(
+        frame = frame(
+          origin = point(
+            x = datum.unidentified_plate_jewel_x(),
+            y = datum.unidentified_plate_jewel_y(),
+            z = train_jewel_z(),
+          ),
           axis = Z,
           angle = 0deg,
         ),
@@ -107,7 +378,11 @@ part main_plate_assembly() -> Assembly {
     eta_pos_1_barrel_plate_jewel()
       |> place(
         frame = frame(
-          origin = point(x = -5.7mm, y = -3.2mm, z = 0.4mm),
+          origin = point(
+            x = datum.barrel_centre_x(),
+            y = datum.barrel_centre_y(),
+            z = barrel_jewel_z(),
+          ),
           axis = Z,
           angle = 0deg,
         ),
