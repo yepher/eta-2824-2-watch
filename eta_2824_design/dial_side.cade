@@ -1,0 +1,238 @@
+import "./components.cade" as common
+
+part eta_pos_32_setting_wheel_envelope() -> Solid<Exact> {
+  -- Expert estimate: 24 teeth.
+  common.toothed_disk(
+    root_r = 1.36mm,
+    tooth_depth = 0.14mm,
+    tooth_width = 0.18mm,
+    h = 0.25mm,
+    bore_r = 0.2mm,
+    teeth = 24,
+  )
+}
+
+part eta_pos_33_cannon_pinion_envelope() -> Solid<Exact> {
+  -- H2 0.90mm hand fitting with an estimated 12-tooth driving pinion.
+  union(
+    common.toothed_disk(
+      root_r = 0.38mm,
+      tooth_depth = 0.07mm,
+      tooth_width = 0.14mm,
+      h = 0.22mm,
+      bore_r = 0.18mm,
+      teeth = 12,
+    ),
+    common.stepped_arbor(r1 = 0.45mm, h1 = 1.6mm, r2 = 0.35mm, h2 = 2.2mm),
+  )
+}
+
+part eta_pos_34_minute_wheel_envelope() -> Solid<Exact> {
+  -- Ratio-constrained estimate: 36-tooth wheel and 10-leaf hour-driving pinion.
+  union(
+    common.spoked_wheel(
+      root_r = 1.86mm,
+      rim_width = 0.22mm,
+      tooth_depth = 0.14mm,
+      tooth_width = 0.16mm,
+      hub_r = 0.44mm,
+      bore_r = 0.2mm,
+      spoke_width = 0.14mm,
+      h = 0.25mm,
+      teeth = 36,
+      spokes = 5,
+    ),
+    common.toothed_disk(
+      root_r = 0.38mm,
+      tooth_depth = 0.07mm,
+      tooth_width = 0.14mm,
+      h = 0.34mm,
+      bore_r = 0.2mm,
+      teeth = 10,
+    )
+      |> at(dx = 0mm, dy = 0mm, dz = 0.29mm),
+  )
+}
+
+part eta_pos_35_date_corrector_envelope() -> Solid<Exact> {
+  common.toothed_disk(
+    root_r = 1.08mm,
+    tooth_depth = 0.12mm,
+    tooth_width = 0.18mm,
+    h = 0.22mm,
+    bore_r = 0.18mm,
+    teeth = 18,
+  )
+}
+
+part eta_pos_36_date_indicator_envelope() -> Solid<Exact> {
+  -- ETA drawing-supported: 23.30mm outside diameter and 31 internal teeth.
+  common.internal_toothed_ring(
+    outer_r = 11.65mm,
+    root_r = 8.71mm,
+    tooth_depth = 0.3mm,
+    tooth_width = 0.32mm,
+    h = 0.23mm,
+    teeth = 31,
+  )
+}
+
+part eta_pos_37_hour_wheel_envelope() -> Solid<Exact> {
+  -- Ratio-constrained 40 teeth: (12/36) * (10/40) = 1/12 hour-hand speed.
+  common.toothed_disk(
+    root_r = 2.14mm,
+    tooth_depth = 0.16mm,
+    tooth_width = 0.16mm,
+    h = 0.3mm,
+    bore_r = 0.75mm,
+    teeth = 40,
+  )
+}
+
+part eta_pos_38_date_driving_wheel_envelope() -> Solid<Exact> {
+  -- Expert-estimated 24-tooth wheel; the date finger is modeled separately.
+  union(
+    common.toothed_disk(
+      root_r = 1.86mm,
+      tooth_depth = 0.14mm,
+      tooth_width = 0.18mm,
+      h = 0.28mm,
+      bore_r = 0.2mm,
+      teeth = 24,
+    ),
+    box(x = 0.35mm, y = 1.2mm, z = 0.22mm) |> at(dx = 0mm, dy = -1.8mm, dz = 0.24mm),
+  )
+}
+
+part eta_pos_39_minute_train_bridge_envelope() -> Solid<Exact> {
+  box(x = 5mm, y = 2.5mm, z = 0.3mm)
+}
+
+part eta_pos_40_date_jumper_envelope() -> Solid<Exact> {
+  box(x = 2.8mm, y = 0.55mm, z = 0.16mm)
+}
+
+part eta_pos_41_maintaining_plate_envelope() -> Solid<Exact> {
+  box(x = 3mm, y = 1.5mm, z = 0.22mm)
+}
+
+part eta_pos_42_dial_support_envelope() -> Solid<Exact> {
+  cut(cylinder(r = 12.8mm, h = 0.2mm), cylinder(r = 12.25mm, h = 0.4mm))
+}
+
+part eta_pos_43_key_bolt_envelope() -> Solid<Exact> {
+  box(x = 1.2mm, y = 0.45mm, z = 0.16mm)
+}
+
+part dial_side_assembly() -> Assembly {
+  together(
+    eta_pos_32_setting_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 5mm, y = 0mm, z = -0.22mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 204, g = 165, b = 62),
+      ),
+    eta_pos_33_cannon_pinion_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = -0.85mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 133, g = 143, b = 154),
+      ),
+    eta_pos_34_minute_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 3.4mm, y = -2.2mm, z = -0.3mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 207, g = 166, b = 59),
+      ),
+    eta_pos_35_date_corrector_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7mm, y = 1.8mm, z = -0.34mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 144, g = 153, b = 163),
+      ),
+    eta_pos_36_date_indicator_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = -0.72mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 236, g = 232, b = 218),
+      ),
+    eta_pos_37_hour_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = -0.38mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 193, g = 151, b = 49),
+      ),
+    eta_pos_38_date_driving_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 6.5mm, y = -2.7mm, z = -0.32mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 199, g = 158, b = 50),
+      ),
+    eta_pos_39_minute_train_bridge_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 3.8mm, y = -2.4mm, z = -0.62mm),
+          axis = Z,
+          angle = -15deg,
+        ),
+        color = rgb(r = 176, g = 173, b = 165),
+      ),
+    eta_pos_40_date_jumper_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -7.5mm, y = -3.5mm, z = -0.33mm),
+          axis = Z,
+          angle = 25deg,
+        ),
+        color = rgb(r = 125, g = 135, b = 146),
+      ),
+    eta_pos_41_maintaining_plate_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -7.4mm, y = -3.5mm, z = -0.55mm),
+          axis = Z,
+          angle = 25deg,
+        ),
+        color = rgb(r = 181, g = 178, b = 170),
+      ),
+    eta_pos_42_dial_support_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = -0.88mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 162, g = 168, b = 176),
+      ),
+    eta_pos_43_key_bolt_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 11.7mm, y = 2mm, z = -0.28mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 116, g = 126, b = 138),
+      ),
+  )
+}

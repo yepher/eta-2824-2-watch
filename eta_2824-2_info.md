@@ -1,0 +1,562 @@
+# ETA 2824-2 Information and Assembly Model
+
+## Purpose and evidence rule
+
+This document is an evidence ledger and a proposed logical CAD assembly for the
+ETA 2824-2. It does not claim that exploded-view proportions are manufacturing
+dimensions. A value is a dimension only when a cited source states it or a
+physical measurement records its method and uncertainty.
+
+Primary source: ETA Technical Communication `CT 2824-2 ESI 481825 25`, dated
+2022-10-06. The local reference file is
+[`references/ETA Caliber 2824-2 Watch Movement.pdf`](references/ETA%20Caliber%202824-2%20Watch%20Movement.pdf).
+The official current download is the [ETA technical document](https://shopb2b.eta.ch/en/technicaldocuments/index/pdf/id/1884/).
+
+## Movement-level facts
+
+| Property | Published value | CAD use |
+|---|---:|---|
+| Calibre | ETA 2824-2 | Configuration identity |
+| Ligne size | 11 1/2''' | Trade size; do not convert back when 25.60 mm is given directly |
+| Overall movement diameter | 26.00 mm | Maximum published radial envelope |
+| Case-fitting diameter | 25.60 mm | Nominal movement-seat interface |
+| Overall movement height | 4.60 mm | Preliminary axial envelope only |
+| Jewels | 25 | BOM/identity |
+| Frequency | 28,800 vibrations/hour (4 Hz) | Kinematic metadata |
+| Balance lift angle | 50 degrees | Service/test metadata |
+| Minimum power reserve | 38 hours | Performance metadata |
+| Typical power reserve | 42 hours | Performance metadata |
+| Functions | Hours, minutes, central seconds, date, stop seconds, quick date correction, bidirectional automatic winding | Functional decomposition |
+
+The overall diameter and height do not define the casing seat, stem axis, dial
+seat, hand stack, rotor clearance, clamp geometry, or individual components.
+
+## Part ledger
+
+`Position` is the identifier printed in the 2022 ETA exploded and assembly
+diagrams. `Catalog identifier` is the published GTIN when ETA supplies one;
+`Variant-controlled` means ETA directs the reader to the relevant calibre and
+variant in ETAshop. It must not be replaced with a guessed legacy number.
+
+The technical communication publishes no component envelope dimensions. That
+absence is recorded explicitly so image scale cannot silently become a datum.
+
+| Logical assembly | Position | Catalog identifier | ETA description | Published component dimensions |
+|---|---:|---|---|---|
+| Main plate | 1 | Variant-controlled | Main plate, assembled | Not published |
+| Main plate | 1-1 | 7613226044203 | Dial fastener | Not published |
+| Main plate | 1-2 | Variant-controlled | Bottom jewelled balance shock absorber, shouldered, press-in | Not published |
+| Hand-setting mechanism | 2 | 7613226053519 | Sliding pinion | Not published |
+| Hand-setting mechanism | 3 | 7613226057111 | Winding pinion | Not published |
+| Hand-setting mechanism | 4 | Variant-controlled | Winding stem | Envelope not published; external supplier lists thread diameter 0.90 mm |
+| Hand-setting mechanism | 5 | 7613226016064 | Corrector lever | Not published |
+| Hand-setting mechanism | 6 | 7613226048171 | Setting lever, assembled | Not published |
+| Hand-setting mechanism | 7 | 7613226032965 | Yoke | Not published |
+| Hand-setting mechanism | 8 | Variant-controlled | Setting lever jumper | Not published |
+| Going train | 9 | 7613226056473 | Escape wheel | Not published |
+| Going train | 10 | 7613226041271 | Intermediate wheel, assembled | Not published |
+| Going train | 11 | 7613226051010 | Third wheel | Not published |
+| Going train | 12 | Variant-controlled | Second wheel | Not published |
+| Going train | 13 | Variant-controlled | Train wheel bridge, jewelled | Not published |
+| Barrel and winding | 14 | Variant-controlled | Movement barrel, complete | Not published |
+| Barrel and winding | 15 | 7613226043121 | Stop lever | Not published |
+| Barrel and winding | 16 | Variant-controlled | Barrel bridge | Not published |
+| Barrel and winding | 17 | 7613226000254 | Click | Not published |
+| Barrel and winding | 18 | 7613226028753 | Click spring | Not published |
+| Barrel and winding | 19 | 7613226057326 | Crown wheel | Not published |
+| Barrel and winding | 20 | Variant-controlled | Ratchet wheel | Not published |
+| Escapement | 21 | 7613226023642 | Pallet fork | Not published |
+| Escapement | 22 | Variant-controlled | Pallet bridge, jewelled | Not published |
+| Balance and regulation | 23 | Variant-controlled | Timed balance regulated, with stud | Not published |
+| Balance and regulation | 24 | Variant-controlled | Balance bridge, assembled | Not published |
+| Balance and regulation | 24-1 | Variant-controlled | Balance bridge | Not published |
+| Balance and regulation | 24-2 | 7613226046092 | Stud support | Not published |
+| Balance and regulation | 24-3 | 7613226048713 | Lower index, assembled | Not published |
+| Balance and regulation | 24-4 | 7613226033832 | Upper index, fine regulation | Not published |
+| Balance and regulation | 24-5 | Variant-controlled | Regulator corrector | Not published |
+| Balance and regulation | 24-6 | Variant-controlled | Top jewelled balance shock absorber, shouldered, press-in | Not published |
+| Automatic winding | 25 | Variant-controlled | Automatic device framework, jewelled | Not published |
+| Automatic winding | 26 | 7613226054400 | Ratchet wheel driving wheel | Not published |
+| Automatic winding | 27 | 7613226023543 | Auxiliary reversing wheel | Not published |
+| Automatic winding | 28 | 7613226044098 | Reversing wheel | Not published |
+| Automatic winding | 29 | 7613226012943 | Reduction wheel, assembled | Not published |
+| Automatic winding | 30 | 7613226025998 | Automatic device lower bridge, jewelled | Not published |
+| Automatic winding | 31 | Variant-controlled | Oscillating weight, assembled | Not published |
+| Automatic winding | 31-1 | Variant-controlled | Oscillating weight | Not published |
+| Automatic winding | 31-2 | 7613226038509 | Ball bearing | Not published |
+| Motion works and calendar | 32 | 7613226074163 | Setting wheel | Not published |
+| Motion works and calendar | 33 | Variant-controlled | Cannon pinion with driving wheel | Not published; hand-fitting interface belongs in a separate controlled drawing |
+| Motion works and calendar | 34 | 7613226031128 | Minute wheel | Not published |
+| Motion works and calendar | 35 | 7613226033115 | Date corrector, assembled | Not published |
+| Motion works and calendar | 36 | Variant-controlled | Date indicator | Not published |
+| Motion works and calendar | 37 | Variant-controlled | Hour wheel, assembled | Not published; hand-fitting interface belongs in a separate controlled drawing |
+| Motion works and calendar | 38 | 7613226014053 | Date indicator driving wheel | Not published |
+| Motion works and calendar | 39 | Variant-controlled | Minute train bridge | Not published |
+| Motion works and calendar | 40 | 7613226036208 | Date jumper | Not published |
+| Motion works and calendar | 41 | 7613226054462 | Date jumper maintaining plate, assembled | Not published |
+| Dial interface | 42 | Variant-controlled | Dial support | Not published |
+| Dial interface | 43 | 7613226021778 | Key-bolt | Not published |
+| Fasteners | 900 | Variant-controlled | Countersunk screw for positions 8 and 41 | Not published |
+| Fasteners | 901 | Variant-controlled | Countersunk screw for bridges at positions 13, 16, 22, and 24 | Not published |
+| Fasteners | 902 | Variant-controlled | Collared cylindrical-head screw for crown wheel, position 19 | Not published |
+| Fasteners | 903 | Variant-controlled | Cylindrical-head screw for ratchet wheel, position 20 | Not published; left-hand thread is called out in assembly instructions |
+| Fasteners | 904 | Variant-controlled | Countersunk screw for automatic framework, position 25 | Not published |
+| Fasteners | 905 | Variant-controlled | Countersunk screw for automatic lower bridge, position 30 | Not published |
+| Fasteners | 906 | Variant-controlled | Collared cylindrical-head screw for oscillating weight, position 31 | Not published |
+| Fasteners | 907 | Variant-controlled | Shouldered screw for minute train bridge, position 39 | Not published |
+
+## Published interface dimensions from secondary catalogs
+
+These are useful leads, not replacements for controlled ETA drawings. Confirm
+them against the selected movement variant and a physical sample before driving
+CAD geometry.
+
+| Interface | Reported value | Source and interpretation |
+|---|---:|---|
+| Hand fittings | 0.90 x 1.50 x 0.25 mm | Boley ETA 2824-2 catalogue; commonly minute/hour/seconds fitting diameters, but order and tolerances require confirmation |
+| Winding stem thread | 0.90 mm diameter | Time Connection ETA 2824-2 parts listing |
+| Mainspring listing | 1.23 x 10.5 x 0.132 AUT | Boley catalogue spelling; meanings and units must be confirmed before use |
+
+## Common dimensions recoverable from ETA manufacturing drawings
+
+ETA's service communication is a parts and lubrication document, not a set of
+manufacturing drawings. A separate official *Manufacturing Information* document,
+`IH 2824-2 FDE 478720 11` (2010-07-27), does publish the shared interfaces used to
+design a case, dial, hands, date window, and crown. An archived copy is available
+as a [16-page ETA manufacturing-information PDF](https://www.watch-spare.com/amfile/file/download/file/1/product/10107/).
+It predates the 2022 service communication, so confirm the selected execution,
+hand-height code, and supplied parts before releasing manufacturing geometry.
+
+### Movement and dial envelope
+
+| Feature | ETA dimension | CAD interpretation |
+|---|---:|---|
+| Overall movement diameter | 26.00 mm | Maximum published radial envelope |
+| Case-fitting diameter | 25.60 mm | Nominal movement seat diameter; case clearance is a separate design choice |
+| Overall movement height | 4.60 mm | Movement only; excludes dial and hands |
+| Dial outside diameter | 26.00 mm | Drawing for calibres 2801-2, 2804-2, and 2824-2 |
+| Flat dial nominal thickness | 0.40 mm | The hand-height table uses a 0.40 mm dial |
+| Dial centre hole | 2.000 to 2.060 mm | Drawing callout `diameter 2 +0.060/0` |
+| Dial-foot diameter | 0.736 to 0.750 mm | Drawing callout `diameter 0.75 +0/-0.014` |
+| Upper-right dial-foot centre | x = +11.60 mm, y = +3.78 mm | Dial coordinates with +x toward 3 o'clock and +y toward 12 o'clock |
+| Lower-left dial-foot centre | x = -11.60 mm, y = -3.78 mm | Diametrically opposed to the upper-right foot in the published drawing |
+| Date-window clear opening | 3.30 x 2.00 mm | Rectangular opening shown at 3 o'clock |
+| Movement centre to near edge of date window | 8.85 mm | Locates the opening radially |
+| Date-window near edge to outer reference | 2.70 mm | Secondary radial location shown on the ETA dial drawing |
+| Crown-to-case gap after casing | 0.02 to 0.10 mm | Crown-position drawing; the text separately requires no more than 0.10 mm |
+
+The two foot coordinates above come from ETA drawing `Z0091446`, reproduced in
+the local files
+[`references/parts/1742079617617.png`](references/parts/1742079617617.png) and
+[`references/parts/looking-for-documents-that-help-me-precisely-locate-dial-v0-n6h561v5yuga1.webp`](references/parts/looking-for-documents-that-help-me-precisely-locate-dial-v0-n6h561v5yuga1.webp).
+The nearby `R 12.8`, `R 12.2`, `R 11.55`, and `R 11.45` annotations point to dial
+profile/window construction and must not be substituted for the explicitly
+dimensioned foot-centre coordinates.
+
+### Date indicator, position 36
+
+| Feature | ETA dimension | Notes |
+|---|---:|---|
+| Outside diameter | 23.30 mm | Flat and convex versions |
+| Toothed inside reference diameter | 16.512 mm | 31 teeth |
+| Flat indicator thickness | 0.23 mm | Edge section in the flat-indicator drawing |
+| Inner free-of-varnish thickness | 0.18 mm | Local section near the inner diameter |
+| Maximum varnish/printing layer | 0.03 mm | Explicit ETA maximum |
+| Inner unvarnished reference diameter, flat version | 17.42 mm | Do not substitute for the 16.512 mm toothed reference |
+| Inner unvarnished reference diameter, convex version | 17.40 mm | Convex drawing |
+| Raised/convex reference diameter | 19.75 mm | Convex drawing only |
+| Date-window corner radius | 11.55/2 mm | ETA notation: `R 11.55/2 x 2.7`; retain drawing notation until the window profile is reconstructed |
+
+### Gear and pinion tooth-count ledger
+
+The available ETA service and manufacturing documents identify the train parts
+but do not publish a tooth schedule. ETA drawing `Z0465620`/`Z0112468` verifies
+the date indicator's 31 internal teeth. The Movement Archive's examination of an
+ETA 2824-2 specimen supplies secondary, direct-observation evidence for a
+20-tooth escape wheel. A wheel and its coaxial pinion are separate toothed
+members and must be counted separately; do not record one number against an
+assembled part without naming which member it describes.
+
+| Position | Component | Wheel/ring teeth | Pinion leaves or secondary teeth | Evidence status |
+|---:|---|---:|---:|---|
+| 2 | Sliding pinion | Unknown | Unknown | Requires direct count or controlled drawing |
+| 3 | Winding pinion | Unknown | Unknown | Requires direct count or controlled drawing |
+| 9 | Escape wheel | **20** | Unknown | Secondary direct-observation evidence from [The Movement Archive](https://17jewels.info/movements/e/eta/eta-2824-2/); not stated in the ETA service document |
+| 10 | Intermediate wheel, assembled | Unknown | Unknown | Count both toothed members separately |
+| 11 | Third wheel | Unknown | Unknown | Count wheel teeth and pinion leaves separately |
+| 12 | Second wheel | Unknown | Unknown | Count wheel teeth and pinion leaves separately |
+| 14 | Movement barrel, complete | Unknown | Not applicable/unknown | Count the barrel's great-wheel teeth; do not count ratchet teeth as the same member |
+| 19 | Crown wheel | Unknown | Unknown | Requires direct count or controlled drawing |
+| 20 | Ratchet wheel | Unknown | Unknown | Requires direct count or controlled drawing |
+| 26 | Ratchet-wheel driving wheel | Unknown | Unknown | Count every distinct toothed member |
+| 27 | Auxiliary reversing wheel | Unknown | Unknown | Reversing-wheel internals may not be described by one external count |
+| 28 | Reversing wheel | Unknown | Unknown | Reversing-wheel internals may not be described by one external count |
+| 29 | Reduction wheel, assembled | Unknown | Unknown | Count wheel teeth and pinion leaves separately |
+| 32 | Setting wheel | Unknown | Unknown | Requires direct count or controlled drawing |
+| 33 | Cannon pinion with driving wheel | Unknown | Unknown | Record driving-wheel teeth separately from the cannon-pinion teeth/leaves |
+| 34 | Minute wheel | Unknown | Unknown | Count minute-wheel teeth and its hour-wheel-driving pinion separately |
+| 36 | Date indicator | **31** | Not applicable | Verified by ETA drawing `Z0465620`/`Z0112468` |
+| 37 | Hour wheel, assembled | Unknown | Unknown | Requires direct count or controlled drawing |
+| 38 | Date-indicator driving wheel | Unknown | Unknown | Include any separate finger or secondary member in the description |
+
+Generic textbook train counts and counts from Sellita, Asian 2824-compatible
+movements, or other ETA calibres are useful plausibility checks but are not
+evidence for this ledger. For a physical movement, capture a calibrated,
+face-on image of each wheel and mark every counted tooth. Validate the completed
+going-train schedule against the observed rotation rates and 28,800-vph
+escapement; validate the motion works against one hour-hand revolution per
+12 cannon-pinion revolutions. These ratio checks catch miscounts but cannot
+identify a unique tooth schedule by themselves.
+
+#### Rejected or unverified tooth-count claims
+
+A proposed schedule of `80/10`, `75/10`, and `70/7`, followed by a 20-tooth
+escape wheel, is not compatible with 28,800 vibrations per hour if interpreted
+as a conventional centre-to-third-to-fourth-to-escape train:
+
+```text
+fourth-wheel rate = (80/10) * (75/10) = 60 revolutions/hour
+escape-wheel rate = 60 * (70/7) = 600 revolutions/hour
+vibrations/hour   = 600 * 20 teeth * 2 vibrations/tooth = 24,000
+```
+
+At 28,800 vibrations/hour and 20 escape-wheel teeth, the escape wheel must turn
+`720 revolutions/hour`, so the last stage would require a 12:1 ratio after a
+60-revolutions/hour fourth wheel. The frequency does not determine a unique pair
+of integer tooth counts, and the ETA 2824-2's indirectly driven hands make it
+unsafe to paste conventional train names onto ETA positions 10-12.
+
+The following submitted values remain leads only: barrel `about 80-84`, winding
+pinion `12`, crown wheel `26`, and ratchet wheel `63`. The cited pages were not
+specific technical drawings or count records, and winding-train tooth counts are
+not mathematically fixed by the escapement frequency. Do not use these values in
+geometry until a clear face-on part image, a counted specimen, or a controlled
+drawing confirms each one.
+
+#### Current CAD train hypothesis (2026-09-05)
+
+The rough-envelope CAD uses the following explicitly provisional integer train
+to constrain relative pitch diameters and wheel centers: second wheel `80/10`,
+third wheel `75/10`, intermediate/fourth wheel `84/7`, and escape wheel `20`.
+Only the escape-wheel count is supported by secondary direct-observation
+evidence; every other count remains an `expert_estimate` until directly counted
+or found on a controlled drawing.
+
+The hypothesis closes the required rate exactly when the second/centre wheel
+turns once per hour:
+
+```text
+intermediate/fourth rate = 1 * (80/10) * (75/10) = 60 revolutions/hour
+escape-wheel rate        = 60 * (84/7) = 720 revolutions/hour
+vibrations/hour          = 720 * 20 * 2 = 28,800
+```
+
+The current Cade radii are visualization envelopes rather than a declared
+module or production tooth profile. They will be revised together when direct
+tooth counts, calibrated images, or measured center distances become available.
+
+The same 2026-09-05 detail pass uses the following additional CAD-only tooth
+hypotheses. These values are `expert_estimate`, not new evidence: barrel great
+wheel 80, crown wheel 26, ratchet wheel 63, automatic driving wheel 42,
+auxiliary/reversing wheels 34 each, reduction wheel 52/12, setting wheel 24,
+cannon-pinion driver 12, minute wheel 36/10, hour wheel 40, date corrector 18,
+date driver 24, and sliding/winding pinions 12 each. The motion-work subset is
+ratio-constrained: `(12/36) * (10/40) = 1/12`. The date indicator alone retains
+its drawing-supported 31 internal teeth. Tooth blocks are visual envelopes, not
+production involute or cycloidal profiles.
+
+### Hand-fitting diameters and normal H2 heights
+
+The drawing's asymmetric diameter tolerances are stated in thousandths of a
+millimetre. The table below expands them into millimetres. `H2 normal` is the
+common normal-height execution, not a promise that every purchased 2824-2 uses
+that execution.
+
+| Interface | Nominal / limits | H2 normal height from dial seat |
+|---|---:|---:|
+| Hour hand fitting | 1.500 mm, +0.004/-0.002 mm; 3% taper | 0.95 mm |
+| Minute hand fitting | 0.900 mm, +0.006/-0.004 mm; cylindrical | 1.35 mm |
+| Seconds hand fitting | 0.250 mm nominal | 1.75 mm |
+| Seconds pin outside diameter | 0.256 mm, +0.006/-0.004 mm | Included in the seconds-hand stack |
+| Hour-wheel outside reference | 1.50 mm | Diameter shown around the hour fitting |
+| Minute-wheel outside reference | 0.90 mm | Diameter shown around the minute fitting |
+| Centre/seconds tube reference | 0.70 mm | Cylindrical reference shown in the stack |
+
+For H2 normal the drawing also gives total lengths from its lower datum: cannon
+pinion `A = 2.20 mm`, hour wheel `B = 1.25 mm`, seconds-wheel pin
+`C = 5.07 mm`, and centre tube `D = 2.50 mm`. The other published hand-height
+executions are H1, H3, H4, H5, and H6; model the execution code as configuration
+data rather than changing these values silently.
+
+### Winding stem and crown interface
+
+| Feature | ETA dimension | Notes |
+|---|---:|---|
+| Stem thread | S 0.9 | Swiss watch-thread designation printed on the drawing; do not treat it as an ISO M0.9 thread |
+| Normal stem length `L` | 16.00 mm | From movement-side shoulder datum to tip in the ETA drawing |
+| Case-fitting diameter to stem tip `L1` | 8.65 mm | Drawing datum, not a cut-to-fit crown length |
+| Opposite movement reference to stem tip `L2` | 21.65 mm | Drawing datum |
+| Total setting travel with calendar `C` | 0.80 mm | `C = C1 + C2` |
+| Running to date-correction travel `C1` | 0.30 mm | Calendar execution |
+| Date-correction to time-setting travel `C2` | 0.50 mm | Calendar execution |
+
+### How to obtain dimensions for the remaining internal parts
+
+There is no reliable single public table of manufacturing dimensions for all
+ETA 2824-2 components. Build the internal CAD model as a measured reconstruction:
+
+1. Buy one known-genuine movement of the exact execution and record its calibre,
+   grade, shock system, and hand-height code before disassembly.
+2. Photograph every layer square to the plate with a stage micrometer in the same
+   plane. Images without an in-plane scale are reference images, not measurements.
+3. Measure outside diameters and thicknesses with a micrometer; use pin gauges or
+   calibrated gauge pins for holes; use an optical comparator or calibrated
+   microscope for tooth profiles, pivots, jewels, and irregular levers.
+4. Establish one coordinate system from the main-plate centre and stem axis. Record
+   wheel/jewel centres as coordinates, not as chained centre distances.
+5. For every value record source, instrument, resolution, repeated readings,
+   uncertainty, execution, and whether it is nominal, measured, or inferred.
+6. Check each reconstructed gear pair by measured centre distance, tooth counts,
+   and pitch/module consistency. A photograph scaled from the 25.60 mm seat is a
+   useful initial estimate only; perspective and exploded-view displacement make
+   it unsuitable for final fits.
+
+This approach can recover practical assembly geometry, but pivots, jewel fits,
+spring geometry, escapement faces, and press fits need substantially tighter
+measurement and should not be reverse-engineered from catalog photographs.
+
+## CAD visualization colors
+
+These colors identify mechanisms in the CAD assembly; they do not assert the
+parts' real material, plating, lubricant, or finish. They use opaque sRGB because
+Cade `rgb` has no alpha channel. Related parts share a color family, while parts
+that touch or overlap use alternating shades. Position identifiers—not color—
+remain the authoritative identity.
+
+| Position | Part | Color | Hex | Cade value |
+|---:|---|---|---|---|
+| 1 | Main plate, assembled | Cool gray | `#9CA3AF` | `rgb(r = 156, g = 163, b = 175)` |
+| 1-1 | Dial fastener | Light gray | `#D1D5DB` | `rgb(r = 209, g = 213, b = 219)` |
+| 1-2 | Bottom balance shock absorber | Slate | `#64748B` | `rgb(r = 100, g = 116, b = 139)` |
+| 2 | Sliding pinion | Blue | `#2563EB` | `rgb(r = 37, g = 99, b = 235)` |
+| 3 | Winding pinion | Light blue | `#60A5FA` | `rgb(r = 96, g = 165, b = 250)` |
+| 4 | Winding stem | Navy | `#1E3A8A` | `rgb(r = 30, g = 58, b = 138)` |
+| 5 | Corrector lever | Sky | `#0EA5E9` | `rgb(r = 14, g = 165, b = 233)` |
+| 6 | Setting lever, assembled | Blue | `#3B82F6` | `rgb(r = 59, g = 130, b = 246)` |
+| 7 | Yoke | Cyan-blue | `#0284C7` | `rgb(r = 2, g = 132, b = 199)` |
+| 8 | Setting lever jumper | Pale blue | `#93C5FD` | `rgb(r = 147, g = 197, b = 253)` |
+| 9 | Escape wheel | Yellow | `#EAB308` | `rgb(r = 234, g = 179, b = 8)` |
+| 10 | Intermediate wheel | Gold | `#D4A72C` | `rgb(r = 212, g = 167, b = 44)` |
+| 11 | Third wheel | Amber | `#F59E0B` | `rgb(r = 245, g = 158, b = 11)` |
+| 12 | Second wheel | Pale gold | `#FACC15` | `rgb(r = 250, g = 204, b = 21)` |
+| 13 | Train wheel bridge | Ochre | `#A16207` | `rgb(r = 161, g = 98, b = 7)` |
+| 14 | Movement barrel | Bronze | `#B7791F` | `rgb(r = 183, g = 121, b = 31)` |
+| 15 | Stop lever | Light brown | `#D6A15D` | `rgb(r = 214, g = 161, b = 93)` |
+| 16 | Barrel bridge | Dark bronze | `#92400E` | `rgb(r = 146, g = 64, b = 14)` |
+| 17 | Click | Orange | `#EA580C` | `rgb(r = 234, g = 88, b = 12)` |
+| 18 | Click spring | Light orange | `#FB923C` | `rgb(r = 251, g = 146, b = 60)` |
+| 19 | Crown wheel | Copper | `#C2410C` | `rgb(r = 194, g = 65, b = 12)` |
+| 20 | Ratchet wheel | Tan | `#CA8A04` | `rgb(r = 202, g = 138, b = 4)` |
+| 21 | Pallet fork | Red | `#DC2626` | `rgb(r = 220, g = 38, b = 38)` |
+| 22 | Pallet bridge | Rose | `#FB7185` | `rgb(r = 251, g = 113, b = 133)` |
+| 23 | Timed balance | Magenta | `#C026D3` | `rgb(r = 192, g = 38, b = 211)` |
+| 24 | Balance bridge, assembled | Purple | `#9333EA` | `rgb(r = 147, g = 51, b = 234)` |
+| 24-1 | Balance bridge | Violet | `#7C3AED` | `rgb(r = 124, g = 58, b = 237)` |
+| 24-2 | Stud support | Light violet | `#A78BFA` | `rgb(r = 167, g = 139, b = 250)` |
+| 24-3 | Lower index | Pink | `#DB2777` | `rgb(r = 219, g = 39, b = 119)` |
+| 24-4 | Upper index | Light pink | `#F472B6` | `rgb(r = 244, g = 114, b = 182)` |
+| 24-5 | Regulator corrector | Deep purple | `#6D28D9` | `rgb(r = 109, g = 40, b = 217)` |
+| 24-6 | Top balance shock absorber | Lavender | `#C4B5FD` | `rgb(r = 196, g = 181, b = 253)` |
+| 25 | Automatic device framework | Green | `#16A34A` | `rgb(r = 22, g = 163, b = 74)` |
+| 26 | Ratchet wheel driving wheel | Lime green | `#65A30D` | `rgb(r = 101, g = 163, b = 13)` |
+| 27 | Auxiliary reversing wheel | Teal green | `#059669` | `rgb(r = 5, g = 150, b = 105)` |
+| 28 | Reversing wheel | Light green | `#4ADE80` | `rgb(r = 74, g = 222, b = 128)` |
+| 29 | Reduction wheel | Emerald | `#10B981` | `rgb(r = 16, g = 185, b = 129)` |
+| 30 | Automatic lower bridge | Dark green | `#166534` | `rgb(r = 22, g = 101, b = 52)` |
+| 31 | Oscillating weight, assembled | Forest | `#15803D` | `rgb(r = 21, g = 128, b = 61)` |
+| 31-1 | Oscillating weight | Green | `#22C55E` | `rgb(r = 34, g = 197, b = 94)` |
+| 31-2 | Ball bearing | Mint | `#6EE7B7` | `rgb(r = 110, g = 231, b = 183)` |
+| 32 | Setting wheel | Cyan | `#0891B2` | `rgb(r = 8, g = 145, b = 178)` |
+| 33 | Cannon pinion | Deep cyan | `#0E7490` | `rgb(r = 14, g = 116, b = 144)` |
+| 34 | Minute wheel | Light cyan | `#22D3EE` | `rgb(r = 34, g = 211, b = 238)` |
+| 35 | Date corrector | Turquoise | `#0D9488` | `rgb(r = 13, g = 148, b = 136)` |
+| 36 | Date indicator | Pale cyan | `#67E8F9` | `rgb(r = 103, g = 232, b = 249)` |
+| 37 | Hour wheel | Dark teal | `#115E59` | `rgb(r = 17, g = 94, b = 89)` |
+| 38 | Date indicator driving wheel | Aqua | `#14B8A6` | `rgb(r = 20, g = 184, b = 166)` |
+| 39 | Minute train bridge | Blue teal | `#155E75` | `rgb(r = 21, g = 94, b = 117)` |
+| 40 | Date jumper | Bright cyan | `#06B6D4` | `rgb(r = 6, g = 182, b = 212)` |
+| 41 | Date jumper maintaining plate | Pale teal | `#5EEAD4` | `rgb(r = 94, g = 234, b = 212)` |
+| 42 | Dial support | Indigo | `#4F46E5` | `rgb(r = 79, g = 70, b = 229)` |
+| 43 | Key-bolt | Light indigo | `#818CF8` | `rgb(r = 129, g = 140, b = 248)` |
+| 900 | Countersunk screw class | Charcoal | `#374151` | `rgb(r = 55, g = 65, b = 81)` |
+| 901 | Bridge screw class | Dark gray | `#4B5563` | `rgb(r = 75, g = 85, b = 99)` |
+| 902 | Crown-wheel screw | Medium gray | `#6B7280` | `rgb(r = 107, g = 114, b = 128)` |
+| 903 | Ratchet-wheel screw | Blue gray | `#475569` | `rgb(r = 71, g = 85, b = 105)` |
+| 904 | Automatic-framework screw class | Graphite | `#52525B` | `rgb(r = 82, g = 82, b = 91)` |
+| 905 | Automatic-lower-bridge screw | Slate gray | `#64748B` | `rgb(r = 100, g = 116, b = 139)` |
+| 906 | Oscillating-weight screw | Steel gray | `#71717A` | `rgb(r = 113, g = 113, b = 122)` |
+| 907 | Minute-train-bridge screw | Light steel | `#94A3B8` | `rgb(r = 148, g = 163, b = 184)` |
+
+When one definition is reused, keep one color for every placement. Cade stores
+color on the definition for 3MF output and refuses placing the same definition
+in two colors. If two visually identical pieces need different diagnostic
+colors, give them distinct part definitions and document why.
+
+## Logical assembly of assemblies
+
+This hierarchy follows function and ETA's service order. It is not a claim that
+every item can be installed as a preassembled physical module. In CAD, the leaf
+parts remain distinct definitions and each subsystem is an assembly of placed
+leaves.
+
+```text
+eta_2824_2
+├── main_plate_assembly
+│   ├── main_plate [1]
+│   ├── dial_fastener [1-1]
+│   └── lower_balance_shock_absorber [1-2]
+├── hand_setting_assembly
+│   ├── sliding_pinion [2]
+│   ├── winding_pinion [3]
+│   ├── winding_stem [4]
+│   ├── corrector_lever [5]
+│   ├── setting_lever [6]
+│   ├── yoke [7]
+│   ├── setting_lever_jumper [8]
+│   └── screws_900
+├── going_train_assembly
+│   ├── escape_wheel [9]
+│   ├── intermediate_wheel [10]
+│   ├── third_wheel [11]
+│   ├── second_wheel [12]
+│   ├── train_wheel_bridge [13]
+│   └── screws_901
+├── barrel_and_winding_assembly
+│   ├── movement_barrel [14]
+│   ├── stop_lever [15]
+│   ├── barrel_bridge [16]
+│   ├── click [17]
+│   ├── click_spring [18]
+│   ├── crown_wheel [19]
+│   ├── ratchet_wheel [20]
+│   └── screws_901_902_903
+├── escapement_assembly
+│   ├── pallet_fork [21]
+│   ├── pallet_bridge [22]
+│   └── screws_901
+├── balance_assembly
+│   ├── timed_balance [23]
+│   ├── balance_bridge_assembly [24]
+│   │   ├── balance_bridge [24-1]
+│   │   ├── stud_support [24-2]
+│   │   ├── lower_index [24-3]
+│   │   ├── upper_index [24-4]
+│   │   ├── regulator_corrector [24-5]
+│   │   └── upper_balance_shock_absorber [24-6]
+│   └── screws_901
+├── automatic_winding_assembly
+│   ├── automatic_framework [25]
+│   ├── ratchet_wheel_driving_wheel [26]
+│   ├── auxiliary_reversing_wheel [27]
+│   ├── reversing_wheel [28]
+│   ├── reduction_wheel [29]
+│   ├── automatic_lower_bridge [30]
+│   ├── rotor_assembly [31]
+│   │   ├── oscillating_weight [31-1]
+│   │   └── ball_bearing [31-2]
+│   └── screws_904_905_906
+└── dial_side_assembly
+    ├── motion_works
+    │   ├── setting_wheel [32]
+    │   ├── cannon_pinion [33]
+    │   └── minute_wheel [34]
+    ├── calendar_works
+    │   ├── date_corrector [35]
+    │   ├── date_indicator [36]
+    │   ├── hour_wheel [37]
+    │   ├── date_indicator_driving_wheel [38]
+    │   ├── minute_train_bridge [39]
+    │   ├── date_jumper [40]
+    │   └── date_jumper_maintaining_plate [41]
+    ├── dial_support [42]
+    ├── key_bolt [43]
+    └── screws_900_907
+```
+
+## Cade organization
+
+Use one definition per manufactured part and one file per stable subsystem.
+Until measured geometry exists, do not create visually plausible proxy gears
+under production names; use an `_envelope` or `_placeholder` suffix so they
+cannot be mistaken for verified parts.
+
+```text
+eta_2824-2/
+├── main_plate.cade
+├── hand_setting.cade
+├── going_train.cade
+├── barrel_and_winding.cade
+├── escapement.cade
+├── balance.cade
+├── automatic_winding.cade
+├── dial_side.cade
+├── fasteners.cade
+└── movement.cade
+```
+
+The final Tier 1 shape should follow this pattern once leaf definitions and
+frames are measured:
+
+```cade
+import "./main_plate.cade" as plate
+import "./hand_setting.cade" as setting
+import "./going_train.cade" as train
+import "./barrel_and_winding.cade" as barrel
+import "./escapement.cade" as escapement
+import "./balance.cade" as balance
+import "./automatic_winding.cade" as automatic
+import "./dial_side.cade" as dial
+
+part eta_2824_2() -> Assembly {
+  together(
+    plate.main() |> place(),
+    setting.main() |> place(),
+    train.main() |> place(),
+    barrel.main() |> place(),
+    escapement.main() |> place(),
+    balance.main() |> place(),
+    automatic.main() |> place(),
+    dial.main() |> place(),
+  )
+}
+```
+
+That snippet expresses logical composition only. It will compile after each
+imported module exists and supplies a `main() -> Assembly`; it does not establish
+any placement without measured frames.
+
+## Measurement backlog
+
+Record every acquired dimension with source, specimen/variant, tool, resolution,
+uncertainty, reference temperature, datum, and date. Highest-value interfaces:
+
+1. Main-plate casing seat, flange, and clamp geometry.
+2. Stem axis height and radial location in every crown position.
+3. Dial seat, dial feet, date window, and dial support heights.
+4. Hour, minute, and seconds hand-fitting diameters and axial stack.
+5. Rotor swept volume and caseback clearance.
+6. Jewel/pivot centers and axial levels for the going train.
+7. Bridge locating features, screw axes, and bearing surfaces.
+8. Wheel pitch geometry, tooth counts, backlash, and endshake.
+
+## Source quality notes
+
+- The ETA technical communication is authoritative for identity, parts list,
+  service order, lubrication, and the few published movement-level values.
+- The Boley catalogue is useful for cross-reference and purchasing information.
+- The Time Connection listing is useful for legacy part names and the stem
+  thread lead, but explicitly says its pictures are for reference only.
+- [`references/parts/assembly.jpg`](references/parts/assembly.jpg) is explicitly
+  labeled ETA 2836-2. It may corroborate the order and identity of base-movement
+  and automatic-winding parts shared with the 2824 family, but it is not a
+  dimensional source and cannot establish ETA 2824-2 tooth counts.

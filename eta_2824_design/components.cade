@@ -1,0 +1,221 @@
+-- Reusable primitive families for the ETA 2824-2 reconstruction.
+-- These helpers create geometry only; ETA-position parts retain BOM identity.
+fn bored_disk(r: Len, h: Len, bore_r: Len) -> Solid<Exact> {
+  cut(cylinder(r = r, h = h), cylinder(r = bore_r, h = h + 0.2mm))
+}
+
+fn stepped_arbor(r1: Len, h1: Len, r2: Len, h2: Len) -> Solid<Exact> {
+  union(cylinder(r = r1, h = h1), cylinder(r = r2, h = h2))
+}
+
+fn wheel_and_pinion_blank(
+  wheel_r: Len,
+  wheel_h: Len,
+  pinion_r: Len,
+  pinion_h: Len,
+  bore_r: Len,
+) -> Solid<Exact> {
+  union(
+    bored_disk(r = wheel_r, h = wheel_h, bore_r = bore_r),
+    bored_disk(r = pinion_r, h = pinion_h, bore_r = bore_r)
+      |> at(dx = 0mm, dy = 0mm, dz = (wheel_h + pinion_h) / 2),
+  )
+}
+
+fn toothed_disk(
+  root_r: Len,
+  tooth_depth: Len,
+  tooth_width: Len,
+  h: Len,
+  bore_r: Len,
+  teeth: Count,
+) -> Solid<Exact> {
+  let root = bored_disk(r = root_r, h = h, bore_r = bore_r)
+  let tooth = box(x = tooth_depth * 2, y = tooth_width, z = h)
+    |> at(dx = root_r, dy = 0mm, dz = 0mm)
+    |> polar(n = teeth, axis = Z)
+
+  union(root, tooth)
+}
+
+fn spoked_wheel(
+  root_r: Len,
+  rim_width: Len,
+  tooth_depth: Len,
+  tooth_width: Len,
+  hub_r: Len,
+  bore_r: Len,
+  spoke_width: Len,
+  h: Len,
+  teeth: Count,
+  spokes: Count,
+) -> Solid<Exact> {
+  let rim = cut(
+    cylinder(r = root_r, h = h),
+    cylinder(r = root_r - rim_width, h = h + 0.2mm),
+  )
+  let teeth_body = box(x = tooth_depth * 2, y = tooth_width, z = h)
+    |> at(dx = root_r, dy = 0mm, dz = 0mm)
+    |> polar(n = teeth, axis = Z)
+  let hub = bored_disk(r = hub_r, h = h, bore_r = bore_r)
+  let spoke_length = root_r - rim_width - hub_r
+  let spoke = box(x = spoke_length, y = spoke_width, z = h)
+    |> at(dx = hub_r + spoke_length / 2, dy = 0mm, dz = 0mm)
+    |> polar(n = spokes, axis = Z)
+
+  union(rim, teeth_body, hub, spoke)
+}
+
+fn spoked_rim(
+  outer_r: Len,
+  rim_width: Len,
+  hub_r: Len,
+  bore_r: Len,
+  spoke_width: Len,
+  h: Len,
+  spokes: Count,
+) -> Solid<Exact> {
+  let rim = cut(
+    cylinder(r = outer_r, h = h),
+    cylinder(r = outer_r - rim_width, h = h + 0.2mm),
+  )
+  let hub = bored_disk(r = hub_r, h = h, bore_r = bore_r)
+  let spoke_length = outer_r - rim_width - hub_r
+  let spoke = box(x = spoke_length, y = spoke_width, z = h)
+    |> at(dx = hub_r + spoke_length / 2, dy = 0mm, dz = 0mm)
+    |> polar(n = spokes, axis = Z)
+
+  union(rim, hub, spoke)
+}
+
+fn internal_toothed_ring(
+  outer_r: Len,
+  root_r: Len,
+  tooth_depth: Len,
+  tooth_width: Len,
+  h: Len,
+  teeth: Count,
+) -> Solid<Exact> {
+  let ring = cut(cylinder(r = outer_r, h = h), cylinder(r = root_r, h = h + 0.2mm))
+  let tooth = box(x = tooth_depth * 2, y = tooth_width, z = h)
+    |> at(dx = root_r, dy = 0mm, dz = 0mm)
+    |> polar(n = teeth, axis = Z)
+
+  union(ring, tooth)
+}
+
+fn jewel_ring(r: Len, h: Len, bore_r: Len) -> Solid<Exact> {
+  bored_disk(r = r, h = h, bore_r = bore_r)
+}
+
+fn screw_shank_with_lead_tip(shank_r: Len, shank_h: Len, head_h: Len) -> Solid<Exact> {
+  let tip_h = shank_r
+
+  union(
+    cylinder(r = shank_r, h = shank_h) |> at(dx = 0mm, dy = 0mm, dz = -head_h / 2),
+    cone(r1 = 0mm, r2 = shank_r, h = tip_h)
+      |> at(dx = 0mm, dy = 0mm, dz = -head_h / 2 - shank_h / 2 - tip_h / 2),
+  )
+}
+
+fn screw_blank(head_r: Len, head_h: Len, shank_r: Len, shank_h: Len) -> Solid<Exact> {
+  union(
+    cylinder(r = head_r, h = head_h) |> at(dx = 0mm, dy = 0mm, dz = shank_h / 2),
+    screw_shank_with_lead_tip(shank_r = shank_r, shank_h = shank_h, head_h = head_h),
+  )
+}
+
+fn slotted_countersunk_screw(
+  head_r: Len,
+  head_h: Len,
+  shank_r: Len,
+  shank_h: Len,
+  slot_w: Len,
+  slot_depth: Len,
+) -> Solid<Exact> {
+  let body = union(
+    cone(r1 = shank_r, r2 = head_r, h = head_h)
+      |> at(dx = 0mm, dy = 0mm, dz = shank_h / 2),
+    screw_shank_with_lead_tip(shank_r = shank_r, shank_h = shank_h, head_h = head_h),
+  )
+  -- Cut to the shank shoulder and overrun the top by `slot_depth`. A shallow
+  -- floor is indistinguishable from the top face in the flat viewer material.
+  let driver_slot = box(x = head_r * 2.2, y = slot_w, z = head_h + slot_depth)
+    |> at(dx = 0mm, dy = 0mm, dz = shank_h / 2 + slot_depth / 2)
+
+  cut(body, driver_slot)
+}
+
+fn slotted_cylindrical_screw(
+  head_r: Len,
+  head_h: Len,
+  shank_r: Len,
+  shank_h: Len,
+  slot_w: Len,
+  slot_depth: Len,
+) -> Solid<Exact> {
+  let body = screw_blank(
+    head_r = head_r,
+    head_h = head_h,
+    shank_r = shank_r,
+    shank_h = shank_h,
+  )
+  -- Cut to the shank shoulder and overrun the top by `slot_depth`. A shallow
+  -- floor is indistinguishable from the top face in the flat viewer material.
+  let driver_slot = box(x = head_r * 2.2, y = slot_w, z = head_h + slot_depth)
+    |> at(dx = 0mm, dy = 0mm, dz = shank_h / 2 + slot_depth / 2)
+
+  cut(body, driver_slot)
+}
+
+fn slotted_collared_screw(
+  head_r: Len,
+  head_h: Len,
+  collar_r: Len,
+  collar_h: Len,
+  shank_r: Len,
+  shank_h: Len,
+  slot_w: Len,
+  slot_depth: Len,
+) -> Solid<Exact> {
+  let body = union(
+    slotted_cylindrical_screw(
+      head_r = head_r,
+      head_h = head_h,
+      shank_r = shank_r,
+      shank_h = shank_h,
+      slot_w = slot_w,
+      slot_depth = slot_depth,
+    ),
+    cylinder(r = collar_r, h = collar_h)
+      |> at(dx = 0mm, dy = 0mm, dz = (shank_h - head_h - collar_h) / 2),
+  )
+
+  body
+}
+
+fn slotted_shouldered_screw(
+  head_r: Len,
+  head_h: Len,
+  shoulder_r: Len,
+  shoulder_h: Len,
+  shank_r: Len,
+  shank_h: Len,
+  slot_w: Len,
+  slot_depth: Len,
+) -> Solid<Exact> {
+  let body = union(
+    slotted_cylindrical_screw(
+      head_r = head_r,
+      head_h = head_h,
+      shank_r = shank_r,
+      shank_h = shank_h,
+      slot_w = slot_w,
+      slot_depth = slot_depth,
+    ),
+    cylinder(r = shoulder_r, h = shoulder_h)
+      |> at(dx = 0mm, dy = 0mm, dz = (shank_h - head_h - shoulder_h) / 2),
+  )
+
+  body
+}

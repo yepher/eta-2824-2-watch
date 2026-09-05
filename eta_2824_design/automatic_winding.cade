@@ -1,0 +1,226 @@
+import "./components.cade" as common
+
+part eta_pos_25_automatic_framework_envelope() -> Solid<Exact> {
+  let framework_blank = union(
+    cylinder(r = 2.4mm, h = 0.38mm) |> at(dx = -6.6mm, dy = 0.2mm, dz = 0mm),
+    cylinder(r = 2.2mm, h = 0.38mm) |> at(dx = -2.8mm, dy = 0.7mm, dz = 0mm),
+    cylinder(r = 2.2mm, h = 0.38mm) |> at(dx = 0.8mm, dy = 0.7mm, dz = 0mm),
+    cylinder(r = 2mm, h = 0.38mm) |> at(dx = 2.6mm, dy = -2mm, dz = 0mm),
+    box(x = 10.5mm, y = 2.8mm, z = 0.38mm) |> at(dx = -2.2mm, dy = 0.5mm, dz = 0mm),
+    box(x = 3mm, y = 4.2mm, z = 0.38mm) |> at(dx = 1.3mm, dy = -0.5mm, dz = 0mm),
+  )
+  let bearing_and_screw_seats = union(
+    cylinder(r = 0.52mm, h = 0.58mm) |> at(dx = -6.6mm, dy = 0.2mm, dz = 0mm),
+    cylinder(r = 0.52mm, h = 0.58mm) |> at(dx = -2.8mm, dy = 0.7mm, dz = 0mm),
+    cylinder(r = 0.52mm, h = 0.58mm) |> at(dx = 0.8mm, dy = 0.7mm, dz = 0mm),
+    cylinder(r = 0.24mm, h = 0.58mm) |> at(dx = -5.5mm, dy = -1.6mm, dz = 0mm),
+    cylinder(r = 0.24mm, h = 0.58mm) |> at(dx = 2.5mm, dy = -2mm, dz = 0mm),
+  )
+
+  cut(framework_blank, bearing_and_screw_seats)
+}
+
+part eta_pos_25_framework_jewel() -> Solid<Exact> {
+  common.jewel_ring(r = 0.52mm, h = 0.3mm, bore_r = 0.11mm)
+}
+
+part eta_pos_26_driving_wheel_envelope() -> Solid<Exact> {
+  -- Expert estimate: 42 teeth.
+  common.spoked_wheel(
+    root_r = 1.66mm,
+    rim_width = 0.22mm,
+    tooth_depth = 0.14mm,
+    tooth_width = 0.14mm,
+    hub_r = 0.46mm,
+    bore_r = 0.22mm,
+    spoke_width = 0.15mm,
+    h = 0.26mm,
+    teeth = 42,
+    spokes = 5,
+  )
+}
+
+part eta_pos_27_aux_reversing_wheel_envelope() -> Solid<Exact> {
+  -- Expert estimate: 34 external teeth; internal reverser pawls are not yet modeled.
+  common.toothed_disk(
+    root_r = 1.56mm,
+    tooth_depth = 0.14mm,
+    tooth_width = 0.15mm,
+    h = 0.34mm,
+    bore_r = 0.22mm,
+    teeth = 34,
+  )
+}
+
+part eta_pos_28_reversing_wheel_envelope() -> Solid<Exact> {
+  -- Same manufactured reversing-wheel family as position 27.
+  common.toothed_disk(
+    root_r = 1.56mm,
+    tooth_depth = 0.14mm,
+    tooth_width = 0.15mm,
+    h = 0.34mm,
+    bore_r = 0.22mm,
+    teeth = 34,
+  )
+}
+
+part eta_pos_29_reduction_wheel_envelope() -> Solid<Exact> {
+  -- Expert estimate: 52-tooth wheel with a 12-leaf pinion.
+  union(
+    common.spoked_wheel(
+      root_r = 2.16mm,
+      rim_width = 0.24mm,
+      tooth_depth = 0.14mm,
+      tooth_width = 0.14mm,
+      hub_r = 0.48mm,
+      bore_r = 0.22mm,
+      spoke_width = 0.16mm,
+      h = 0.28mm,
+      teeth = 52,
+      spokes = 5,
+    ),
+    common.toothed_disk(
+      root_r = 0.42mm,
+      tooth_depth = 0.08mm,
+      tooth_width = 0.16mm,
+      h = 0.38mm,
+      bore_r = 0.22mm,
+      teeth = 12,
+    )
+      |> at(dx = 0mm, dy = 0mm, dz = 0.31mm),
+  )
+}
+
+part eta_pos_30_automatic_lower_bridge_envelope() -> Solid<Exact> {
+  box(x = 6.8mm, y = 2.6mm, z = 0.34mm)
+}
+
+part eta_pos_31_1_rotor_weight_envelope() -> Solid<Exact> {
+  let half_annulus = cut(
+    cut(cylinder(r = 12.2mm, h = 0.55mm), cylinder(r = 8.6mm, h = 0.75mm)),
+    box(x = 26mm, y = 13mm, z = 0.8mm) |> at(dx = 0mm, dy = -6.5mm, dz = 0mm),
+  )
+  let hub = common.bored_disk(r = 3mm, h = 0.38mm, bore_r = 2.1mm)
+  let left_arm = box(x = 9.6mm, y = 1.5mm, z = 0.38mm)
+    |> at(dx = -4.6mm, dy = 2mm, dz = 0mm)
+    |> rotate(ax = 0, ay = 0, az = 1, angle = -24deg)
+  let right_arm = box(x = 9.6mm, y = 1.5mm, z = 0.38mm)
+    |> at(dx = 4.6mm, dy = 2mm, dz = 0mm)
+    |> rotate(ax = 0, ay = 0, az = 1, angle = 24deg)
+
+  cut(union(half_annulus, hub, left_arm, right_arm), cylinder(r = 2.1mm, h = 0.9mm))
+}
+
+part eta_pos_31_2_ball_bearing_envelope() -> Solid<Exact> {
+  common.bored_disk(r = 2.1mm, h = 0.48mm, bore_r = 0.72mm)
+}
+
+part rotor_assembly() -> Assembly {
+  together(
+    eta_pos_31_1_rotor_weight_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = 4.2mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 174, g = 171, b = 164),
+      ),
+    eta_pos_31_2_ball_bearing_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = 3.9mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 103, g = 112, b = 123),
+      ),
+  )
+}
+
+part automatic_winding_assembly() -> Assembly {
+  together(
+    eta_pos_25_automatic_framework_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 3.8mm, y = -0.8mm, z = 3.15mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 180, g = 176, b = 168),
+      ),
+    eta_pos_26_driving_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -2.8mm, y = -0.6mm, z = 3.35mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 194, g = 153, b = 52),
+      ),
+    eta_pos_27_aux_reversing_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 1mm, y = -0.1mm, z = 3.58mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 148, g = 157, b = 167),
+      ),
+    eta_pos_28_reversing_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 4.6mm, y = -0.1mm, z = 3.58mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 148, g = 157, b = 167),
+      ),
+    eta_pos_29_reduction_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 3.2mm, y = 3.4mm, z = 3.58mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 204, g = 164, b = 61),
+      ),
+    eta_pos_30_automatic_lower_bridge_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 3.1mm, y = 2.7mm, z = 3.75mm),
+          axis = Z,
+          angle = 8deg,
+        ),
+        color = rgb(r = 175, g = 172, b = 165),
+      ),
+    eta_pos_25_framework_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = -2.8mm, y = -0.6mm, z = 3.15mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    eta_pos_25_framework_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = 1mm, y = -0.1mm, z = 3.15mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    eta_pos_25_framework_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = 4.6mm, y = -0.1mm, z = 3.15mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    rotor_assembly(),
+  )
+}

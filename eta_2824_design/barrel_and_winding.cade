@@ -1,0 +1,157 @@
+import "./components.cade" as common
+
+part eta_pos_14_barrel_envelope() -> Solid<Exact> {
+  -- Expert estimate: 80-tooth great wheel around the mainspring drum.
+  union(
+    common.toothed_disk(
+      root_r = 4.32mm,
+      tooth_depth = 0.18mm,
+      tooth_width = 0.18mm,
+      h = 0.24mm,
+      bore_r = 0.45mm,
+      teeth = 80,
+    )
+      |> at(dx = 0mm, dy = 0mm, dz = -0.5mm),
+    common.bored_disk(r = 4.05mm, h = 1mm, bore_r = 0.45mm),
+    common.bored_disk(r = 1mm, h = 1.25mm, bore_r = 0.45mm),
+  )
+}
+
+part eta_pos_15_stop_lever_envelope() -> Solid<Exact> {
+  box(x = 4mm, y = 0.55mm, z = 0.18mm)
+}
+
+part eta_pos_16_barrel_bridge_envelope() -> Solid<Exact> {
+  let bridge_blank = union(
+    cylinder(r = 3.2mm, h = 0.4mm) |> at(dx = -1.1mm, dy = 0.1mm, dz = 0mm),
+    cylinder(r = 2mm, h = 0.4mm) |> at(dx = 3mm, dy = -1mm, dz = 0mm),
+    cylinder(r = 1.6mm, h = 0.4mm) |> at(dx = 6.8mm, dy = -3.5mm, dz = 0mm),
+    box(x = 8.5mm, y = 2.5mm, z = 0.4mm) |> at(dx = 1.7mm, dy = -0.6mm, dz = 0mm),
+    box(x = 5mm, y = 1.8mm, z = 0.4mm) |> at(dx = 5mm, dy = -2.3mm, dz = 0mm),
+  )
+  let arbor_and_screw_clearances = union(
+    cylinder(r = 0.5mm, h = 0.6mm) |> at(dx = -1.1mm, dy = 0.1mm, dz = 0mm),
+    cylinder(r = 0.28mm, h = 0.6mm) |> at(dx = -3mm, dy = -1.6mm, dz = 0mm),
+    cylinder(r = 0.28mm, h = 0.6mm) |> at(dx = 2.7mm, dy = 0.2mm, dz = 0mm),
+    cylinder(r = 0.28mm, h = 0.6mm) |> at(dx = 7.5mm, dy = -3.3mm, dz = 0mm),
+  )
+
+  cut(bridge_blank, arbor_and_screw_clearances)
+}
+
+part eta_pos_16_barrel_bridge_jewel() -> Solid<Exact> {
+  common.jewel_ring(r = 0.5mm, h = 0.3mm, bore_r = 0.14mm)
+}
+
+part eta_pos_17_click_envelope() -> Solid<Exact> {
+  box(x = 2mm, y = 0.65mm, z = 0.18mm)
+}
+
+part eta_pos_18_click_spring_envelope() -> Solid<Exact> {
+  box(x = 3mm, y = 0.3mm, z = 0.14mm)
+}
+
+part eta_pos_19_crown_wheel_envelope() -> Solid<Exact> {
+  -- Expert estimate: 26 radial teeth; count remains unverified.
+  common.toothed_disk(
+    root_r = 1.82mm,
+    tooth_depth = 0.18mm,
+    tooth_width = 0.22mm,
+    h = 0.35mm,
+    bore_r = 0.28mm,
+    teeth = 26,
+  )
+}
+
+part eta_pos_20_ratchet_wheel_envelope() -> Solid<Exact> {
+  -- Expert estimate: 63 teeth; the left-hand retaining screw is ETA-supported.
+  common.spoked_wheel(
+    root_r = 3.24mm,
+    rim_width = 0.34mm,
+    tooth_depth = 0.16mm,
+    tooth_width = 0.16mm,
+    hub_r = 0.72mm,
+    bore_r = 0.36mm,
+    spoke_width = 0.24mm,
+    h = 0.35mm,
+    teeth = 63,
+    spokes = 5,
+  )
+}
+
+part barrel_and_winding_assembly() -> Assembly {
+  together(
+    eta_pos_14_barrel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -5.7mm, y = -3.2mm, z = 1.55mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 197, g = 158, b = 69),
+      ),
+    eta_pos_15_stop_lever_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -1.4mm, y = -5.3mm, z = 1.45mm),
+          axis = Z,
+          angle = -34deg,
+        ),
+        color = rgb(r = 125, g = 134, b = 145),
+      ),
+    eta_pos_16_barrel_bridge_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -4.6mm, y = -3.3mm, z = 2.35mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 179, g = 176, b = 167),
+      ),
+    eta_pos_16_barrel_bridge_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = -5.7mm, y = -3.2mm, z = 2.35mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    eta_pos_17_click_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -1.2mm, y = -7mm, z = 2.65mm),
+          axis = Z,
+          angle = 35deg,
+        ),
+        color = rgb(r = 151, g = 160, b = 170),
+      ),
+    eta_pos_18_click_spring_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -0.5mm, y = -8mm, z = 2.66mm),
+          axis = Z,
+          angle = 18deg,
+        ),
+        color = rgb(r = 100, g = 112, b = 126),
+      ),
+    eta_pos_19_crown_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 2.4mm, y = -6.9mm, z = 2.72mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 205, g = 165, b = 58),
+      ),
+    eta_pos_20_ratchet_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -5.7mm, y = -3.2mm, z = 2.75mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 211, g = 171, b = 63),
+      ),
+  )
+}

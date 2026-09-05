@@ -1,0 +1,151 @@
+-- ETA 2824-2 watch reconstruction entry point. Revision: ETA rotor-side orientation reconciled.
+-- Every imported entry has a unique name because qualified `main` currently
+-- triggers the recursion diagnostic recorded in GAPS.md.
+import "./eta_2824_design/movement.cade" as movement
+import "./eta_2824_design/case.cade" as watch_case
+import "./eta_2824_design/fasteners.cade" as fasteners
+import "./eta_2824_design/main_plate.cade" as plate
+import "./eta_2824_design/hand_setting.cade" as setting
+import "./eta_2824_design/going_train.cade" as train
+import "./eta_2824_design/barrel_and_winding.cade" as barrel
+import "./eta_2824_design/escapement.cade" as escapement
+import "./eta_2824_design/balance.cade" as balance
+import "./eta_2824_design/automatic_winding.cade" as automatic
+import "./eta_2824_design/dial_side.cade" as dial_side
+
+part movement_preview() -> Assembly {
+  movement.eta_2824_2_rough_assembly()
+}
+
+part main_plate_preview() -> Assembly {
+  plate.main_plate_assembly()
+}
+
+part keyless_works_preview() -> Assembly {
+  setting.hand_setting_assembly()
+}
+
+part going_train_preview() -> Assembly {
+  train.going_train_assembly()
+}
+
+part barrel_and_winding_preview() -> Assembly {
+  barrel.barrel_and_winding_assembly()
+}
+
+part escapement_preview() -> Assembly {
+  escapement.escapement_assembly()
+}
+
+part balance_preview() -> Assembly {
+  balance.balance_assembly()
+}
+
+part balance_bridge_preview() -> Assembly {
+  balance.balance_bridge_assembly()
+}
+
+part automatic_winding_preview() -> Assembly {
+  automatic.automatic_winding_assembly()
+}
+
+part rotor_preview() -> Assembly {
+  automatic.rotor_assembly()
+}
+
+part dial_and_calendar_preview() -> Assembly {
+  dial_side.dial_side_assembly()
+}
+
+part installed_fasteners_preview() -> Assembly {
+  fasteners.fasteners_assembly()
+}
+
+part case_and_hands_preview() -> Assembly {
+  watch_case.watch_case_assembly()
+}
+
+part hand_stack_preview() -> Assembly {
+  watch_case.hand_stack_assembly()
+}
+
+part fastener_detail_preview() -> Assembly {
+  together(
+    fasteners.eta_pos_900_countersunk_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -7mm, y = 0mm, z = 0mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 74, g = 81, b = 91),
+      ),
+    fasteners.eta_pos_901_bridge_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -5mm, y = 0mm, z = 0mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 78, g = 86, b = 97),
+      ),
+    fasteners.eta_pos_902_crown_wheel_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -3mm, y = 0mm, z = 0mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 90, g = 99, b = 110),
+      ),
+    fasteners.eta_pos_903_ratchet_wheel_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -1mm, y = 0mm, z = 0mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 82, g = 91, b = 103),
+      ),
+    fasteners.eta_pos_904_automatic_framework_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 1mm, y = 0mm, z = 0mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 80, g = 88, b = 98),
+      ),
+    fasteners.eta_pos_905_automatic_bridge_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 3mm, y = 0mm, z = 0mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 92, g = 101, b = 112),
+      ),
+    fasteners.eta_pos_906_rotor_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 5mm, y = 0mm, z = 0mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 105, g = 113, b = 124),
+      ),
+    fasteners.eta_pos_907_minute_bridge_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7mm, y = 0mm, z = 0mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 118, g = 126, b = 137),
+      ),
+  )
+}
+
+part watch() -> Assembly {
+  together(movement.eta_2824_2_rough_assembly(), watch_case.watch_case_assembly())
+}

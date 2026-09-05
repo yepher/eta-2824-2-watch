@@ -1,0 +1,130 @@
+import "./components.cade" as common
+
+part eta_pos_23_timed_balance_envelope() -> Solid<Exact> {
+  common.spoked_rim(
+    outer_r = 4.9mm,
+    rim_width = 0.42mm,
+    hub_r = 0.72mm,
+    bore_r = 0.12mm,
+    spoke_width = 0.22mm,
+    h = 0.24mm,
+    spokes = 3,
+  )
+}
+
+part eta_pos_23_hairspring_envelope() -> Solid<Exact> {
+  union(
+    torus(major = 1.15mm, minor = 0.035mm),
+    torus(major = 1.48mm, minor = 0.035mm),
+    torus(major = 1.81mm, minor = 0.035mm),
+    torus(major = 2.14mm, minor = 0.035mm),
+    box(x = 2.2mm, y = 0.07mm, z = 0.07mm) |> at(dx = 2.7mm, dy = 0mm, dz = 0mm),
+  )
+}
+
+part eta_pos_24_1_balance_bridge_envelope() -> Solid<Exact> {
+  box(x = 7.2mm, y = 2mm, z = 0.38mm)
+}
+
+part eta_pos_24_2_stud_support_envelope() -> Solid<Exact> {
+  box(x = 1.4mm, y = 0.8mm, z = 0.22mm)
+}
+
+part eta_pos_24_3_lower_index_envelope() -> Solid<Exact> {
+  common.bored_disk(r = 1.4mm, h = 0.14mm, bore_r = 1mm)
+}
+
+part eta_pos_24_4_upper_index_envelope() -> Solid<Exact> {
+  common.bored_disk(r = 1.6mm, h = 0.14mm, bore_r = 1.15mm)
+}
+
+part eta_pos_24_5_regulator_corrector_envelope() -> Solid<Exact> {
+  cylinder(r = 0.24mm, h = 0.45mm)
+}
+
+part eta_pos_24_6_upper_shock_absorber_envelope() -> Solid<Exact> {
+  common.jewel_ring(r = 0.75mm, h = 0.25mm, bore_r = 0.12mm)
+}
+
+part balance_bridge_assembly() -> Assembly {
+  together(
+    eta_pos_24_1_balance_bridge_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7.2mm, y = -3.4mm, z = 2.7mm),
+          axis = Z,
+          angle = -63deg,
+        ),
+        color = rgb(r = 183, g = 179, b = 170),
+      ),
+    eta_pos_24_2_stud_support_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 9.4mm, y = -5mm, z = 2.98mm),
+          axis = Z,
+          angle = -25deg,
+        ),
+        color = rgb(r = 142, g = 151, b = 161),
+      ),
+    eta_pos_24_3_lower_index_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7.9mm, y = -3.6mm, z = 3mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 126, g = 136, b = 148),
+      ),
+    eta_pos_24_4_upper_index_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7.9mm, y = -3.6mm, z = 3.16mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 158, g = 166, b = 175),
+      ),
+    eta_pos_24_5_regulator_corrector_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7.9mm, y = -3.6mm, z = 3.45mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 112, g = 122, b = 134),
+      ),
+    eta_pos_24_6_upper_shock_absorber_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7.9mm, y = -3.6mm, z = 3.34mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+  )
+}
+
+part balance_assembly() -> Assembly {
+  together(
+    eta_pos_23_timed_balance_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7.9mm, y = -3.6mm, z = 2.25mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 205, g = 169, b = 72),
+      ),
+    eta_pos_23_hairspring_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7.9mm, y = -3.6mm, z = 2.48mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 58, g = 92, b = 135),
+      ),
+    balance_bridge_assembly(),
+  )
+}

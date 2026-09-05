@@ -1,0 +1,117 @@
+import "./components.cade" as common
+
+part eta_pos_1_main_plate_envelope() -> Solid<Exact> {
+  let plate_blank = cylinder(r = 12.8mm, h = 0.8mm)
+  let center_and_bearing_seats = union(
+    cylinder(r = 1.1mm, h = 1mm),
+    cylinder(r = 0.48mm, h = 1mm) |> at(dx = -1.2mm, dy = 2.5mm, dz = 0mm),
+    cylinder(r = 0.48mm, h = 1mm) |> at(dx = 4.3mm, dy = 2.5mm, dz = 0mm),
+    cylinder(r = 0.48mm, h = 1mm) |> at(dx = 6.6mm, dy = 6.2mm, dz = 0mm),
+    cylinder(r = 0.48mm, h = 1mm) |> at(dx = 9.5mm, dy = 3.6mm, dz = 0mm),
+    cylinder(r = 0.5mm, h = 1mm) |> at(dx = -5.7mm, dy = -3.2mm, dz = 0mm),
+    cylinder(r = 0.75mm, h = 1mm) |> at(dx = 7.9mm, dy = -3.6mm, dz = 0mm),
+  )
+  let stem_passage = cylinder(r = 0.52mm, h = 7.5mm)
+    |> rotate(ax = 0, ay = 1, az = 0, angle = -90deg)
+    |> at(dx = 9.6mm, dy = 0mm, dz = 0mm)
+
+  cut(plate_blank, union(center_and_bearing_seats, stem_passage))
+}
+
+part eta_pos_1_1_dial_fastener_envelope() -> Solid<Exact> {
+  common.screw_blank(
+    head_r = 0.45mm,
+    head_h = 0.18mm,
+    shank_r = 0.18mm,
+    shank_h = 0.55mm,
+  )
+}
+
+part eta_pos_1_2_lower_shock_absorber_envelope() -> Solid<Exact> {
+  common.jewel_ring(r = 0.75mm, h = 0.25mm, bore_r = 0.12mm)
+}
+
+part eta_pos_1_train_plate_jewel() -> Solid<Exact> {
+  common.jewel_ring(r = 0.48mm, h = 0.3mm, bore_r = 0.105mm)
+}
+
+part eta_pos_1_barrel_plate_jewel() -> Solid<Exact> {
+  common.jewel_ring(r = 0.5mm, h = 0.3mm, bore_r = 0.14mm)
+}
+
+part main_plate_assembly() -> Assembly {
+  together(
+    eta_pos_1_main_plate_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = 0.4mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 190, g = 184, b = 168),
+      ),
+    eta_pos_1_1_dial_fastener_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -12.1mm, y = 0mm, z = 0.9mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 95, g = 101, b = 110),
+      ),
+    eta_pos_1_2_lower_shock_absorber_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7.9mm, y = -3.6mm, z = 0.4mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    eta_pos_1_train_plate_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = -1.2mm, y = 2.5mm, z = 0.4mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    eta_pos_1_train_plate_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = 4.3mm, y = 2.5mm, z = 0.4mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    eta_pos_1_train_plate_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = 6.6mm, y = 6.2mm, z = 0.4mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    eta_pos_1_train_plate_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = 9.5mm, y = 3.6mm, z = 0.4mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    eta_pos_1_barrel_plate_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = -5.7mm, y = -3.2mm, z = 0.4mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+  )
+}

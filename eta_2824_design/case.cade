@@ -1,0 +1,173 @@
+part case_middle_envelope() -> Solid<Exact> {
+  let case_and_lugs = union(cylinder(r = 18.5mm, h = 7mm), lug_pair_envelope())
+  let movement_cavity = cylinder(r = 13.4mm, h = 7.2mm)
+  let stem_passage = cylinder(r = 0.55mm, h = 11mm)
+    |> rotate(ax = 0, ay = 1, az = 0, angle = 90deg)
+    |> at(dx = 15.6mm, dy = 0mm, dz = -0.55mm)
+
+  cut(case_and_lugs, union(movement_cavity, stem_passage))
+}
+
+part caseback_envelope() -> Solid<Exact> {
+  cylinder(r = 18mm, h = 1.2mm)
+}
+
+part dial_envelope() -> Solid<Exact> {
+  let dial_blank = cylinder(r = 13mm, h = 0.4mm)
+  let center_clearance = cylinder(r = 1.03mm, h = 0.6mm)
+  let date_window = box(x = 3.3mm, y = 2mm, z = 0.6mm)
+    |> at(dx = 10.5mm, dy = 0mm, dz = 0mm)
+
+  cut(cut(dial_blank, center_clearance), date_window)
+}
+
+part crystal_envelope() -> Solid<Exact> {
+  cylinder(r = 17.2mm, h = 1mm)
+}
+
+part lug_pair_envelope() -> Solid<Exact> {
+  let lug = cut(
+    box(x = 3.8mm, y = 5.5mm, z = 3mm),
+    cylinder(r = 0.65mm, h = 4.2mm) |> rotate(ax = 1, ay = 0, az = 0, angle = 90deg),
+  )
+
+  union(
+    lug |> at(dx = 11.9mm, dy = 18.5mm, dz = -0.2mm),
+    lug |> at(dx = -11.9mm, dy = 18.5mm, dz = -0.2mm),
+    lug |> at(dx = 11.9mm, dy = -18.5mm, dz = -0.2mm),
+    lug |> at(dx = -11.9mm, dy = -18.5mm, dz = -0.2mm),
+  )
+}
+
+part crown_envelope() -> Solid<Exact> {
+  let crown_blank = cylinder(r = 2.8mm, h = 2.2mm)
+  let stem_socket = cylinder(r = 0.48mm, h = 2.4mm)
+
+  cut(crown_blank, stem_socket) |> rotate(ax = 0, ay = 1, az = 0, angle = 90deg)
+}
+
+part hour_hand_envelope() -> Solid<Exact> {
+  let hand_blank = union(
+    cylinder(r = 0.95mm, h = 0.06mm),
+    box(x = 0.8mm, y = 6.8mm, z = 0.06mm) |> at(dx = 0mm, dy = 3.1mm, dz = 0mm),
+  )
+
+  cut(hand_blank, cylinder(r = 0.752mm, h = 0.16mm))
+}
+
+part minute_hand_envelope() -> Solid<Exact> {
+  let hand_blank = union(
+    cylinder(r = 0.7mm, h = 0.05mm),
+    box(x = 0.55mm, y = 9.6mm, z = 0.05mm) |> at(dx = 0mm, dy = 4.5mm, dz = 0mm),
+  )
+
+  cut(hand_blank, cylinder(r = 0.453mm, h = 0.15mm))
+}
+
+part seconds_hand_envelope() -> Solid<Exact> {
+  let hand_blank = union(
+    cylinder(r = 0.42mm, h = 0.04mm),
+    box(x = 0.2mm, y = 11.5mm, z = 0.04mm) |> at(dx = 0mm, dy = 4.6mm, dz = 0mm),
+  )
+
+  cut(hand_blank, cylinder(r = 0.13mm, h = 0.14mm))
+}
+
+part hand_stack_assembly() -> Assembly {
+  together(
+    -- Conventional 10:10 presentation. The hour hand includes its 10-minute advance.
+    hour_hand_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = -1.44mm),
+          axis = Z,
+          angle = 55deg,
+        ),
+        color = rgb(r = 205, g = 210, b = 216),
+      ),
+    minute_hand_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = -1.52mm),
+          axis = Z,
+          angle = -60deg,
+        ),
+        color = rgb(r = 210, g = 215, b = 221),
+      ),
+    seconds_hand_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = -1.6mm),
+          axis = Z,
+          angle = 180deg,
+        ),
+        color = rgb(r = 190, g = 32, b = 42),
+      ),
+  )
+}
+
+part watch_case_assembly() -> Assembly {
+  together(
+    case_middle_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = 1.8mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 155, g = 161, b = 169),
+      ),
+    caseback_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = 5.9mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 202, g = 226, b = 238, a = 72),
+      ),
+    dial_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = -1.18mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 25, g = 30, b = 36),
+      ),
+    crystal_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = -2.2mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 202, g = 226, b = 238, a = 72),
+      ),
+    crown_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 19.6mm, y = 0mm, z = 1.25mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 145, g = 151, b = 160),
+      ),
+    hand_stack_assembly(),
+  )
+}
+
+part case_movement_interference_diagnostic() -> Solid<Exact> {
+  let movement = cylinder(r = 13mm, h = 4.6mm) |> at(dx = 0mm, dy = 0mm, dz = 2.3mm)
+  let case = case_middle_envelope() |> at(dx = 0mm, dy = 0mm, dz = 1.8mm)
+
+  intersect(movement, case)
+}
+
+part rotor_case_interference_diagnostic() -> Solid<Exact> {
+  let rotor_sweep = cylinder(r = 12.2mm, h = 0.55mm)
+    |> at(dx = 0mm, dy = 0mm, dz = 4.2mm)
+  let case = case_middle_envelope() |> at(dx = 0mm, dy = 0mm, dz = 1.8mm)
+
+  intersect(rotor_sweep, case)
+}

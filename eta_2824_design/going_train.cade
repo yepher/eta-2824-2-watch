@@ -1,0 +1,264 @@
+import "./components.cade" as common
+
+part eta_pos_9_escape_wheel_envelope() -> Solid<Exact> {
+  -- Published secondary evidence: 20 escape teeth. The 7-leaf pinion is an
+  -- expert estimate constrained by the 28,800-vph train hypothesis below.
+  union(
+    common.spoked_wheel(
+      root_r = 1.38mm,
+      rim_width = 0.2mm,
+      tooth_depth = 0.12mm,
+      tooth_width = 0.16mm,
+      hub_r = 0.34mm,
+      bore_r = 0.1mm,
+      spoke_width = 0.1mm,
+      h = 0.18mm,
+      teeth = 20,
+      spokes = 5,
+    ),
+    common.toothed_disk(
+      root_r = 0.29mm,
+      tooth_depth = 0.06mm,
+      tooth_width = 0.14mm,
+      h = 0.34mm,
+      bore_r = 0.1mm,
+      teeth = 7,
+    )
+      |> at(dx = 0mm, dy = 0mm, dz = 0.26mm),
+  )
+}
+
+part eta_pos_10_intermediate_wheel_envelope() -> Solid<Exact> {
+  -- Expert estimate: 84 wheel teeth / 7 pinion leaves.
+  union(
+    common.spoked_wheel(
+      root_r = 1.73mm,
+      rim_width = 0.2mm,
+      tooth_depth = 0.12mm,
+      tooth_width = 0.1mm,
+      hub_r = 0.4mm,
+      bore_r = 0.11mm,
+      spoke_width = 0.13mm,
+      h = 0.22mm,
+      teeth = 84,
+      spokes = 6,
+    ),
+    common.toothed_disk(
+      root_r = 0.29mm,
+      tooth_depth = 0.06mm,
+      tooth_width = 0.14mm,
+      h = 0.38mm,
+      bore_r = 0.11mm,
+      teeth = 7,
+    )
+      |> at(dx = 0mm, dy = 0mm, dz = 0.3mm),
+  )
+}
+
+part eta_pos_11_third_wheel_envelope() -> Solid<Exact> {
+  -- Expert estimate: 75 wheel teeth / 10 pinion leaves.
+  union(
+    common.spoked_wheel(
+      root_r = 2.36mm,
+      rim_width = 0.24mm,
+      tooth_depth = 0.14mm,
+      tooth_width = 0.13mm,
+      hub_r = 0.48mm,
+      bore_r = 0.12mm,
+      spoke_width = 0.16mm,
+      h = 0.22mm,
+      teeth = 75,
+      spokes = 6,
+    ),
+    common.toothed_disk(
+      root_r = 0.42mm,
+      tooth_depth = 0.08mm,
+      tooth_width = 0.15mm,
+      h = 0.38mm,
+      bore_r = 0.12mm,
+      teeth = 10,
+    )
+      |> at(dx = 0mm, dy = 0mm, dz = 0.3mm),
+  )
+}
+
+part eta_pos_12_second_wheel_envelope() -> Solid<Exact> {
+  -- Expert estimate: 80 wheel teeth / 10 pinion leaves.
+  union(
+    common.spoked_wheel(
+      root_r = 2.84mm,
+      rim_width = 0.28mm,
+      tooth_depth = 0.16mm,
+      tooth_width = 0.15mm,
+      hub_r = 0.54mm,
+      bore_r = 0.13mm,
+      spoke_width = 0.18mm,
+      h = 0.24mm,
+      teeth = 80,
+      spokes = 6,
+    ),
+    common.toothed_disk(
+      root_r = 0.42mm,
+      tooth_depth = 0.08mm,
+      tooth_width = 0.15mm,
+      h = 0.42mm,
+      bore_r = 0.13mm,
+      teeth = 10,
+    )
+      |> at(dx = 0mm, dy = 0mm, dz = 0.33mm),
+  )
+}
+
+part eta_pos_13_train_bridge_envelope() -> Solid<Exact> {
+  let bridge_blank = union(
+    cylinder(r = 2mm, h = 0.35mm) |> at(dx = -5.4mm, dy = -1.3mm, dz = 0mm),
+    cylinder(r = 1.8mm, h = 0.35mm) |> at(dx = 0.1mm, dy = -1.3mm, dz = 0mm),
+    cylinder(r = 1.6mm, h = 0.35mm) |> at(dx = 2.4mm, dy = 2.4mm, dz = 0mm),
+    cylinder(r = 1.5mm, h = 0.35mm) |> at(dx = 5.3mm, dy = -0.2mm, dz = 0mm),
+    box(x = 11mm, y = 2.1mm, z = 0.35mm) |> at(dx = 0mm, dy = -1.2mm, dz = 0mm),
+    box(x = 2.2mm, y = 5mm, z = 0.35mm) |> at(dx = 1.2mm, dy = 0.7mm, dz = 0mm),
+    box(x = 4mm, y = 1.8mm, z = 0.35mm) |> at(dx = 3.5mm, dy = 1mm, dz = 0mm),
+  )
+  let bearing_seats = union(
+    cylinder(r = 0.48mm, h = 0.55mm) |> at(dx = -5.4mm, dy = -1.3mm, dz = 0mm),
+    cylinder(r = 0.48mm, h = 0.55mm) |> at(dx = 0.1mm, dy = -1.3mm, dz = 0mm),
+    cylinder(r = 0.48mm, h = 0.55mm) |> at(dx = 2.4mm, dy = 2.4mm, dz = 0mm),
+    cylinder(r = 0.48mm, h = 0.55mm) |> at(dx = 5.3mm, dy = -0.2mm, dz = 0mm),
+  )
+  let screw_clearances = union(
+    cylinder(r = 0.24mm, h = 0.55mm) |> at(dx = -6mm, dy = -2.3mm, dz = 0mm),
+    cylinder(r = 0.24mm, h = 0.55mm) |> at(dx = 6.1mm, dy = -1mm, dz = 0mm),
+  )
+
+  cut(bridge_blank, union(bearing_seats, screw_clearances))
+}
+
+part eta_pos_13_train_bridge_jewel() -> Solid<Exact> {
+  common.jewel_ring(r = 0.48mm, h = 0.3mm, bore_r = 0.105mm)
+}
+
+part going_train_pivot_arbor() -> Solid<Exact> {
+  cylinder(r = 0.085mm, h = 1.85mm)
+}
+
+part going_train_assembly() -> Assembly {
+  together(
+    eta_pos_9_escape_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 9.5mm, y = 3.6mm, z = 1.55mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 214, g = 172, b = 64),
+      ),
+    eta_pos_10_intermediate_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 6.6mm, y = 6.2mm, z = 1.55mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 203, g = 158, b = 52),
+      ),
+    eta_pos_11_third_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 4.3mm, y = 2.5mm, z = 1.55mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 224, g = 184, b = 74),
+      ),
+    eta_pos_12_second_wheel_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -1.2mm, y = 2.5mm, z = 1.55mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 194, g = 147, b = 38),
+      ),
+    eta_pos_13_train_bridge_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 4.2mm, y = 3.8mm, z = 2.15mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 184, g = 180, b = 170),
+      ),
+    eta_pos_13_train_bridge_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = -1.2mm, y = 2.5mm, z = 2.15mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    eta_pos_13_train_bridge_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = 4.3mm, y = 2.5mm, z = 2.15mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    eta_pos_13_train_bridge_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = 6.6mm, y = 6.2mm, z = 2.15mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    eta_pos_13_train_bridge_jewel()
+      |> place(
+        frame = frame(
+          origin = point(x = 9.5mm, y = 3.6mm, z = 2.15mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 210),
+      ),
+    going_train_pivot_arbor()
+      |> place(
+        frame = frame(
+          origin = point(x = -1.2mm, y = 2.5mm, z = 1.4mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 136, g = 145, b = 155),
+      ),
+    going_train_pivot_arbor()
+      |> place(
+        frame = frame(
+          origin = point(x = 4.3mm, y = 2.5mm, z = 1.4mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 136, g = 145, b = 155),
+      ),
+    going_train_pivot_arbor()
+      |> place(
+        frame = frame(
+          origin = point(x = 6.6mm, y = 6.2mm, z = 1.4mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 136, g = 145, b = 155),
+      ),
+    going_train_pivot_arbor()
+      |> place(
+        frame = frame(
+          origin = point(x = 9.5mm, y = 3.6mm, z = 1.4mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 136, g = 145, b = 155),
+      ),
+  )
+}

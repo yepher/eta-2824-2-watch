@@ -1,0 +1,26 @@
+.DS_Store
+.fuse_hidden*
+
+# Generated geometry and views.
+*.3mf
+*.stl
+*.step
+*.html
+*.svg
+*.dxf
+*.x_t
+*.x_b
+
+# The per-part STEP set and the assembled STEP are small enough to keep.
+!/output/step/*.step
+!/output/watch_assembly.step
+!/output/watch_assembly.x_t
+!/output/README.md
+
+# The full-assembly 3MF is tens of MB — regenerate it with the commands in
+# output/README.md, or attach it to a release.
+
+# Local source material can be large or carry third-party rights.
+# Keep the index; never commit the files themselves.
+/references/*
+!/references/README.md

@@ -1,0 +1,65 @@
+part eta_pos_21_pallet_fork_envelope() -> Solid<Exact> {
+  let hub = cut(cylinder(r = 0.52mm, h = 0.22mm), cylinder(r = 0.11mm, h = 0.42mm))
+  let arms = union(
+    box(x = 2.3mm, y = 0.28mm, z = 0.22mm)
+      |> at(dx = -0.9mm, dy = -0.42mm, dz = 0mm)
+      |> rotate(ax = 0, ay = 0, az = 1, angle = 14deg),
+    box(x = 2.3mm, y = 0.28mm, z = 0.22mm)
+      |> at(dx = -0.9mm, dy = 0.42mm, dz = 0mm)
+      |> rotate(ax = 0, ay = 0, az = 1, angle = -14deg),
+    box(x = 2.6mm, y = 0.32mm, z = 0.22mm) |> at(dx = 1.45mm, dy = 0mm, dz = 0mm),
+  )
+  let fork_slot = box(x = 0.9mm, y = 0.16mm, z = 0.42mm)
+    |> at(dx = 2.5mm, dy = 0mm, dz = 0mm)
+
+  cut(union(hub, arms), fork_slot)
+}
+
+part eta_pos_21_pallet_stone_envelope() -> Solid<Exact> {
+  box(x = 0.48mm, y = 0.24mm, z = 0.18mm)
+}
+
+part eta_pos_22_pallet_bridge_envelope() -> Solid<Exact> {
+  box(x = 3.6mm, y = 1.7mm, z = 0.32mm)
+}
+
+part escapement_assembly() -> Assembly {
+  together(
+    eta_pos_21_pallet_fork_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7.3mm, y = 1.1mm, z = 1.72mm),
+          axis = Z,
+          angle = -62deg,
+        ),
+        color = rgb(r = 148, g = 156, b = 166),
+      ),
+    eta_pos_21_pallet_stone_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 6.2mm, y = 1.99mm, z = 1.72mm),
+          axis = Z,
+          angle = -48deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 220),
+      ),
+    eta_pos_21_pallet_stone_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7.18mm, y = 2.51mm, z = 1.72mm),
+          axis = Z,
+          angle = -76deg,
+        ),
+        color = rgba(r = 190, g = 20, b = 62, a = 220),
+      ),
+    eta_pos_22_pallet_bridge_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 8.2mm, y = 0.5mm, z = 2.2mm),
+          axis = Z,
+          angle = -60deg,
+        ),
+        color = rgb(r = 181, g = 178, b = 170),
+      ),
+  )
+}

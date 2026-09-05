@@ -1,0 +1,236 @@
+import "./components.cade" as common
+
+part eta_pos_900_countersunk_screw_envelope() -> Solid<Exact> {
+  common.slotted_countersunk_screw(
+    head_r = 0.42mm,
+    head_h = 0.16mm,
+    shank_r = 0.18mm,
+    shank_h = 0.55mm,
+    slot_w = 0.16mm,
+    slot_depth = 0.1mm,
+  )
+}
+
+part eta_pos_901_bridge_screw_envelope() -> Solid<Exact> {
+  common.slotted_countersunk_screw(
+    head_r = 0.48mm,
+    head_h = 0.18mm,
+    shank_r = 0.2mm,
+    shank_h = 0.72mm,
+    slot_w = 0.18mm,
+    slot_depth = 0.11mm,
+  )
+}
+
+part eta_pos_902_crown_wheel_screw_envelope() -> Solid<Exact> {
+  common.slotted_collared_screw(
+    head_r = 0.56mm,
+    head_h = 0.2mm,
+    collar_r = 0.34mm,
+    collar_h = 0.1mm,
+    shank_r = 0.22mm,
+    shank_h = 0.62mm,
+    slot_w = 0.2mm,
+    slot_depth = 0.12mm,
+  )
+}
+
+part eta_pos_903_ratchet_wheel_screw_envelope() -> Solid<Exact> {
+  -- ETA explicitly specifies a left-hand thread; pitch and diameter remain unknown.
+  common.slotted_cylindrical_screw(
+    head_r = 0.62mm,
+    head_h = 0.2mm,
+    shank_r = 0.24mm,
+    shank_h = 0.68mm,
+    slot_w = 0.22mm,
+    slot_depth = 0.12mm,
+  )
+}
+
+part eta_pos_904_automatic_framework_screw_envelope() -> Solid<Exact> {
+  common.slotted_countersunk_screw(
+    head_r = 0.44mm,
+    head_h = 0.16mm,
+    shank_r = 0.18mm,
+    shank_h = 0.62mm,
+    slot_w = 0.16mm,
+    slot_depth = 0.1mm,
+  )
+}
+
+part eta_pos_905_automatic_bridge_screw_envelope() -> Solid<Exact> {
+  common.slotted_countersunk_screw(
+    head_r = 0.46mm,
+    head_h = 0.17mm,
+    shank_r = 0.19mm,
+    shank_h = 0.64mm,
+    slot_w = 0.17mm,
+    slot_depth = 0.1mm,
+  )
+}
+
+part eta_pos_906_rotor_screw_envelope() -> Solid<Exact> {
+  common.slotted_collared_screw(
+    head_r = 0.72mm,
+    head_h = 0.22mm,
+    collar_r = 0.44mm,
+    collar_h = 0.12mm,
+    shank_r = 0.28mm,
+    shank_h = 0.78mm,
+    slot_w = 0.24mm,
+    slot_depth = 0.13mm,
+  )
+}
+
+part eta_pos_907_minute_bridge_screw_envelope() -> Solid<Exact> {
+  common.slotted_shouldered_screw(
+    head_r = 0.45mm,
+    head_h = 0.18mm,
+    shoulder_r = 0.29mm,
+    shoulder_h = 0.2mm,
+    shank_r = 0.2mm,
+    shank_h = 0.82mm,
+    slot_w = 0.18mm,
+    slot_depth = 0.11mm,
+  )
+}
+
+part fasteners_assembly() -> Assembly {
+  together(
+    eta_pos_900_countersunk_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 9.3mm, y = -5.7mm, z = 1.72mm),
+          axis = Z,
+          angle = -18deg,
+        ),
+        color = rgb(r = 74, g = 81, b = 91),
+      ),
+    eta_pos_900_countersunk_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -8.6mm, y = -4.8mm, z = -0.48mm),
+          axis = Z,
+          angle = 37deg,
+        ),
+        color = rgb(r = 74, g = 81, b = 91),
+      ),
+    eta_pos_901_bridge_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -1.8mm, y = 1.5mm, z = 2.55mm),
+          axis = Z,
+          angle = -24deg,
+        ),
+        color = rgb(r = 78, g = 86, b = 97),
+      ),
+    eta_pos_901_bridge_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 10.3mm, y = 2.8mm, z = 2.55mm),
+          axis = Z,
+          angle = 12deg,
+        ),
+        color = rgb(r = 78, g = 86, b = 97),
+      ),
+    eta_pos_901_bridge_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -7.6mm, y = -4.9mm, z = 2.75mm),
+          axis = Z,
+          angle = -41deg,
+        ),
+        color = rgb(r = 78, g = 86, b = 97),
+      ),
+    eta_pos_901_bridge_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -1.9mm, y = -3.1mm, z = 2.75mm),
+          axis = Z,
+          angle = 29deg,
+        ),
+        color = rgb(r = 78, g = 86, b = 97),
+      ),
+    eta_pos_901_bridge_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 2.9mm, y = -6.6mm, z = 2.75mm),
+          axis = Z,
+          angle = -11deg,
+        ),
+        color = rgb(r = 78, g = 86, b = 97),
+      ),
+    eta_pos_901_bridge_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 9.5mm, y = -2mm, z = 3.02mm),
+          axis = Z,
+          angle = -33deg,
+        ),
+        color = rgb(r = 78, g = 86, b = 97),
+      ),
+    eta_pos_902_crown_wheel_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 2.4mm, y = -6.9mm, z = 3.12mm),
+          axis = Z,
+          angle = 17deg,
+        ),
+        color = rgb(r = 90, g = 99, b = 110),
+      ),
+    eta_pos_903_ratchet_wheel_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -5.7mm, y = -3.2mm, z = 3.15mm),
+          axis = Z,
+          angle = -27deg,
+        ),
+        color = rgb(r = 82, g = 91, b = 103),
+      ),
+    eta_pos_904_automatic_framework_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = -1.7mm, y = -2.4mm, z = 3.78mm),
+          axis = Z,
+          angle = -14deg,
+        ),
+        color = rgb(r = 80, g = 88, b = 98),
+      ),
+    eta_pos_904_automatic_framework_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 6.3mm, y = -2.8mm, z = 3.78mm),
+          axis = Z,
+          angle = 34deg,
+        ),
+        color = rgb(r = 80, g = 88, b = 98),
+      ),
+    eta_pos_905_automatic_bridge_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 4.8mm, y = 3mm, z = 4.02mm),
+          axis = Z,
+          angle = -22deg,
+        ),
+        color = rgb(r = 92, g = 101, b = 112),
+      ),
+    eta_pos_906_rotor_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 0mm, y = 0mm, z = 4.58mm),
+          axis = Z,
+          angle = 8deg,
+        ),
+        color = rgb(r = 105, g = 113, b = 124),
+      ),
+    eta_pos_907_minute_bridge_screw_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 4.8mm, y = -3mm, z = -0.72mm),
+          axis = Z,
+          angle = -36deg,
+        ),
+        color = rgb(r = 118, g = 126, b = 137),
+      ),
+  )
+}

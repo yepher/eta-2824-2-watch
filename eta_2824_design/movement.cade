@@ -1,0 +1,23 @@
+import "./main_plate.cade" as plate
+import "./hand_setting.cade" as setting
+import "./going_train.cade" as train
+import "./barrel_and_winding.cade" as barrel
+import "./escapement.cade" as escapement
+import "./balance.cade" as balance
+import "./automatic_winding.cade" as automatic
+import "./dial_side.cade" as dial_side
+import "./fasteners.cade" as fasteners
+
+part eta_2824_2_rough_assembly() -> Assembly {
+  together(
+    plate.main_plate_assembly(),
+    setting.hand_setting_assembly(),
+    train.going_train_assembly(),
+    barrel.barrel_and_winding_assembly(),
+    escapement.escapement_assembly(),
+    balance.balance_assembly(),
+    automatic.automatic_winding_assembly(),
+    dial_side.dial_side_assembly(),
+    fasteners.fasteners_assembly(),
+  )
+}

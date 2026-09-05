@@ -1,0 +1,113 @@
+import "./components.cade" as common
+
+part eta_pos_2_sliding_pinion_envelope() -> Solid<Exact> {
+  -- Expert estimate: 12 clutch teeth around the square/stem passage envelope.
+  common.toothed_disk(
+    root_r = 0.91mm,
+    tooth_depth = 0.14mm,
+    tooth_width = 0.22mm,
+    h = 0.55mm,
+    bore_r = 0.46mm,
+    teeth = 12,
+  )
+}
+
+part eta_pos_3_winding_pinion_envelope() -> Solid<Exact> {
+  -- Expert estimate: 12 winding teeth; count is an unverified secondary lead.
+  common.toothed_disk(
+    root_r = 1.01mm,
+    tooth_depth = 0.14mm,
+    tooth_width = 0.22mm,
+    h = 0.55mm,
+    bore_r = 0.46mm,
+    teeth = 12,
+  )
+}
+
+part eta_pos_4_winding_stem_envelope() -> Solid<Exact> {
+  cylinder(r = 0.45mm, h = 13mm) |> rotate(ax = 0, ay = 1, az = 0, angle = -90deg)
+}
+
+part eta_pos_5_corrector_lever_envelope() -> Solid<Exact> {
+  box(x = 3.2mm, y = 0.65mm, z = 0.22mm)
+}
+
+part eta_pos_6_setting_lever_envelope() -> Solid<Exact> {
+  box(x = 3.8mm, y = 0.7mm, z = 0.22mm)
+}
+
+part eta_pos_7_yoke_envelope() -> Solid<Exact> {
+  box(x = 4.2mm, y = 0.65mm, z = 0.2mm)
+}
+
+part eta_pos_8_setting_lever_jumper_envelope() -> Solid<Exact> {
+  box(x = 4.8mm, y = 0.55mm, z = 0.16mm)
+}
+
+part hand_setting_assembly() -> Assembly {
+  together(
+    eta_pos_2_sliding_pinion_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 9.4mm, y = 0mm, z = 1.25mm),
+          axis = X,
+          angle = 0deg,
+        ),
+        color = rgb(r = 170, g = 176, b = 184),
+      ),
+    eta_pos_3_winding_pinion_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 11.2mm, y = 0mm, z = 1.25mm),
+          axis = X,
+          angle = 0deg,
+        ),
+        color = rgb(r = 198, g = 158, b = 66),
+      ),
+    eta_pos_4_winding_stem_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 17.8mm, y = 0mm, z = 1.25mm),
+          axis = Z,
+          angle = 0deg,
+        ),
+        color = rgb(r = 150, g = 158, b = 168),
+      ),
+    eta_pos_5_corrector_lever_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7.7mm, y = 3.7mm, z = 1.18mm),
+          axis = Z,
+          angle = 22deg,
+        ),
+        color = rgb(r = 165, g = 173, b = 183),
+      ),
+    eta_pos_6_setting_lever_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 8mm, y = -3.4mm, z = 1.2mm),
+          axis = Z,
+          angle = -18deg,
+        ),
+        color = rgb(r = 148, g = 156, b = 166),
+      ),
+    eta_pos_7_yoke_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 7mm, y = -1.2mm, z = 1.5mm),
+          axis = Z,
+          angle = -6deg,
+        ),
+        color = rgb(r = 133, g = 142, b = 153),
+      ),
+    eta_pos_8_setting_lever_jumper_envelope()
+      |> place(
+        frame = frame(
+          origin = point(x = 6.7mm, y = -4.7mm, z = 1.52mm),
+          axis = Z,
+          angle = -24deg,
+        ),
+        color = rgb(r = 105, g = 115, b = 127),
+      ),
+  )
+}
