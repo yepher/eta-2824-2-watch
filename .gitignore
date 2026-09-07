@@ -14,8 +14,19 @@
 # The per-part STEP set and the assembled STEP are small enough to keep.
 !/output/step/*.step
 !/output/watch_assembly.step
-!/output/watch_assembly.x_t
 !/output/README.md
+!/output/EXPORTS-*.md
+
+# The Parasolid conversion lives in output/x_t/, so the old exception --
+# !/output/watch_assembly.x_t -- named a path that does not exist and the file
+# stayed ignored.
+!/output/x_t/*.x_t
+
+# The raymarched viewer is 1.6 MB and the README tells a reader to open it, so
+# it has to be in the repo. `*.html` above would have kept it out and left the
+# README pointing at a file nobody who cloned this would have. The MESH viewer
+# (output/watch.html, 54 MB) stays ignored -- regenerate it.
+!/output/watch-raymarch.html
 
 # The full-assembly 3MF is tens of MB — regenerate it with the commands in
 # output/README.md, or attach it to a release.
