@@ -115,22 +115,34 @@ fn plate_mid_z() -> Len {
 -- dial-side face. The two PINIONS do not: they sit in the measured through-slot
 -- (see `keyless_slot_*` above), which is why the stem axis is no longer derived
 -- from this pocket's floor.
+-- Deep enough that the yoke lies wholly inside it and still reaches the
+-- sliding pinion's groove. The barrel bounds it in plan, not in depth.
 fn keyless_pocket_depth() -> Len {
-  0.55mm
+  0.7mm
 }
 
 fn keyless_pocket_floor_z() -> Len {
   plate_dial_face_z() + keyless_pocket_depth()
 }
 
--- The winding pinion is measured at 1.45-1.60mm over its teeth, which on the
--- winding train's module 0.23 is 5 teeth: pitch radius 0.575, tip 0.805.
+-- OPEN, and deliberately left as it was. The watchmaker's account gives the
+-- winding pinion 12 teeth, and since it meshes the crown wheel it must share
+-- the crown's 0.2298 module -- pitch radius 1.379, outside diameter 3.22.
+-- That contradicts the 1.55 measured over its teeth on page 6 by more than a
+-- factor of two, so one of the two is describing a different feature: most
+-- likely the drawing measured the pinion's clutch end rather than its winding
+-- toothing.
+--
+-- The stem's whole height hangs off this number (`stem_axis_z` below), so it
+-- is NOT being changed on an unresolved conflict. The 11 teeth on 0.1149 below
+-- reproduce the measured 1.55 and keep the keyless works where the audit left
+-- them. Resolve the conflict, then move the stem once.
 fn winding_pinion_pitch_radius() -> Len {
-  winding_module() * 5 / 2
+  ratchet_module() * 11 / 2
 }
 
 fn winding_pinion_tip_radius() -> Len {
-  winding_pinion_pitch_radius() + winding_module()
+  winding_pinion_pitch_radius() + ratchet_module()
 }
 
 -- DERIVED FROM THE MESH, not from the plate. The winding pinion straddles the
@@ -173,6 +185,14 @@ fn barrel_recess_floor_z() -> Len {
 --
 -- The keyless slot's measured centre lands on y = 0.012mm, which is an
 -- independent confirmation that the stem axis is the +X axis.
+--
+-- ORIENTATION WARNING, see ERRORS.md E15. The plan below is HANDED CORRECTLY -
+-- read from +z it has the same chirality as a back-of-movement photograph, by
+-- the signed-area test on the barrel, crown wheel and balance. But it is TURNED
+-- 180 DEGREES: +Y here points at the watch's 6 o'clock, not its 12, so the stem
+-- on +X reads at 9 o'clock from the dial side where ETA drawing Z0091446 puts it
+-- at 3. Every x and y below therefore needs negating before this is published.
+-- Nothing needs mirroring, and nothing here is wrong in z.
 fn barrel_centre_x() -> Len {
   2.834mm
 }
@@ -290,12 +310,17 @@ fn keyless_slot_outer_x() -> Len {
 -- Pinions are tall and may span two planes; it is the DISC thickness that sets
 -- the spacing. Four planes at 0.19 with 0.15 discs leaves 0.04 between
 -- neighbours and still lands the bridge under the 3.35mm base movement.
+-- Thinned from 0.15 so the four planes fit BELOW the ratchet wheel. The
+-- ratchet's underside is at 2.82 and it overlaps the fourth wheel by 0.87mm in
+-- plan without meshing it, so the train has to clear it: four planes at 0.145
+-- with 0.11 discs put the band ceiling at 2.79, and every one of the ratchet's
+-- own numbers is measured while the 3.35 base movement height is not.
 fn train_wheel_thickness() -> Len {
-  0.15mm
+  0.11mm
 }
 
 fn train_plane_pitch() -> Len {
-  0.19mm
+  0.145mm
 }
 
 fn train_band_floor_z() -> Len {
@@ -304,6 +329,26 @@ fn train_band_floor_z() -> Len {
 
 fn train_level_1_z() -> Len {
   train_band_floor_z() + 0.12mm
+}
+
+-- The barrel's great wheel is the one train member NOT on a train plane. Plane
+-- 1 is at 2.30 and the crown wheel's underside teeth reach down past it, and
+-- both of those are forced -- the crown wheel by its mesh with the ratchet,
+-- plane 1 by the rest of the train -- so the great wheel is what moves.
+--
+-- It moves DOWN but not below the plate's train face. Dropping it into the
+-- recess is the obvious move and it is wrong: the great wheel's tip radius is
+-- larger than the recess, so its teeth would run through the plate's top
+-- surface. It sits just clear of that face instead, and the crown wheel's
+-- bevel is shortened to meet it.
+fn barrel_wheel_z() -> Len {
+  plate_train_face_z() + 0.08mm
+}
+
+-- Balance sweep, shared: the automatic framework has to be relieved around it,
+-- and the framework cannot import the balance.
+fn balance_sweep_radius() -> Len {
+  5.25mm
 }
 
 fn train_level_2_z() -> Len {
@@ -363,46 +408,79 @@ fn barrel_bridge_top_z() -> Len {
 }
 
 -- ------------------------------------------------------- winding on top
--- The winding train is module 0.23, which is measured rather than chosen: the
--- crown wheel is the one wheel on the materials page coarse enough for its
--- teeth to resolve, and it counts 26 teeth on a 6.29mm outside diameter. The
--- model previously ran this train on module 0.100, which made the crown wheel
--- 59% undersize and is why the winding pinion could not reach it.
+-- The winding train's fine module. See the block below `keyless_pocket_depth`.
+--
+-- THE WINDING TRAIN CARRIES TWO MODULES, AND THAT IS THE WHOLE STORY.
+--
+-- The crown wheel's teeth are twice the pitch of the ratchet wheel's and
+-- engage EVERY OTHER ONE. A watchmaker states it directly: winding pinion 12
+-- teeth, crown wheel 26 "which only engage every other tooth on the ratchet
+-- wheel", ratchet wheel 63. It is self-confirming -- the same account gives
+-- 2.625 crown turns per ratchet turn, and 12/26 x 26/31.5 inverts to 2.6250
+-- exactly from those three counts.
+--
+-- This model spent two days concluding a member was missing, because two
+-- wheels of different pitch cannot mesh -- true of involute gearing, false of
+-- a wolf-tooth winding drive. Every measurement taken was right. See ERRORS.md
+-- E9.
+--
+-- The ratchet wheel's one fine toothing does three jobs: the click holds it,
+-- the automatic module's driving pinion meshes it normally on 0.1149, and the
+-- crown wheel engages it two teeth at a time on 0.2298. THIS IS WHY THE OLD
+-- PINION ARGUMENT WAS RIGHT AND STILL IS: the automatic train's 8- and 10-leaf
+-- pinions are cut on the fine module, and they would be 3 and 4 leaves on the
+-- coarse one. Both modules are real; they belong to different meshes.
+--
+-- 63 is ODD, so the crown wheel does not re-engage the same teeth each turn --
+-- 52 ratchet teeth per crown revolution against 63 on the wheel. The
+-- engagement walks, which spreads the wear.
+fn ratchet_module() -> Len {
+  0.1149mm
+}
+
 fn winding_module() -> Len {
-  0.23mm
+  ratchet_module() * 2
 }
 
+-- 26 teeth. photo_measured off IMG_9577.JPG, fit score 0.209 with harmonics at
+-- 53 and 78 confirming the fundamental.
 fn crown_wheel_pitch_radius() -> Len {
-  2.99mm
+  2.9874mm
 }
 
+-- A crown tooth has to enter a ratchet SPACE, and a standard tooth on the
+-- coarse module is twice too thick for one. So the teeth are slender, which is
+-- what a wolf tooth is. Thinned to clear the ratchet's 0.1805 space width they
+-- come to a POINT at 3.1775 -- an outside diameter of 6.355 against the
+-- 6.29-6.41 measured off page 6. Nothing was fitted to that; it falls out of
+-- the tooth thickness the mesh demands.
 fn crown_wheel_tip_radius() -> Len {
-  crown_wheel_pitch_radius() + winding_module()
+  3.1775mm
 }
 
+-- 63 teeth. photo_measured off a teardown frame and confirmed by the ratio.
 fn ratchet_wheel_pitch_radius() -> Len {
-  3.565mm
+  3.61935mm
 }
 
 fn ratchet_wheel_tip_radius() -> Len {
-  ratchet_wheel_pitch_radius() + winding_module()
+  ratchet_wheel_pitch_radius() + ratchet_module()
 }
 
--- Derived: the crown wheel sits on the circle of this radius about the barrel
--- axis. The position on that circle is the one whose pitch circle crosses the
--- stem axis inside the measured keyless slot while clearing every other wheel,
--- and it lands 0.14mm from the measured slot's centre -- which the solve was
--- never told about.
+-- Derived: the crown wheel's pitch circle is tangent to the stem axis, and its
+-- centre lies at the mesh centre distance 6.6068 from the barrel axis. Solving
+-- both puts it here, and the winding-pinion mesh point lands at X = +8.856 --
+-- 0.107 from the centre of the keyless slot ETA actually cut, which was
+-- measured independently and which nothing in the solve was told about.
 fn crown_wheel_centre_x() -> Len {
-  8.8003mm
+  8.8561mm
 }
 
 fn crown_wheel_centre_y() -> Len {
-  2.9899mm
+  2.9874mm
 }
 
--- Measured: 7.40mm over the tips and 0.53mm thick. On module 0.23 that is 31
--- teeth. The model's earlier 63 teeth on module 0.100 is not supported.
+-- Measured 7.40-7.54 over the tips and 0.53 thick; 63 teeth on module 0.1149.
 fn ratchet_wheel_thickness() -> Len {
   0.53mm
 }
@@ -436,8 +514,10 @@ fn crown_wheel_seat_z() -> Len {
 -- The 90-degree interface to the stem. The crown wheel's underside carries a
 -- band of teeth standing down from the disc; the winding pinion runs with its
 -- pitch cylinder tangent to their pitch plane, one addendum below the face.
+-- Shortened to 0.16 so the band clears the barrel's great wheel, which sits
+-- just above the plate's train face. A face tooth does not need full depth.
 fn crown_wheel_bevel_depth() -> Len {
-  0.28mm
+  0.16mm
 }
 
 fn crown_wheel_bevel_floor_z() -> Len {
@@ -461,22 +541,43 @@ fn automatic_top_z() -> Len {
 -- expert_estimate: the reversing and reduction wheels run inside openings in
 -- the framework rather than on top of it, which is how the module fits in
 -- 1.25mm at all.
+-- NOT A FLAT SLAB. The framework is the module's thick structural member and the
+-- wheels sit down INSIDE it, in pockets sunk from its underside -- which is what
+-- page 6's concentric steps around the rotor seat are. At 0.18 it was a sheet
+-- lying over the wheels with nothing recessed. It now runs from just clear of
+-- the lower bridge at 3.49 up to 4.05 under the weight's hub: 0.56 thick, with a
+-- pocket over each wheel deep enough to swallow it.
 fn automatic_framework_thickness() -> Len {
-  0.3mm
+  0.56mm
 }
 
+-- WHICH SIDE OF THE WHEELS THE PLATE IS ON. Corrected 2026-09-06: the framework
+-- is the OUTER member of the module. It lies against the oscillating weight and
+-- the wheels hang BENEATH it, running in the openings cut through it; the lower
+-- bridge -- which is what its name says it is -- is the INNER member, against
+-- the movement. The model had the two the other way round, so from the back you
+-- saw the wheels sitting on top of an exposed plate, which is the view you get
+-- with the module turned over. Page 16's own mounted view shows the plate's face
+-- with only the wheel teeth showing through it. See ERRORS.md E17.
+--
+-- The framework's ceiling is therefore the weight's hub, not the seat plane.
 fn automatic_framework_top_z() -> Len {
-  automatic_seat_z() + automatic_framework_thickness()
+  rotor_top_z() - rotor_hub_thickness() - running_clearance()
+}
+
+fn automatic_framework_seat_z() -> Len {
+  automatic_framework_top_z() - automatic_framework_thickness()
 }
 
 fn automatic_bridge_thickness() -> Len {
-  0.2mm
+  0.14mm
 }
 
--- Set from the reverser level, not from the framework: the reversing wheels
--- stand proud of the framework, so the bridge has to clear them, not it.
+-- The lower bridge sits ON the automatic seat, under the wheels -- it is the
+-- part of the module that touches the movement. It was at seat + 0.76, above
+-- everything, which is the inverted stack E17 records.
 fn automatic_bridge_underside_z() -> Len {
-  automatic_seat_z() + 0.48mm
+  automatic_seat_z()
 }
 
 fn automatic_bridge_top_z() -> Len {
@@ -485,6 +586,9 @@ fn automatic_bridge_top_z() -> Len {
 
 -- expert_estimate: the weight's rim carries the mass and is the thickest part
 -- of the rotor; its top face is the top of the movement.
+-- The weight's rim hangs below its plate. Everything in the automatic
+-- module runs inside the bore of this rim, which is what the module's
+-- radial extent is solved against.
 fn rotor_rim_thickness() -> Len {
   0.6mm
 }
@@ -497,24 +601,148 @@ fn rotor_rim_floor_z() -> Len {
   rotor_top_z() - rotor_rim_thickness()
 }
 
--- expert_estimate: the ball bearing is the only part of the rotor that reaches
--- down past the bridge, into the centre of the framework.
+-- Derived: the bearing is the only part of the rotor that reaches down past the
+-- bridge, and its floor has to clear the reduction wheel's ring, which passes
+-- under it in plan.
 fn rotor_bearing_height() -> Len {
-  0.6mm
+  0.90mm
 }
 
+-- The bearing is flush with the weight's top face, and being taller than the
+-- 0.5 hub it stands proud BELOW the hub, which is where its toothed ring goes.
 fn rotor_bearing_top_z() -> Len {
-  rotor_top_z() - 0.15mm
+  rotor_top_z()
 }
 
 fn rotor_bearing_floor_z() -> Len {
   rotor_bearing_top_z() - rotor_bearing_height()
 }
 
--- expert_estimate: the swept envelope has to clear the case bore, so it is
--- smaller than the movement.
+-- MEASURED, page 6, blob 126 at 30.938 px/mm, anchored on the BEARING BORE --
+-- which a least-squares fit of the outer arc puts within 0.10 of the arc's own
+-- centre, so the bore is the rotor axis and the arc is concentric with it.
+--
+-- The fit gives R = 12.343 with a 0.05 residual. The raw ink is 24.953 across,
+-- which wants 12.477, and 16.420 tall, which with the 4.043 hub wants 12.377.
+-- The three disagree by 0.13 because the drawn part is very slightly squared off
+-- at each end of the chord rather than running tangent into the arc. 12.38 is
+-- the value that fits both extents; the end squares are not modelled.
 fn rotor_radius() -> Len {
-  12.2mm
+  12.38mm
+}
+
+-- ---------------------------------------------- the weight's own outline
+-- All MEASURED off the same drawing. The oscillating weight is a SEGMENT OF A
+-- DISC: one chord, a round hub boss standing above it, and a scallop each side
+-- where the boss meets the chord. Inside it, two concentric steps.
+--
+-- THE 8.6mm BORE THIS PART USED TO HAVE IS NOT THERE. The weight is solid from
+-- the hub outward and the arcs that suggested a bore are thickness steps. The
+-- automatic module is not confined inside an 8.6 bore; it runs UNDER the web.
+-- That was the guessed number E14 was blocked on.
+
+-- How far BELOW the rotor axis the chord runs. The weight is very slightly
+-- more than a half disc.
+fn rotor_chord_drop() -> Len {
+  0.083mm
+}
+
+-- Measured directly: the boss tops out 4.043 above the arc centre. The check is
+-- that a 4.043 circle on the axis meets the chord at 4.042, and the scallop
+-- beside it starts at a measured 4.02 -- so the notch begins exactly where the
+-- boss lands on the chord, which is what the drawing shows.
+fn rotor_hub_radius() -> Len {
+  4.043mm
+}
+
+-- The two concentric steps, read down the symmetry axis.
+fn rotor_hub_platform_radius() -> Len {
+  7.198mm
+}
+
+fn rotor_web_radius() -> Len {
+  9.589mm
+}
+
+-- The scallop each side. Column by column the notch runs 4.02 to 6.13 out and
+-- bottoms 0.916 below the chord: half-width 1.05 with a 0.916 depth is not a
+-- circle centred ON the chord, it is a 1.060 circle whose centre sits 0.144
+-- ABOVE it -- 0.061 above the rotor axis. Both sides agree to 0.01.
+fn rotor_scallop_radius() -> Len {
+  1.06mm
+}
+
+fn rotor_scallop_x() -> Len {
+  5.075mm
+}
+
+-- How far ABOVE the rotor axis the scallop's centre sits.
+fn rotor_scallop_y() -> Len {
+  0.061mm
+}
+
+-- MEASURED: the bore reads 4.654 across, so 2.327 to the inside of its own
+-- outline stroke and about 2.39 to the metal. 31-3's ring is bored on the same
+-- race and now takes this number instead of its own 2.45; at 2.82 over the
+-- teeth the ring still cannot pass through, which is why it stays below the hub.
+fn rotor_bearing_seat_radius() -> Len {
+  2.39mm
+}
+
+-- The bearing's BORE, and it is a bore rather than a thread now.
+--
+-- MEASURED 2026-09-07: step 1 of `tools/framework_steps.py`, the innermost of
+-- the eight concentric circles the project lead drew round position 25 on the
+-- assembled movement. r/r_outer = 0.1495 against the plate's own 8.366.
+--
+-- It settles an architecture the model had backwards. 906 was threading into
+-- the BEARING and the framework carried a 2.44 hole for the bearing to pass
+-- through -- which left no annulus anywhere near the centre for the spacer the
+-- same photographs plainly show, because 2.44 already ate it. The bearing's
+-- inner race goes over a POST of position 25, the post is what 906 threads
+-- into, and the two circles at the middle of the outline are that post and the
+-- counterbore it stands in.
+fn rotor_bearing_bore_radius() -> Len {
+  1.25mm
+}
+
+-- 906 Var SCREWS INTO 31-2, so the bearing's central bore is the screw's thread,
+-- not a clearance hole. This is `shank_r` on `eta_pos_906_rotor_screw_envelope`.
+fn rotor_screw_thread_radius() -> Len {
+  0.28mm
+}
+
+-- The screw's head and collar sit DOWN IN the bearing, on its inner race, not on
+-- top of it -- the head is flush with the weight. The bearing therefore needs a
+-- counterbore for them. `head_r` 0.72 and `collar_r` 0.44 over 0.34 of height,
+-- on `eta_pos_906_rotor_screw_envelope`; the audit found 0.300 mm^3 of screw
+-- inside solid bearing without this.
+fn rotor_screw_head_radius() -> Len {
+  0.72mm
+}
+
+fn rotor_screw_head_depth() -> Len {
+  0.34mm
+}
+
+-- Over the teeth of 31-3, the ring the bearing carries. The framework's central
+-- opening has to clear it: the ring turns with the weight and the framework does
+-- not. It was a 2.4 bore against a 2.82 ring, which the audit found as
+-- 0.367 mm^3 -- the largest single overlap in the model.
+fn rotor_pinion_tip_radius() -> Len {
+  2.82mm
+}
+
+-- expert_estimate: page 6 draws no elevation for this part, so the plan above
+-- is measured and the three thicknesses are reasoned. The hub has to swallow
+-- the bearing, the rim carries the mass at the published `rotor_rim_thickness`,
+-- and the web between them is the thinnest section the module can run under.
+fn rotor_hub_thickness() -> Len {
+  0.5mm
+}
+
+fn rotor_web_thickness() -> Len {
+  0.3mm
 }
 
 -- ------------------------------------------------ shared feature sizes
@@ -676,28 +904,32 @@ fn pallet_bridge_screw_y() -> Len {
   0mm - 7.14mm
 }
 
+-- MEASURED off a bench photograph of position 25 face up, carried through the
+-- registration that fixed the plate's pose (see `automatic_winding.cade`). Screw
+-- a was 5.49 out on radius alone, which E16 had already flagged; both are now
+-- read off the part rather than estimated from oblique frames.
 fn automatic_framework_screw_a_x() -> Len {
-  9.966mm
+  6.8964mm
 }
 
 fn automatic_framework_screw_a_y() -> Len {
-  -0.289mm
+  2.6539mm
 }
 
 fn automatic_framework_screw_b_x() -> Len {
-  -5.607mm
+  5.3514mm
 }
 
 fn automatic_framework_screw_b_y() -> Len {
-  -4.972mm
+  0mm - 5.3459mm
 }
 
 fn automatic_bridge_screw_x() -> Len {
-  8.5mm
+  1.5mm
 }
 
 fn automatic_bridge_screw_y() -> Len {
-  -3mm
+  7.85mm
 }
 
 -- A bridge stands on feet turned from the same blank, not on air.

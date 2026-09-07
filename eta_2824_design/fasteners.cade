@@ -227,8 +227,8 @@ part fasteners_assembly() -> Assembly {
       |> place(
         frame = frame(
           origin = point(
-            x = 3.9137mm,
-            y = 1.131mm,
+            x = datum.crown_wheel_centre_x(),
+            y = datum.crown_wheel_centre_y(),
             z = datum.crown_wheel_top_z() - head_top_902(),
           ),
           axis = Z,
@@ -240,8 +240,8 @@ part fasteners_assembly() -> Assembly {
       |> place(
         frame = frame(
           origin = point(
-            x = 7.0603mm,
-            y = 4.2777mm,
+            x = datum.barrel_centre_x(),
+            y = datum.barrel_centre_y(),
             z = datum.ratchet_wheel_top_z() - head_top_903(),
           ),
           axis = Z,
@@ -349,8 +349,8 @@ part verified_retaining_fasteners_assembly() -> Assembly {
       |> place(
         frame = frame(
           origin = point(
-            x = 3.9137mm,
-            y = 1.131mm,
+            x = datum.crown_wheel_centre_x(),
+            y = datum.crown_wheel_centre_y(),
             z = datum.crown_wheel_top_z() - head_top_902(),
           ),
           axis = Z,
@@ -362,8 +362,8 @@ part verified_retaining_fasteners_assembly() -> Assembly {
       |> place(
         frame = frame(
           origin = point(
-            x = 7.0603mm,
-            y = 4.2777mm,
+            x = datum.barrel_centre_x(),
+            y = datum.barrel_centre_y(),
             z = datum.ratchet_wheel_top_z() - head_top_903(),
           ),
           axis = Z,

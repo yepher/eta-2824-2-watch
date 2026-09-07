@@ -9,28 +9,38 @@ import "./datums.cade" as datum
 --
 --   second dial pinion 12 -> idler 40 -> minute wheel 36 -> cannon pinion 12
 --
+-- Re-solved 2026-09-05 onto the measured layout: the driving pinion is on the
+-- second wheel's arbor, which moved when the going train was re-derived from
+-- the plate view, so the idler and the minute wheel moved with it.
+--
 -- An idler changes no ratio, and 12 into 12 is 1:1, so the cannon pinion turns
 -- once an hour exactly as the second wheel does.
 part eta_pos_12_1_minute_train_driving_pinion() -> Solid<Exact> {
-  common.toothed_disk(
+  common.involute_disk(
     root_r = 0.475mm,
-    tooth_depth = 0.225mm,
-    tooth_width = 0.14mm,
-    h = 0.24mm,
     bore_r = 0.13mm,
+    flank_nx = 0.34093,
+    flank_ny = 0.94009,
+    flank_d = 0.26598mm,
+    inner_x = 0.4275mm,
+    tip_r = 0.7mm,
+    h = 0.24mm,
     teeth = 12,
   )
 }
 
 part eta_pos_34_1_minute_train_idler() -> Solid<Exact> {
-  common.spoked_wheel(
+  common.involute_spoked_wheel(
     root_r = 1.875mm,
     rim_width = 0.24mm,
-    tooth_depth = 0.225mm,
-    tooth_width = 0.14mm,
     hub_r = 0.44mm,
     bore_r = 0.2mm,
     spoke_width = 0.16mm,
+    flank_nx = 0.27573,
+    flank_ny = 0.96123,
+    flank_d = 0.614mm,
+    inner_x = 1.6875mm,
+    tip_r = 2.1mm,
     h = 0.22mm,
     teeth = 40,
     spokes = 5,
@@ -39,12 +49,15 @@ part eta_pos_34_1_minute_train_idler() -> Solid<Exact> {
 
 part eta_pos_32_setting_wheel_envelope() -> Solid<Exact> {
   -- Expert estimate: 24 teeth.
-  common.toothed_disk(
-    root_r = 0.75mm,
-    tooth_depth = 0.12mm,
-    tooth_width = 0.18mm,
-    h = 0.25mm,
+  common.involute_disk(
+    root_r = 1.075mm,
     bore_r = 0.2mm,
+    flank_nx = 0.29914,
+    flank_ny = 0.95421,
+    flank_d = 0.42133mm,
+    inner_x = 0.9675mm,
+    tip_r = 1.3mm,
+    h = 0.25mm,
     teeth = 24,
   )
 }
@@ -63,12 +76,15 @@ fn cannon_pinion_seat_radius() -> Len {
 part eta_pos_33_cannon_pinion_envelope() -> Solid<Exact> {
   -- H2 0.90mm hand fitting with an estimated 12-tooth driving pinion.
   union(
-    common.toothed_disk(
-      root_r = 0.45mm,
-      tooth_depth = 0.08mm,
-      tooth_width = 0.14mm,
-      h = 0.22mm,
+    common.involute_disk(
+      root_r = 0.475mm,
       bore_r = 0.18mm,
+      flank_nx = 0.34093,
+      flank_ny = 0.94009,
+      flank_d = 0.26598mm,
+      inner_x = 0.4275mm,
+      tip_r = 0.7mm,
+      h = 0.22mm,
       teeth = 12,
     ),
     cylinder(r = cannon_pinion_seat_radius(), h = cannon_pinion_length())
@@ -76,40 +92,62 @@ part eta_pos_33_cannon_pinion_envelope() -> Solid<Exact> {
   )
 }
 
-part eta_pos_34_minute_wheel_envelope() -> Solid<Exact> {
-  -- Ratio-constrained estimate: 36-tooth wheel and 10-leaf hour-driving pinion.
+part eta_pos_34_minute_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
+  -- The ring and the hour wheel overlap by 3.9mm in plan and do not mesh -- only
+  -- the pinion does -- so the hour wheel runs a level above the ring. Square
+  -- tooth blocks hid this; involute teeth are thicker at the pitch circle and
+  -- brought it out.
+  --
+  -- The calendar band is only 0.39mm tall, so making room meant thinning both:
+  -- ring 0.15 at 0.455-0.605, hour wheel 0.15 at 0.640-0.790, and a 0.30 pinion
+  -- spanning 0.490-0.790 to reach from one to the other.
+  --
+  -- 36-tooth ring on module 0.100, which is what the 2.400mm centre distance to
+  -- the cannon pinion and the 3.800mm to the idler both require, and a 10-leaf
+  -- hour-driving pinion on 0.096. The ring and the pinion do not share a
+  -- module because they do not share a mesh.
   union(
-    common.spoked_wheel(
-      root_r = 1.86mm,
+    common.involute_spoked_wheel(
+      root_r = 1.675mm,
       rim_width = 0.22mm,
-      tooth_depth = 0.14mm,
-      tooth_width = 0.16mm,
       hub_r = 0.44mm,
       bore_r = 0.2mm,
       spoke_width = 0.14mm,
-      h = 0.25mm,
+      flank_nx = 0.28003,
+      flank_ny = 0.95999,
+      flank_d = 0.56656mm,
+      inner_x = 1.5075mm,
+      tip_r = 1.9mm,
+      h = 0.15mm,
       teeth = 36,
       spokes = 5,
     ),
-    common.toothed_disk(
-      root_r = 0.38mm,
-      tooth_depth = 0.07mm,
-      tooth_width = 0.14mm,
-      h = 0.34mm,
+    common.involute_disk(
+      root_r = 0.36mm,
       bore_r = 0.2mm,
+      flank_nx = 0.35346,
+      flank_ny = 0.93545,
+      flank_d = 0.22814mm,
+      inner_x = 0.324mm,
+      tip_r = 0.576mm,
+      h = 0.3mm,
       teeth = 10,
     )
-      |> at(dx = 0mm, dy = 0mm, dz = 0.15mm),
+      |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
+      |> at(dx = 0mm, dy = 0mm, dz = 0.11mm),
   )
 }
 
 part eta_pos_35_date_corrector_envelope() -> Solid<Exact> {
-  common.toothed_disk(
-    root_r = 1.08mm,
-    tooth_depth = 0.12mm,
-    tooth_width = 0.18mm,
-    h = 0.22mm,
+  common.involute_disk(
+    root_r = 0.775mm,
     bore_r = 0.18mm,
+    flank_nx = 0.31519,
+    flank_ny = 0.94903,
+    flank_d = 0.34578mm,
+    inner_x = 0.6975mm,
+    tip_r = 1mm,
+    h = 0.22mm,
     teeth = 18,
   )
 }
@@ -128,12 +166,20 @@ part eta_pos_36_date_indicator_envelope() -> Solid<Exact> {
 
 part eta_pos_37_hour_wheel_envelope() -> Solid<Exact> {
   -- Ratio-constrained 40 teeth: (12/36) * (10/40) = 1/12 hour-hand speed.
-  common.toothed_disk(
-    root_r = 1.95mm,
-    tooth_depth = 0.16mm,
-    tooth_width = 0.16mm,
-    h = 0.3mm,
+  --
+  -- Re-cut on a consistent module. The 10-leaf pinion above and this wheel have
+  -- to share one, and the 2.400mm centre distance with 40 and 10 teeth fixes it
+  -- at 0.096: pitch radii 1.920 and 0.480. The two were previously drawn with
+  -- tooth depths that belonged to no common module at all.
+  common.involute_disk(
+    root_r = 1.8mm,
     bore_r = 0.75mm,
+    flank_nx = 0.27573,
+    flank_ny = 0.96123,
+    flank_d = 0.58944mm,
+    inner_x = 1.62mm,
+    tip_r = 2.016mm,
+    h = 0.15mm,
     teeth = 40,
   )
 }
@@ -141,12 +187,15 @@ part eta_pos_37_hour_wheel_envelope() -> Solid<Exact> {
 part eta_pos_38_date_driving_wheel_envelope() -> Solid<Exact> {
   -- Expert-estimated 24-tooth wheel; the date finger is modeled separately.
   union(
-    common.toothed_disk(
-      root_r = 1.7mm,
-      tooth_depth = 0.14mm,
-      tooth_width = 0.18mm,
-      h = 0.28mm,
+    common.involute_disk(
+      root_r = 1.075mm,
       bore_r = 0.2mm,
+      flank_nx = 0.29914,
+      flank_ny = 0.95421,
+      flank_d = 0.42133mm,
+      inner_x = 0.9675mm,
+      tip_r = 1.3mm,
+      h = 0.28mm,
       teeth = 24,
     ),
     box(x = 0.35mm, y = 1.2mm, z = 0.22mm) |> at(dx = 0mm, dy = -1.8mm, dz = 0.24mm),
@@ -154,20 +203,22 @@ part eta_pos_38_date_driving_wheel_envelope() -> Solid<Exact> {
 }
 
 part eta_pos_39_minute_train_bridge_envelope() -> Solid<Exact> {
-  -- Local coordinates: the bridge is placed at (2.0, -0.65) turned -15deg, and
-  -- the cannon pinion runs on the centre axis through it.
+  -- A strip from the cannon pinion out to its screw. Local +X runs along that
+  -- line, so the cannon-pinion bore is at one end and the screw at the other:
+  -- placed at (1.9500mm, -0.8000mm) turned -22.306deg, the bore lands on the
+  -- movement axis and the screw on `datum`'s 907 axis.
   cut(
-    box(x = 5mm, y = 2.5mm, z = datum.minute_bridge_thickness()),
+    box(x = 5.8154mm, y = 2.2mm, z = datum.minute_bridge_thickness()),
     union(
       cylinder(r = cannon_pinion_seat_radius() + datum.running_clearance(), h = 0.6mm)
-        |> at(dx = -2.07mm, dy = 0.13mm, dz = 0mm),
+        |> at(dx = 0mm - 2.1077mm, dy = 0mm, dz = 0mm),
       common.screw_clearance_hole(
         head_r = 0.47mm,
         head_h = 0.19mm,
         shank_r = 0.23mm,
         depth = datum.minute_bridge_thickness(),
       )
-        |> at(dx = 1.86mm, dy = -0.83mm, dz = 0mm),
+        |> at(dx = 2.1077mm, dy = 0mm, dz = 0mm),
     ),
   )
 }
@@ -208,7 +259,7 @@ part dial_side_assembly() -> Assembly {
         frame = frame(
           origin = point(x = 0mm, y = 0mm, z = datum.calendar_band_floor_z() + 0.1mm),
           axis = Z,
-          angle = 0deg,
+          angle = 200.099deg,
         ),
         color = rgb(r = 133, g = 143, b = 154),
       ),
@@ -216,12 +267,12 @@ part dial_side_assembly() -> Assembly {
       |> place(
         frame = frame(
           origin = point(
-            x = 2.7065mm,
-            y = 5.4152mm,
+            x = datum.second_wheel_x(),
+            y = datum.second_wheel_y(),
             z = datum.calendar_band_floor_z() + 0.1mm,
           ),
           axis = Z,
-          angle = 285.976deg,
+          angle = 282.867deg,
         ),
         color = rgb(r = 150, g = 158, b = 168),
       ),
@@ -229,25 +280,25 @@ part dial_side_assembly() -> Assembly {
       |> place(
         frame = frame(
           origin = point(
-            x = 3.4221mm,
-            y = 2.9156mm,
+            x = 0mm - 3.496mm,
+            y = 3.4223mm,
             z = datum.calendar_band_floor_z() + 0.1mm,
           ),
           axis = Z,
-          angle = 110.476deg,
+          angle = 107.367deg,
         ),
         color = rgb(r = 199, g = 160, b = 55),
       ),
-    eta_pos_34_minute_wheel_envelope()
+    eta_pos_34_minute_wheel_envelope(pinion_phase = 253.186deg)
       |> place(
         frame = frame(
           origin = point(
-            x = 2.35mm,
-            y = -0.73mm,
+            x = 0mm - 2.3905mm,
+            y = 0mm - 0.2133mm,
             z = datum.calendar_band_floor_z() + 0.1mm,
           ),
           axis = Z,
-          angle = 0deg,
+          angle = 111.913deg,
         ),
         color = rgb(r = 207, g = 166, b = 59),
       ),
@@ -280,9 +331,9 @@ part dial_side_assembly() -> Assembly {
     eta_pos_37_hour_wheel_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = datum.calendar_band_floor_z() + 0.25mm),
+          origin = point(x = 0mm, y = 0mm, z = datum.calendar_band_floor_z() + 0.285mm),
           axis = Z,
-          angle = 0deg,
+          angle = 189.599deg,
         ),
         color = rgb(r = 193, g = 151, b = 49),
       ),
@@ -303,12 +354,12 @@ part dial_side_assembly() -> Assembly {
       |> place(
         frame = frame(
           origin = point(
-            x = 2mm,
-            y = -0.65mm,
+            x = 1.95mm,
+            y = 0mm - 0.8mm,
             z = (datum.minute_bridge_underside_z() + datum.minute_bridge_top_z()) / 2,
           ),
           axis = Z,
-          angle = -15deg,
+          angle = -22.306deg,
         ),
         color = rgb(r = 176, g = 173, b = 165),
       ),

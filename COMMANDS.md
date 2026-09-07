@@ -1,20 +1,20 @@
 # Working commands
 
-Run Cargo commands from `~/src/cade_research/cade/`.
+Run Cargo commands from `$CADE_REPO/cade/`.
 
 ## Live views
 
 ```sh
-cargo run --release -- view ~/src/watch/watch.cade --raymarch -p 7879 --part watch --watch
-cargo run --release -- view ~/src/watch/watch.cade --cell 0.05mm -p 7880 --part watch --watch
+cargo run --release -- view watch.cade --raymarch -p 7879 --part watch --watch
+cargo run --release -- view watch.cade --cell 0.05mm -p 7880 --part watch --watch
 ```
 
 ## Format and validate syntax
 
 ```sh
-cargo run --release -- fmt ~/src/watch/watch.cade --check
-cargo run --release -- view ~/src/watch/watch.cade --raymarch -o /tmp/watch-check.html --part watch
-cargo run --release -- check ~/src/watch/watch.cade --part movement_envelope
+cargo run --release -- fmt watch.cade --check
+cargo run --release -- view watch.cade --raymarch -o /tmp/watch-check.html --part watch
+cargo run --release -- check watch.cade --part movement_envelope
 ```
 
 `check` requires one solid and intentionally refuses the `watch` assembly. Use
@@ -32,5 +32,5 @@ also a pass. The CAD agent may move mature diagnostics to another file later.
 ## Export a review mesh
 
 ```sh
-cargo run --release -- build ~/src/watch/watch.cade -o ~/src/watch/watch.3mf --part watch --cell 0.05mm
+cargo run --release -- build watch.cade -o watch.3mf --part watch --cell 0.05mm
 ```

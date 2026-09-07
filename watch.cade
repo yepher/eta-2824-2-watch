@@ -34,14 +34,14 @@ part keyless_works_preview() -> Assembly {
 
 part date_setting_preview() -> Assembly {
   together(
-    setting.keyless_state_assembly(stem_x = 0.3mm, sliding_x = 8mm, yoke_x = 8mm),
+    setting.keyless_state_assembly(stem_x = 0.3mm, sliding_x = 8mm, yoke_x = 9.55mm),
     watch_case.crown_position_assembly(crown_x = 20.3mm),
   )
 }
 
 part hand_setting_preview() -> Assembly {
   together(
-    setting.keyless_state_assembly(stem_x = 0.8mm, sliding_x = 8.5mm, yoke_x = 8.5mm),
+    setting.keyless_state_assembly(stem_x = 0.8mm, sliding_x = 8.5mm, yoke_x = 9.65mm),
     watch_case.crown_position_assembly(crown_x = 20.8mm),
   )
 }

@@ -15,18 +15,21 @@ part eta_pos_14_barrel_envelope() -> Solid<Exact> {
   -- distance. The drum is turned below the tooth root so the second wheel's
   -- pinion can reach the teeth without fouling the drum under them.
   union(
-    common.toothed_disk(
+    common.involute_disk(
       root_r = 5.7479mm,
-      tooth_depth = 0.3618mm,
-      tooth_width = 0.2251mm,
-      h = datum.train_wheel_thickness(),
       bore_r = 0.45mm,
+      flank_nx = 0.30925,
+      flank_ny = 0.95098,
+      flank_d = 1.94804mm,
+      inner_x = 5.1737mm,
+      tip_r = 6.1104mm,
+      h = datum.train_wheel_thickness(),
       teeth = 74,
     )
       |> at(
         dx = 0mm,
         dy = 0mm,
-        dz = datum.train_level_1_z()
+        dz = datum.barrel_wheel_z()
           - (datum.barrel_floor_z() + datum.barrel_ceiling_z()) / 2,
       ),
     common.bored_disk(
@@ -42,6 +45,20 @@ part eta_pos_15_stop_lever_envelope() -> Solid<Exact> {
   box(x = 4mm, y = 0.55mm, z = 0.18mm)
 }
 
+-- How deep the ratchet wheel sinks into the barrel bridge's top face. Held to
+-- less than the bridge's own thickness so the counterbore keeps a floor.
+--
+-- OPEN, and it exposes an axial conflict this does not resolve. The bridge runs
+-- 2.820 to 3.220 and the ratchet wheel is 0.53 thick with its top at the 3.35
+-- base movement height, so the wheel wants 2.820 to 3.350 -- the same space as
+-- the bridge. Sitting the wheel ON the bridge needs 3.220 + 0.53 = 3.750, which
+-- is over the 3.35 ceiling. The barrel height, the bridge thickness or the
+-- ratchet's own thickness has to give; none of the three is measured. Recorded
+-- rather than absorbed.
+fn ratchet_countersink_depth() -> Len {
+  0.15mm
+}
+
 part eta_pos_16_barrel_bridge_envelope() -> Solid<Exact> {
   -- Carries the barrel arbor and stands on two feet that reach the plate.
   -- It is relieved by the parts that pass through it rather than trimmed by
@@ -49,26 +66,1051 @@ part eta_pos_16_barrel_bridge_envelope() -> Solid<Exact> {
   -- ratchet wheel is countersunk into its top face, both cut with the wheels'
   -- own clearance cylinders, so the relief follows if either wheel moves.
   -- Local coordinates are relative to the placement at (6.3586mm, 3.6287mm).
+  -- MEASURED and GENERATED: `tools/page6_outline.py 62 1828.1 3460.7 -3.5246
+  -- 2.0763 46 1 datum.barrel_bridge_thickness()`. Page 6 blob 62, the kidney
+  -- carrying the barrel arbor and the click work, at 30.938 px/mm.
+  --
+  -- It was a stick figure: three discs and four rotated boxes, 10.18 x 10.25
+  -- against a drawn 17.32 x 17.84 -- about a THIRD of the area. That is why the
+  -- render showed the barrel and the whole going train lying open where the real
+  -- movement shows bridge. See ERRORS.md E12.
+  --
+  -- Anchored on the BARREL ARBOR HOLE, the 1.16 round opening the drawing puts at
+  -- (1828.1, 3460.7) px, mapped to this part's local (-3.5246, 2.0763) which is
+  -- the barrel centre. Mirrored and swept: at 46 degrees it covers 73.3% of the
+  -- barrel and the going train, takes 0.0% of the balance bridge, and puts the
+  -- crown wheel's centre on the bridge where its relief is cut. The band is soft
+  -- -- 32 to 46 all score alike -- so this rotation is good to about 10 degrees
+  -- and no better. The two screw datums do NOT fit the drawing's holes (they are
+  -- 161 degrees apart on the drawing, 90 in the datums), so they are estimates
+  -- that still need measuring, exactly as the framework's screw a did.
   let blank = union(
-    cylinder(r = 2.4mm, h = datum.barrel_bridge_thickness())
-      |> at(dx = 0mm - 3.5246mm, dy = 2.0763mm, dz = 0mm),
-    cylinder(r = 0.95mm, h = datum.barrel_bridge_thickness())
-      |> at(dx = 0mm - 2.2186mm, dy = 0mm - 4.8287mm, dz = 0mm),
-    cylinder(r = 0.95mm, h = datum.barrel_bridge_thickness())
-      |> at(dx = 3.3014mm, dy = 3.3913mm, dz = 0mm),
-    box(x = 6.9515mm, y = 2mm, z = datum.barrel_bridge_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = 10.904deg)
-      |> at(dx = 0mm - 0.1116mm, dy = 2.7338mm, dz = 0mm),
-    box(x = 4.1208mm, y = 1.8mm, z = datum.barrel_bridge_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = -102.042deg)
-      |> at(dx = 2.8716mm, dy = 1.3763mm, dz = 0mm),
-    box(x = 6.2669mm, y = 1.6mm, z = datum.barrel_bridge_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = -138.042deg)
-      |> at(dx = 0.1116mm, dy = 0mm - 2.7337mm, dz = 0mm),
-    box(x = 6.555mm, y = 1.6mm, z = datum.barrel_bridge_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = -24.469deg)
-      |> at(dx = 0mm - 0.5415mm, dy = 0.7188mm, dz = 0mm),
+    intersect(
+      half_space(nx = 0.607225, ny = 0.794530, nz = 0, d = 0mm - 0.6751mm),
+      half_space(nx = -0.323213, ny = 0.946326, nz = 0, d = 10.3159mm),
+      half_space(nx = -0.157750, ny = -0.987479, nz = 0, d = 0mm - 5.3417mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.572055, ny = -0.820215, nz = 0, d = 3.3736mm),
+      half_space(nx = 0.999756, ny = 0.022112, nz = 0, d = 6.1864mm),
+      half_space(nx = -0.880573, ny = 0.473910, nz = 0, d = 0mm - 5.1970mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.880573, ny = -0.473910, nz = 0, d = 5.2013mm),
+      half_space(nx = 0.870572, ny = 0.492040, nz = 0, d = 5.6269mm),
+      half_space(nx = -0.991552, ny = 0.129711, nz = 0, d = 0mm - 5.8565mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.304766, ny = -0.952427, nz = 0, d = 1.7970mm),
+      half_space(nx = 0.991552, ny = -0.129711, nz = 0, d = 5.8615mm),
+      half_space(nx = -0.901763, ny = 0.432231, nz = 0, d = 0mm - 5.0773mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.220402, ny = -0.975409, nz = 0, d = 1.3280mm),
+      half_space(nx = 0.901763, ny = -0.432231, nz = 0, d = 5.0823mm),
+      half_space(nx = -0.788386, ny = 0.615180, nz = 0, d = 0mm - 4.2515mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.788386, ny = -0.615180, nz = 0, d = 4.2565mm),
+      half_space(nx = 0.938688, ny = 0.344767, nz = 0, d = 5.9257mm),
+      half_space(nx = -0.896431, ny = 0.443183, nz = 0, d = 0mm - 4.7923mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.112520, ny = -0.993649, nz = 0, d = 0.7670mm),
+      half_space(nx = 0.896431, ny = -0.443183, nz = 0, d = 4.7975mm),
+      half_space(nx = -0.805489, ny = 0.592610, nz = 0, d = 0mm - 4.0908mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.805489, ny = -0.592610, nz = 0, d = 4.0962mm),
+      half_space(nx = 0.889840, ny = 0.456273, nz = 0, d = 5.7653mm),
+      half_space(nx = -0.891828, ny = 0.452374, nz = 0, d = 0mm - 4.4884mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.891828, ny = -0.452374, nz = 0, d = 4.4936mm),
+      half_space(nx = 0.917485, ny = 0.397770, nz = 0, d = 5.8415mm),
+      half_space(nx = -0.941945, ny = 0.335766, nz = 0, d = 0mm - 4.7126mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.237048, ny = -0.971498, nz = 0, d = 1.3819mm),
+      half_space(nx = 0.941945, ny = -0.335766, nz = 0, d = 4.7176mm),
+      half_space(nx = -0.892936, ny = 0.450183, nz = 0, d = 0mm - 4.2422mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.892936, ny = -0.450183, nz = 0, d = 4.2473mm),
+      half_space(nx = 0.908204, ny = 0.418528, nz = 0, d = 5.8284mm),
+      half_space(nx = -0.935643, ny = 0.352948, nz = 0, d = 0mm - 4.4122mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.293375, ny = -0.955998, nz = 0, d = 1.6398mm),
+      half_space(nx = 0.935643, ny = -0.352948, nz = 0, d = 4.4172mm),
+      half_space(nx = -0.895780, ny = 0.444498, nz = 0, d = 0mm - 4.0104mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.895780, ny = -0.444498, nz = 0, d = 4.0156mm),
+      half_space(nx = 0.862053, ny = 0.506819, nz = 0, d = 5.7576mm),
+      half_space(nx = -0.934677, ny = 0.355498, nz = 0, d = 0mm - 4.1435mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.148579, ny = -0.988901, nz = 0, d = 1.0363mm),
+      half_space(nx = 0.934677, ny = -0.355498, nz = 0, d = 4.1490mm),
+      half_space(nx = -0.896307, ny = 0.443435, nz = 0, d = 0mm - 3.7384mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.896307, ny = -0.443435, nz = 0, d = 3.7441mm),
+      half_space(nx = 0.795044, ny = 0.606552, nz = 0, d = 5.6353mm),
+      half_space(nx = -0.933717, ny = 0.358011, nz = 0, d = 0mm - 3.8500mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.171870, ny = -0.985120, nz = 0, d = 1.1295mm),
+      half_space(nx = 0.933717, ny = -0.358011, nz = 0, d = 3.8557mm),
+      half_space(nx = -0.900196, ny = 0.435485, nz = 0, d = 0mm - 3.4812mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.900196, ny = -0.435485, nz = 0, d = 3.4864mm),
+      half_space(nx = 0.919256, ny = 0.393660, nz = 0, d = 5.7241mm),
+      half_space(nx = -0.928413, ny = 0.371550, nz = 0, d = 0mm - 3.5531mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.928413, ny = -0.371550, nz = 0, d = 3.5586mm),
+      half_space(nx = 0.694658, ny = 0.719340, nz = 0, d = 5.5463mm),
+      half_space(nx = -0.956399, ny = 0.292065, nz = 0, d = 0mm - 3.6157mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.306504, ny = -0.951869, nz = 0, d = 1.6062mm),
+      half_space(nx = 0.956399, ny = -0.292065, nz = 0, d = 3.6215mm),
+      half_space(nx = -0.933620, ny = 0.358265, nz = 0, d = 0mm - 3.3034mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.217396, ny = -0.976083, nz = 0, d = 1.3272mm),
+      half_space(nx = 0.933620, ny = -0.358265, nz = 0, d = 3.3087mm),
+      half_space(nx = -0.907759, ny = 0.419493, nz = 0, d = 0mm - 2.9914mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.086746, ny = -0.996230, nz = 0, d = 0.9523mm),
+      half_space(nx = 0.907759, ny = -0.419493, nz = 0, d = 2.9970mm),
+      half_space(nx = -0.877326, ny = 0.479894, nz = 0, d = 0mm - 2.6603mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.877326, ny = -0.479894, nz = 0, d = 2.6657mm),
+      half_space(nx = 0.919256, ny = 0.393660, nz = 0, d = 5.6005mm),
+      half_space(nx = -0.903646, ny = 0.428281, nz = 0, d = 0mm - 2.6950mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.903646, ny = -0.428281, nz = 0, d = 2.7008mm),
+      half_space(nx = 0.694658, ny = 0.719340, nz = 0, d = 5.6851mm),
+      half_space(nx = -0.931193, ny = 0.364527, nz = 0, d = 0mm - 2.7238mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.931193, ny = -0.364527, nz = 0, d = 2.7300mm),
+      half_space(nx = 0.722155, ny = 0.691732, nz = 0, d = 5.7036mm),
+      half_space(nx = -0.952646, ny = 0.304081, nz = 0, d = 0mm - 2.7394mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.239724, ny = -0.970841, nz = 0, d = 1.3466mm),
+      half_space(nx = 0.952646, ny = -0.304081, nz = 0, d = 2.7452mm),
+      half_space(nx = -0.933919, ny = 0.357485, nz = 0, d = 0mm - 2.4550mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.059415, ny = -0.998233, nz = 0, d = 0.9506mm),
+      half_space(nx = 0.933919, ny = -0.357485, nz = 0, d = 2.4608mm),
+      half_space(nx = -0.910920, ny = 0.412583, nz = 0, d = 0mm - 2.1460mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.034361, ny = -0.999409, nz = 0, d = 0.9019mm),
+      half_space(nx = 0.910920, ny = -0.412583, nz = 0, d = 2.1520mm),
+      half_space(nx = -0.885896, ny = 0.463884, nz = 0, d = 0mm - 1.8437mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.105636, ny = -0.994405, nz = 0, d = 0.6679mm),
+      half_space(nx = 0.885896, ny = -0.463884, nz = 0, d = 1.8497mm),
+      half_space(nx = -0.857842, ny = 0.513914, nz = 0, d = 0mm - 1.5337mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.145421, ny = -0.989370, nz = 0, d = 0.6119mm),
+      half_space(nx = 0.857842, ny = -0.513914, nz = 0, d = 1.5398mm),
+      half_space(nx = -0.828259, ny = 0.560345, nz = 0, d = 0mm - 1.2315mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.828259, ny = -0.560345, nz = 0, d = 1.2373mm),
+      half_space(nx = 0.624551, ny = 0.780984, nz = 0, d = 5.6615mm),
+      half_space(nx = -0.854615, ny = 0.519262, nz = 0, d = 0mm - 1.2289mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.027880, ny = -0.999611, nz = 0, d = 0.7904mm),
+      half_space(nx = 0.854615, ny = -0.519262, nz = 0, d = 1.2345mm),
+      half_space(nx = -0.828181, ny = 0.560461, nz = 0, d = 0mm - 0.9586mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.008053, ny = -0.999968, nz = 0, d = 0.7781mm),
+      half_space(nx = 0.828181, ny = -0.560461, nz = 0, d = 0.9641mm),
+      half_space(nx = -0.801282, ny = 0.598288, nz = 0, d = 0mm - 0.7002mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.043299, ny = -0.999062, nz = 0, d = 0.7620mm),
+      half_space(nx = 0.801282, ny = -0.598288, nz = 0, d = 0.7057mm),
+      half_space(nx = -0.773520, ny = 0.633772, nz = 0, d = 0mm - 0.4479mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.752234, ny = 0.658896, nz = 0, d = 0mm - 3.1352mm),
+      half_space(nx = 0.157750, ny = 0.987479, nz = 0, d = 5.3455mm),
+      half_space(nx = -0.394947, ny = -0.918704, nz = 0, d = 0mm - 2.2532mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.394947, ny = 0.918704, nz = 0, d = 2.2573mm),
+      half_space(nx = -0.507615, ny = 0.861584, nz = 0, d = 11.7319mm),
+      half_space(nx = -0.161167, ny = -0.986927, nz = 0, d = 0mm - 5.0882mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.882353, ny = 0.470588, nz = 0, d = 0mm - 5.7328mm),
+      half_space(nx = 0.161167, ny = 0.986927, nz = 0, d = 5.0929mm),
+      half_space(nx = -0.352178, ny = -0.935933, nz = 0, d = 0mm - 2.5864mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.352178, ny = 0.935933, nz = 0, d = 2.5907mm),
+      half_space(nx = -0.315935, ny = 0.948781, nz = 0, d = 10.1901mm),
+      half_space(nx = -0.225326, ny = -0.974283, nz = 0, d = 0mm - 4.1038mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.225326, ny = 0.974283, nz = 0, d = 4.1083mm),
+      half_space(nx = -0.660957, ny = 0.750424, nz = 0, d = 12.8142mm),
+      half_space(nx = -0.076298, ny = -0.997085, nz = 0, d = 0mm - 5.7401mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.694658, ny = 0.719340, nz = 0, d = 0mm - 2.2329mm),
+      half_space(nx = 0.076298, ny = 0.997085, nz = 0, d = 5.7447mm),
+      half_space(nx = -0.179191, ny = -0.983814, nz = 0, d = 0mm - 4.4377mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.694658, ny = 0.719340, nz = 0, d = 0mm - 2.2329mm),
+      half_space(nx = 0.179191, ny = 0.983814, nz = 0, d = 4.4415mm),
+      half_space(nx = -0.256456, ny = -0.966556, nz = 0, d = 0mm - 3.4110mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.256456, ny = 0.966556, nz = 0, d = 3.4147mm),
+      half_space(nx = -0.402588, ny = 0.915381, nz = 0, d = 10.8655mm),
+      half_space(nx = -0.180191, ny = -0.983632, nz = 0, d = 0mm - 4.2384mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.180191, ny = 0.983632, nz = 0, d = 4.2430mm),
+      half_space(nx = -0.712003, ny = 0.702177, nz = 0, d = 13.2268mm),
+      half_space(nx = -0.082530, ny = -0.996589, nz = 0, d = 0mm - 5.2435mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.694658, ny = 0.719340, nz = 0, d = 0mm - 2.2264mm),
+      half_space(nx = 0.082530, ny = 0.996589, nz = 0, d = 5.2482mm),
+      half_space(nx = -0.150932, ny = -0.988544, nz = 0, d = 0mm - 4.3490mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.150932, ny = 0.988544, nz = 0, d = 4.3528mm),
+      half_space(nx = -0.402970, ny = 0.915213, nz = 0, d = 10.7455mm),
+      half_space(nx = -0.099145, ny = -0.995073, nz = 0, d = 0mm - 4.8664mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.099145, ny = 0.995073, nz = 0, d = 4.8707mm),
+      half_space(nx = -0.719340, ny = 0.694658, nz = 0, d = 13.4007mm),
+      half_space(nx = -0.025775, ny = -0.999668, nz = 0, d = 0mm - 5.5710mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.025775, ny = 0.999668, nz = 0, d = 5.5751mm),
+      half_space(nx = -0.452380, ny = 0.891825, nz = 0, d = 11.1157mm),
+      half_space(nx = 0.014047, ny = -0.999901, nz = 0, d = 0mm - 5.9419mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.014047, ny = 0.999901, nz = 0, d = 5.9456mm),
+      half_space(nx = -0.673504, ny = 0.739183, nz = 0, d = 13.1600mm),
+      half_space(nx = 0.067440, ny = -0.997723, nz = 0, d = 0mm - 6.4225mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.067440, ny = 0.997723, nz = 0, d = 6.4269mm),
+      half_space(nx = -0.719340, ny = 0.694658, nz = 0, d = 13.5313mm),
+      half_space(nx = 0.118605, ny = -0.992942, nz = 0, d = 0mm - 6.8680mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.118605, ny = 0.992942, nz = 0, d = 6.8723mm),
+      half_space(nx = -0.719340, ny = 0.694658, nz = 0, d = 13.5313mm),
+      half_space(nx = 0.163787, ny = -0.986496, nz = 0, d = 0mm - 7.2487mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.163787, ny = 0.986496, nz = 0, d = 7.2528mm),
+      half_space(nx = -0.719340, ny = 0.694658, nz = 0, d = 13.5313mm),
+      half_space(nx = 0.203737, ny = -0.979026, nz = 0, d = 0mm - 7.5750mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.473982, ny = 0.880534, nz = 0, d = 0.7664mm),
+      half_space(nx = -0.203737, ny = 0.979026, nz = 0, d = 7.5790mm),
+      half_space(nx = 0.164147, ny = -0.986436, nz = 0, d = 0mm - 7.0507mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.164147, ny = 0.986436, nz = 0, d = 7.0547mm),
+      half_space(nx = -0.719340, ny = 0.694658, nz = 0, d = 13.5345mm),
+      half_space(nx = 0.200236, ny = -0.979748, nz = 0, d = 0mm - 7.3363mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.200236, ny = 0.979748, nz = 0, d = 7.3402mm),
+      half_space(nx = -0.719340, ny = 0.694658, nz = 0, d = 13.5345mm),
+      half_space(nx = 0.232607, ny = -0.972571, nz = 0, d = 0mm - 7.5859mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.232607, ny = 0.972571, nz = 0, d = 7.5896mm),
+      half_space(nx = -0.719340, ny = 0.694658, nz = 0, d = 13.5345mm),
+      half_space(nx = 0.261712, ny = -0.965146, nz = 0, d = 0mm - 7.8049mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.261712, ny = 0.965146, nz = 0, d = 7.8084mm),
+      half_space(nx = -0.719340, ny = 0.694658, nz = 0, d = 13.5345mm),
+      half_space(nx = 0.287952, ny = -0.957645, nz = 0, d = 0mm - 7.9977mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.287952, ny = 0.957645, nz = 0, d = 8.0010mm),
+      half_space(nx = -0.719340, ny = 0.694658, nz = 0, d = 13.5345mm),
+      half_space(nx = 0.311677, ny = -0.950188, nz = 0, d = 0mm - 8.1682mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.311677, ny = 0.950188, nz = 0, d = 8.1723mm),
+      half_space(nx = -0.945598, ny = 0.325337, nz = 0, d = 15.7040mm),
+      half_space(nx = 0.346761, ny = -0.937954, nz = 0, d = 0mm - 8.4125mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.346761, ny = 0.937954, nz = 0, d = 8.4182mm),
+      half_space(nx = -0.977819, ny = -0.209453, nz = 0, d = 14.4680mm),
+      half_space(nx = 0.390084, ny = -0.920779, nz = 0, d = 0mm - 8.7029mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.390084, ny = 0.920779, nz = 0, d = 8.7092mm),
+      half_space(nx = -0.695640, ny = -0.718390, nz = 0, d = 8.6293mm),
+      half_space(nx = 0.431992, ny = -0.901877, nz = 0, d = 0mm - 8.9715mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.431992, ny = 0.901877, nz = 0, d = 8.9781mm),
+      half_space(nx = -0.918737, ny = -0.394870, nz = 0, d = 12.8826mm),
+      half_space(nx = 0.475370, ny = -0.879786, nz = 0, d = 0mm - 9.2352mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.475370, ny = 0.879786, nz = 0, d = 9.2418mm),
+      half_space(nx = -0.695949, ny = -0.718091, nz = 0, d = 8.7643mm),
+      half_space(nx = 0.517151, ny = -0.855894, nz = 0, d = 0mm - 9.4745mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.517151, ny = 0.855894, nz = 0, d = 9.4811mm),
+      half_space(nx = -0.918574, ny = -0.395250, nz = 0, d = 12.7470mm),
+      half_space(nx = 0.558080, ny = -0.829787, nz = 0, d = 0mm - 9.6936mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.558080, ny = 0.829787, nz = 0, d = 9.7002mm),
+      half_space(nx = -0.696257, ny = -0.717792, nz = 0, d = 8.8988mm),
+      half_space(nx = 0.598409, ny = -0.801191, nz = 0, d = 0mm - 9.8932mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.598409, ny = 0.801191, nz = 0, d = 9.8998mm),
+      half_space(nx = -0.928565, ny = -0.371169, nz = 0, d = 12.7971mm),
+      half_space(nx = 0.635742, ny = -0.771902, nz = 0, d = 0mm - 10.0622mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.635742, ny = 0.771902, nz = 0, d = 10.0675mm),
+      half_space(nx = -0.983157, ny = 0.182765, nz = 0, d = 14.2811mm),
+      half_space(nx = 0.658314, ny = -0.752744, nz = 0, d = 0mm - 10.1573mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.029909, ny = 0.999553, nz = 0, d = 5.9688mm),
+      half_space(nx = -0.658314, ny = 0.752744, nz = 0, d = 10.1614mm),
+      half_space(nx = 0.636141, ny = -0.771573, nz = 0, d = 0mm - 9.8589mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.269796, ny = 0.962918, nz = 0, d = 7.8152mm),
+      half_space(nx = -0.636141, ny = 0.771573, nz = 0, d = 9.8623mm),
+      half_space(nx = 0.622458, ny = -0.782654, nz = 0, d = 0mm - 9.6751mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.622458, ny = 0.782654, nz = 0, d = 9.6776mm),
+      half_space(nx = -0.872683, ny = 0.488287, nz = 0, d = 12.9903mm),
+      half_space(nx = 0.634742, ny = -0.772724, nz = 0, d = 0mm - 9.7200mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.634742, ny = 0.772724, nz = 0, d = 9.7226mm),
+      half_space(nx = -0.899964, ny = 0.435964, nz = 0, d = 13.3523mm),
+      half_space(nx = 0.647548, ny = -0.762025, nz = 0, d = 0mm - 9.7646mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.647548, ny = 0.762025, nz = 0, d = 9.7677mm),
+      half_space(nx = -0.943665, ny = 0.330904, nz = 0, d = 13.9560mm),
+      half_space(nx = 0.662531, ny = -0.749035, nz = 0, d = 0mm - 9.8140mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.662531, ny = 0.749035, nz = 0, d = 9.8180mm),
+      half_space(nx = -0.998240, ny = 0.059311, nz = 0, d = 14.7533mm),
+      half_space(nx = 0.682561, ny = -0.730829, nz = 0, d = 0mm - 9.8748mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.682561, ny = 0.730829, nz = 0, d = 9.8804mm),
+      half_space(nx = -0.841811, ny = -0.539772, nz = 0, d = 12.6214mm),
+      half_space(nx = 0.708807, ny = -0.705402, nz = 0, d = 0mm - 9.9455mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.708807, ny = 0.705402, nz = 0, d = 9.9520mm),
+      half_space(nx = -0.802727, ny = -0.596347, nz = 0, d = 12.0832mm),
+      half_space(nx = 0.734285, ny = -0.678842, nz = 0, d = 0mm - 10.0041mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.734285, ny = 0.678842, nz = 0, d = 10.0101mm),
+      half_space(nx = -0.974114, ny = -0.226057, nz = 0, d = 14.2381mm),
+      half_space(nx = 0.754167, ny = -0.656683, nz = 0, d = 0mm - 10.0422mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.315935, ny = 0.948781, nz = 0, d = 8.1335mm),
+      half_space(nx = -0.754167, ny = 0.656683, nz = 0, d = 10.0466mm),
+      half_space(nx = 0.742073, ny = -0.670319, nz = 0, d = 0mm - 9.8554mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.172215, ny = 0.985059, nz = 0, d = 7.2102mm),
+      half_space(nx = -0.742073, ny = 0.670319, nz = 0, d = 9.8591mm),
+      half_space(nx = 0.727744, ny = -0.685849, nz = 0, d = 0mm - 9.6332mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.148241, ny = 0.988951, nz = 0, d = 7.0515mm),
+      half_space(nx = -0.727744, ny = 0.685849, nz = 0, d = 9.6372mm),
+      half_space(nx = 0.713343, ny = -0.700815, nz = 0, d = 0mm - 9.4109mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.285048, ny = 0.958513, nz = 0, d = 7.8607mm),
+      half_space(nx = -0.713343, ny = 0.700815, nz = 0, d = 9.4145mm),
+      half_space(nx = 0.702155, ny = -0.712024, nz = 0, d = 0mm - 9.2391mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.033413, ny = 0.999442, nz = 0, d = 6.3666mm),
+      half_space(nx = -0.702155, ny = 0.712024, nz = 0, d = 9.2429mm),
+      half_space(nx = 0.686487, ny = -0.727142, nz = 0, d = 0mm - 8.9979mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.264764, ny = 0.964313, nz = 0, d = 7.6767mm),
+      half_space(nx = -0.686487, ny = 0.727142, nz = 0, d = 9.0017mm),
+      half_space(nx = 0.675869, ny = -0.737022, nz = 0, d = 0mm - 8.8360mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.034752, ny = 0.999396, nz = 0, d = 6.4528mm),
+      half_space(nx = -0.675869, ny = 0.737022, nz = 0, d = 8.8397mm),
+      half_space(nx = 0.661105, ny = -0.750293, nz = 0, d = 0mm - 8.6098mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.020191, ny = 0.999796, nz = 0, d = 6.3689mm),
+      half_space(nx = -0.661105, ny = 0.750293, nz = 0, d = 8.6141mm),
+      half_space(nx = 0.646544, ny = -0.762877, nz = 0, d = 0mm - 8.3879mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.000373, ny = 1.000000, nz = 0, d = 6.2593mm),
+      half_space(nx = -0.646544, ny = 0.762877, nz = 0, d = 8.3922mm),
+      half_space(nx = 0.632045, ny = -0.774932, nz = 0, d = 0mm - 8.1674mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.002407, ny = 0.999997, nz = 0, d = 6.2700mm),
+      half_space(nx = -0.632045, ny = 0.774932, nz = 0, d = 8.1717mm),
+      half_space(nx = 0.618017, ny = -0.786164, nz = 0, d = 0mm - 7.9547mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.205420, ny = 0.978674, nz = 0, d = 5.1153mm),
+      half_space(nx = -0.618017, ny = 0.786164, nz = 0, d = 7.9593mm),
+      half_space(nx = 0.601310, ny = -0.799016, nz = 0, d = 0mm - 7.7014mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.027216, ny = 0.999630, nz = 0, d = 6.0625mm),
+      half_space(nx = -0.601310, ny = 0.799016, nz = 0, d = 7.7060mm),
+      half_space(nx = 0.587589, ny = -0.809159, nz = 0, d = 0mm - 7.4946mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.011211, ny = 0.999937, nz = 0, d = 6.1324mm),
+      half_space(nx = -0.587589, ny = 0.809159, nz = 0, d = 7.4987mm),
+      half_space(nx = 0.574597, ny = -0.818436, nz = 0, d = 0mm - 7.2988mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.218565, ny = 0.975822, nz = 0, d = 5.1730mm),
+      half_space(nx = -0.574597, ny = 0.818436, nz = 0, d = 7.3033mm),
+      half_space(nx = 0.558773, ny = -0.829321, nz = 0, d = 0mm - 7.0603mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.244777, ny = 0.969579, nz = 0, d = 5.0410mm),
+      half_space(nx = -0.558773, ny = 0.829321, nz = 0, d = 7.0652mm),
+      half_space(nx = 0.542818, ny = -0.839850, nz = 0, d = 0mm - 6.8207mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.282630, ny = 0.959229, nz = 0, d = 4.8555mm),
+      half_space(nx = -0.542818, ny = 0.839850, nz = 0, d = 6.8257mm),
+      half_space(nx = 0.526491, ny = -0.850181, nz = 0, d = 0mm - 6.5760mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.155640, ny = 0.987814, nz = 0, d = 5.3967mm),
+      half_space(nx = -0.526491, ny = 0.850181, nz = 0, d = 6.5807mm),
+      half_space(nx = 0.512826, ny = -0.858492, nz = 0, d = 0mm - 6.3720mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.304967, ny = 0.952363, nz = 0, d = 4.8005mm),
+      half_space(nx = -0.512826, ny = 0.858492, nz = 0, d = 6.3767mm),
+      half_space(nx = 0.496897, ny = -0.867809, nz = 0, d = 0mm - 6.1338mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.282630, ny = 0.959229, nz = 0, d = 4.8909mm),
+      half_space(nx = -0.496897, ny = 0.867809, nz = 0, d = 6.1387mm),
+      half_space(nx = 0.481671, ny = -0.876352, nz = 0, d = 0mm - 5.9069mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.282630, ny = 0.959229, nz = 0, d = 4.8909mm),
+      half_space(nx = -0.481671, ny = 0.876352, nz = 0, d = 5.9117mm),
+      half_space(nx = 0.466816, ny = -0.884355, nz = 0, d = 0mm - 5.6859mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.488287, ny = 0.872683, nz = 0, d = 4.0749mm),
+      half_space(nx = -0.466816, ny = 0.884355, nz = 0, d = 5.6911mm),
+      half_space(nx = 0.449579, ny = -0.893240, nz = 0, d = 0mm - 5.4295mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.452908, ny = 0.891557, nz = 0, d = 4.2241mm),
+      half_space(nx = -0.449579, ny = 0.893240, nz = 0, d = 5.4349mm),
+      half_space(nx = 0.433219, ny = -0.901289, nz = 0, d = 0mm - 5.1870mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.374017, ny = 0.927422, nz = 0, d = 4.4942mm),
+      half_space(nx = -0.433219, ny = 0.901289, nz = 0, d = 5.1921mm),
+      half_space(nx = 0.418209, ny = -0.908351, nz = 0, d = 0mm - 4.9650mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.370147, ny = 0.928973, nz = 0, d = 4.5050mm),
+      half_space(nx = -0.418209, ny = 0.908351, nz = 0, d = 4.9698mm),
+      half_space(nx = 0.403584, ny = -0.914942, nz = 0, d = 0mm - 4.7489mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.641705, ny = 0.766951, nz = 0, d = 3.5817mm),
+      half_space(nx = -0.403584, ny = 0.914942, nz = 0, d = 4.7543mm),
+      half_space(nx = 0.385221, ny = -0.922824, nz = 0, d = 0mm - 4.4772mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.418258, ny = 0.908328, nz = 0, d = 4.2923mm),
+      half_space(nx = -0.385221, ny = 0.922824, nz = 0, d = 4.4826mm),
+      half_space(nx = 0.370664, ny = -0.928767, nz = 0, d = 0mm - 4.2633mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.463391, ny = 0.886154, nz = 0, d = 4.1961mm),
+      half_space(nx = -0.370664, ny = 0.928767, nz = 0, d = 4.2682mm),
+      half_space(nx = 0.355761, ny = -0.934577, nz = 0, d = 0mm - 4.0439mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.612067, ny = 0.790806, nz = 0, d = 3.8337mm),
+      half_space(nx = -0.355761, ny = 0.934577, nz = 0, d = 4.0492mm),
+      half_space(nx = 0.338818, ny = -0.940852, nz = 0, d = 0mm - 3.7946mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.694658, ny = 0.719340, nz = 0, d = 3.5859mm),
+      half_space(nx = -0.338818, ny = 0.940852, nz = 0, d = 3.8005mm),
+      half_space(nx = 0.320721, ny = -0.947174, nz = 0, d = 0mm - 3.5289mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.681751, ny = 0.731585, nz = 0, d = 3.6231mm),
+      half_space(nx = -0.320721, ny = 0.947174, nz = 0, d = 3.5349mm),
+      half_space(nx = 0.303057, ny = -0.952973, nz = 0, d = 0mm - 3.2702mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.377512, ny = 0.926005, nz = 0, d = 3.9966mm),
+      half_space(nx = -0.303057, ny = 0.952973, nz = 0, d = 3.2753mm),
+      half_space(nx = 0.290661, ny = -0.956826, nz = 0, d = 0mm - 3.0898mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.694658, ny = 0.719340, nz = 0, d = 3.7165mm),
+      half_space(nx = -0.290661, ny = 0.956826, nz = 0, d = 3.0949mm),
+      half_space(nx = 0.273390, ny = -0.961903, nz = 0, d = 0mm - 2.8366mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.694658, ny = 0.719340, nz = 0, d = 3.7165mm),
+      half_space(nx = -0.273390, ny = 0.961903, nz = 0, d = 2.8425mm),
+      half_space(nx = 0.256387, ny = -0.966574, nz = 0, d = 0mm - 2.5886mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.694658, ny = 0.719340, nz = 0, d = 3.7165mm),
+      half_space(nx = -0.256387, ny = 0.966574, nz = 0, d = 2.5944mm),
+      half_space(nx = 0.239661, ny = -0.970857, nz = 0, d = 0mm - 2.3450mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.694658, ny = 0.719340, nz = 0, d = 3.7165mm),
+      half_space(nx = -0.239661, ny = 0.970857, nz = 0, d = 2.3507mm),
+      half_space(nx = 0.223220, ny = -0.974768, nz = 0, d = 0mm - 2.1059mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.223220, ny = 0.974768, nz = 0, d = 2.1107mm),
+      half_space(nx = -0.760613, ny = 0.649205, nz = 0, d = 10.2470mm),
+      half_space(nx = 0.234573, ny = -0.972099, nz = 0, d = 0mm - 2.0729mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.234573, ny = 0.972099, nz = 0, d = 2.0781mm),
+      half_space(nx = -0.997852, ny = 0.065513, nz = 0, d = 14.5485mm),
+      half_space(nx = 0.252416, ny = -0.967619, nz = 0, d = 0mm - 2.0177mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.252416, ny = 0.967619, nz = 0, d = 2.0242mm),
+      half_space(nx = -0.989564, ny = -0.144094, nz = 0, d = 14.7925mm),
+      half_space(nx = 0.270733, ny = -0.962654, nz = 0, d = 0mm - 1.9611mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.270733, ny = 0.962654, nz = 0, d = 1.9674mm),
+      half_space(nx = -0.701354, ny = -0.712813, nz = 0, d = 11.7534mm),
+      half_space(nx = 0.287122, ny = -0.957894, nz = 0, d = 0mm - 1.9101mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.287122, ny = 0.957894, nz = 0, d = 1.9160mm),
+      half_space(nx = -0.679815, ny = -0.733384, nz = 0, d = 11.4909mm),
+      half_space(nx = 0.303446, ny = -0.952849, nz = 0, d = 0mm - 1.8582mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.245726, ny = 0.969339, nz = 0, d = 3.2855mm),
+      half_space(nx = -0.303446, ny = 0.952849, nz = 0, d = 1.8627mm),
+      half_space(nx = 0.294822, ny = -0.955552, nz = 0, d = 0mm - 1.7323mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.294822, ny = 0.955552, nz = 0, d = 1.7351mm),
+      half_space(nx = -0.086214, ny = -0.996277, nz = 0, d = 3.7625mm),
+      half_space(nx = 0.301861, ny = -0.953352, nz = 0, d = 0mm - 1.7082mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.221797, ny = 0.975093, nz = 0, d = 3.0901mm),
+      half_space(nx = -0.719340, ny = 0.694658, nz = 0, d = 0.1880mm),
+      half_space(nx = 0.496724, ny = -0.867909, nz = 0, d = 0mm - 1.5789mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.056109, ny = -0.998425, nz = 0, d = 3.6934mm),
+      half_space(nx = 0.518446, ny = -0.855111, nz = 0, d = 0mm - 1.7308mm),
+      half_space(nx = -0.294597, ny = 0.955621, nz = 0, d = 0mm - 0.9455mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.719340, ny = 0.694658, nz = 0, d = 0.1875mm),
+      half_space(nx = -0.930185, ny = 0.367092, nz = 0, d = 0mm - 1.6134mm),
+      half_space(nx = 0.839619, ny = -0.543175, nz = 0, d = 0.7837mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.496724, ny = 0.867909, nz = 0, d = 1.5829mm),
+      half_space(nx = -0.839619, ny = 0.543175, nz = 0, d = 0mm - 0.7801mm),
+      half_space(nx = 0.690561, ny = -0.723274, nz = 0, d = 0mm - 0.2348mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.690561, ny = 0.723274, nz = 0, d = 0.2375mm),
+      half_space(nx = -0.901882, ny = 0.431982, nz = 0, d = 0mm - 1.3189mm),
+      half_space(nx = 0.742199, ny = -0.670179, nz = 0, d = 0.1815mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.773520, ny = -0.633772, nz = 0, d = 0.4513mm),
+      half_space(nx = -0.742199, ny = 0.670179, nz = 0, d = 0mm - 0.1777mm),
+      half_space(nx = -0.783844, ny = 0.620957, nz = 0, d = 0mm - 0.4404mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.294597, ny = -0.955621, nz = 0, d = 0.9472mm),
+      half_space(nx = 0.557280, ny = -0.830324, nz = 0, d = 0mm - 2.2255mm),
+      half_space(nx = -0.386851, ny = 0.922142, nz = 0, d = 0.1891mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.386851, ny = -0.922142, nz = 0, d = 0mm - 0.1872mm),
+      half_space(nx = 0.719340, ny = -0.694658, nz = 0, d = 0mm - 4.3521mm),
+      half_space(nx = -0.480923, ny = 0.876763, nz = 0, d = 1.3951mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.480923, ny = -0.876763, nz = 0, d = 0mm - 1.3921mm),
+      half_space(nx = 0.911040, ny = -0.412318, nz = 0, d = 0mm - 7.2300mm),
+      half_space(nx = -0.587880, ny = 0.808948, nz = 0, d = 2.8361mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.034752, ny = -0.999396, nz = 0, d = 3.9341mm),
+      half_space(nx = 0.587880, ny = -0.808948, nz = 0, d = 0mm - 2.8326mm),
+      half_space(nx = -0.502604, ny = 0.864517, nz = 0, d = 1.8401mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.282630, ny = -0.959229, nz = 0, d = 7.2811mm),
+      half_space(nx = 0.502604, ny = -0.864517, nz = 0, d = 0mm - 1.8361mm),
+      half_space(nx = -0.398297, ny = 0.917257, nz = 0, d = 0.6740mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.575711, ny = -0.817653, nz = 0, d = 10.0295mm),
+      half_space(nx = 0.398297, ny = -0.917257, nz = 0, d = 0mm - 0.6690mm),
+      half_space(nx = -0.281736, ny = 0.959492, nz = 0, d = 0mm - 0.5728mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.694658, ny = -0.719340, nz = 0, d = 11.0239mm),
+      half_space(nx = 0.281736, ny = -0.959492, nz = 0, d = 0.5783mm),
+      half_space(nx = -0.164983, ny = 0.986296, nz = 0, d = 0mm - 1.7695mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.694658, ny = -0.719340, nz = 0, d = 11.0239mm),
+      half_space(nx = 0.164983, ny = -0.986296, nz = 0, d = 1.7750mm),
+      half_space(nx = -0.063833, ny = 0.997961, nz = 0, d = 0mm - 2.7676mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.760407, ny = -0.649447, nz = 0, d = 11.5767mm),
+      half_space(nx = 0.063833, ny = -0.997961, nz = 0, d = 2.7728mm),
+      half_space(nx = 0.028566, ny = 0.999592, nz = 0, d = 0mm - 3.6486mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.876157, ny = -0.482027, nz = 0, d = 12.4607mm),
+      half_space(nx = -0.028566, ny = -0.999592, nz = 0, d = 3.6540mm),
+      half_space(nx = 0.120344, ny = 0.992732, nz = 0, d = 0mm - 4.4949mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.120344, ny = -0.992732, nz = 0, d = 4.5003mm),
+      half_space(nx = 0.756454, ny = -0.654047, nz = 0, d = 0mm - 4.9300mm),
+      half_space(nx = 0.035093, ny = 0.999384, nz = 0, d = 0mm - 3.4461mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.035093, ny = -0.999384, nz = 0, d = 3.4513mm),
+      half_space(nx = 0.719340, ny = -0.694658, nz = 0, d = 0mm - 4.4608mm),
+      half_space(nx = -0.036803, ny = 0.999323, nz = 0, d = 0mm - 2.5449mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.036803, ny = -0.999323, nz = 0, d = 2.5497mm),
+      half_space(nx = 0.751295, ny = -0.659967, nz = 0, d = 0mm - 4.8477mm),
+      half_space(nx = -0.102016, ny = 0.994783, nz = 0, d = 0mm - 1.7137mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.102016, ny = -0.994783, nz = 0, d = 1.7188mm),
+      half_space(nx = 0.914229, ny = -0.405197, nz = 0, d = 0mm - 6.9427mm),
+      half_space(nx = -0.174100, ny = 0.984728, nz = 0, d = 0mm - 0.7792mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.694658, ny = -0.719340, nz = 0, d = 10.9065mm),
+      half_space(nx = 0.174100, ny = -0.984728, nz = 0, d = 0.7847mm),
+      half_space(nx = -0.108272, ny = 0.994121, nz = 0, d = 0mm - 1.3713mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.694658, ny = -0.719340, nz = 0, d = 10.9065mm),
+      half_space(nx = 0.108272, ny = -0.994121, nz = 0, d = 1.3765mm),
+      half_space(nx = -0.048582, ny = 0.998819, nz = 0, d = 0mm - 1.8993mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.048582, ny = -0.998819, nz = 0, d = 1.9041mm),
+      half_space(nx = 0.719340, ny = -0.694658, nz = 0, d = 0mm - 4.5845mm),
+      half_space(nx = -0.098860, ny = 0.995101, nz = 0, d = 0mm - 1.2352mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.098860, ny = -0.995101, nz = 0, d = 1.2396mm),
+      half_space(nx = 0.719340, ny = -0.694658, nz = 0, d = 0mm - 4.5845mm),
+      half_space(nx = -0.143594, ny = 0.989637, nz = 0, d = 0mm - 0.6387mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.143594, ny = -0.989637, nz = 0, d = 0.6428mm),
+      half_space(nx = 0.719340, ny = -0.694658, nz = 0, d = 0mm - 4.5845mm),
+      half_space(nx = -0.183420, ny = 0.983035, nz = 0, d = 0mm - 0.1032mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.183420, ny = -0.983035, nz = 0, d = 0.1072mm),
+      half_space(nx = 0.719340, ny = -0.694658, nz = 0, d = 0mm - 4.5845mm),
+      half_space(nx = -0.218936, ny = 0.975739, nz = 0, d = 0.3779mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.218936, ny = -0.975739, nz = 0, d = 0mm - 0.3741mm),
+      half_space(nx = 0.717602, ny = -0.696453, nz = 0, d = 0mm - 4.5688mm),
+      half_space(nx = -0.250557, ny = 0.968102, nz = 0, d = 0.8091mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.167073, ny = -0.985944, nz = 0, d = 4.7018mm),
+      half_space(nx = 0.250557, ny = -0.968102, nz = 0, d = 0mm - 0.8061mm),
+      half_space(nx = -0.230933, ny = 0.972970, nz = 0, d = 0.6564mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.301861, ny = 0.953352, nz = 0, d = 1.7101mm),
+      half_space(nx = 0.124054, ny = -0.992275, nz = 0, d = 0.8474mm),
+      half_space(nx = 0.305313, ny = -0.952252, nz = 0, d = 0mm - 1.6969mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.230933, ny = -0.972970, nz = 0, d = 0mm - 0.6546mm),
+      half_space(nx = 0.395872, ny = -0.918306, nz = 0, d = 0mm - 1.9383mm),
+      half_space(nx = -0.239782, ny = 0.970827, nz = 0, d = 0.7790mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.239782, ny = -0.970827, nz = 0, d = 0mm - 0.7771mm),
+      half_space(nx = 0.610017, ny = -0.792388, nz = 0, d = 0mm - 3.5810mm),
+      half_space(nx = -0.259293, ny = 0.965799, nz = 0, d = 1.0521mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.305313, ny = 0.952252, nz = 0, d = 1.7007mm),
+      half_space(nx = 0.259293, ny = -0.965799, nz = 0, d = 0mm - 1.0428mm),
+      half_space(nx = 0.335094, ny = -0.942185, nz = 0, d = 0mm - 1.5872mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.236945, ny = -0.971523, nz = 0, d = 0.9528mm),
+      half_space(nx = 0.006447, ny = -0.999979, nz = 0, d = 0.6466mm),
+      half_space(nx = 0.115679, ny = 0.993287, nz = 0, d = 0mm - 0.7630mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.204024, ny = -0.978966, nz = 0, d = 1.5171mm),
+      half_space(nx = 0.002929, ny = -0.999996, nz = 0, d = 0.7795mm),
+      half_space(nx = 0.100150, ny = 0.994972, nz = 0, d = 0mm - 1.1155mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.282630, ny = -0.959229, nz = 0, d = 1.8153mm),
+      half_space(nx = -0.100150, ny = -0.994972, nz = 0, d = 1.1165mm),
+      half_space(nx = 0.162264, ny = 0.986747, nz = 0, d = 0mm - 1.3144mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.162264, ny = -0.986747, nz = 0, d = 1.3154mm),
+      half_space(nx = 0.000148, ny = -1.000000, nz = 0, d = 0.7896mm),
+      half_space(nx = 0.121557, ny = 0.992584, nz = 0, d = 0mm - 1.1434mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.121557, ny = -0.992584, nz = 0, d = 1.1447mm),
+      half_space(nx = 0.142584, ny = -0.989783, nz = 0, d = 0.3602mm),
+      half_space(nx = 0.068923, ny = 0.997622, nz = 0, d = 0mm - 0.9204mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.068923, ny = -0.997622, nz = 0, d = 0.9219mm),
+      half_space(nx = 0.177923, ny = -0.984044, nz = 0, d = 0.2632mm),
+      half_space(nx = 0.027870, ny = 0.999612, nz = 0, d = 0mm - 0.7455mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.280556, ny = -0.959838, nz = 0, d = 1.8106mm),
+      half_space(nx = -0.027870, ny = -0.999612, nz = 0, d = 0.7470mm),
+      half_space(nx = 0.064928, ny = 0.997890, nz = 0, d = 0mm - 0.8301mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.064928, ny = -0.997890, nz = 0, d = 0.8315mm),
+      half_space(nx = 0.160866, ny = -0.986976, nz = 0, d = 0.3058mm),
+      half_space(nx = 0.036563, ny = 0.999331, nz = 0, d = 0mm - 0.7000mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.036563, ny = -0.999331, nz = 0, d = 0.7013mm),
+      half_space(nx = 0.159544, ny = -0.987191, nz = 0, d = 0.3085mm),
+      half_space(nx = 0.014576, ny = 0.999894, nz = 0, d = 0mm - 0.5989mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.166864, ny = -0.985980, nz = 0, d = 1.2994mm),
+      half_space(nx = -0.014576, ny = -0.999894, nz = 0, d = 0.6000mm),
+      half_space(nx = 0.029893, ny = 0.999553, nz = 0, d = 0mm - 0.6243mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.115679, ny = -0.993287, nz = 0, d = 0.7638mm),
+      half_space(nx = 0.001764, ny = -0.999998, nz = 0, d = 0.6512mm),
+      half_space(nx = 0.076300, ny = 0.997085, nz = 0, d = 0mm - 0.7000mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.076300, ny = -0.997085, nz = 0, d = 0.7005mm),
+      half_space(nx = 0.001567, ny = -0.999999, nz = 0, d = 0.6514mm),
+      half_space(nx = 0.056712, ny = 0.998391, nz = 0, d = 0mm - 0.6683mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.079089, ny = -0.996868, nz = 0, d = 0.8681mm),
+      half_space(nx = -0.029893, ny = -0.999553, nz = 0, d = 0.6249mm),
+      half_space(nx = 0.034462, ny = 0.999406, nz = 0, d = 0mm - 0.6321mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.783844, ny = -0.620957, nz = 0, d = 0.4415mm),
+      half_space(nx = -0.770906, ny = 0.636949, nz = 0, d = 0mm - 0.3574mm),
+      half_space(nx = -0.784852, ny = 0.619683, nz = 0, d = 0mm - 0.4404mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.188588, ny = -0.982056, nz = 0, d = 0.7387mm),
+      half_space(nx = 0.784852, ny = -0.619683, nz = 0, d = 0.4434mm),
+      half_space(nx = -0.742061, ny = 0.670332, nz = 0, d = 0mm - 0.1918mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.056712, ny = -0.998391, nz = 0, d = 0.7029mm),
+      half_space(nx = 0.742061, ny = -0.670332, nz = 0, d = 0.2050mm),
+      half_space(nx = -0.597864, ny = 0.801598, nz = 0, d = 0.5390mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.034462, ny = -0.999406, nz = 0, d = 0.6657mm),
+      half_space(nx = 0.597864, ny = -0.801598, nz = 0, d = 0mm - 0.5078mm),
+      half_space(nx = -0.362659, ny = 0.931922, nz = 0, d = 1.5072mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.026776, ny = -0.999641, nz = 0, d = 0.3380mm),
+      half_space(nx = 0.362659, ny = -0.931922, nz = 0, d = 0mm - 1.4918mm),
+      half_space(nx = -0.350618, ny = 0.936519, nz = 0, d = 1.5378mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.070354, ny = -0.997522, nz = 0, d = 0.0888mm),
+      half_space(nx = 0.350618, ny = -0.936519, nz = 0, d = 0mm - 1.5358mm),
+      half_space(nx = -0.340798, ny = 0.940137, nz = 0, d = 1.5730mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.233525, ny = -0.972351, nz = 0, d = 0mm - 0.9084mm),
+      half_space(nx = 0.340798, ny = -0.940137, nz = 0, d = 0mm - 1.5717mm),
+      half_space(nx = -0.337125, ny = 0.941460, nz = 0, d = 1.5856mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.296741, ny = -0.954958, nz = 0, d = 0mm - 1.3206mm),
+      half_space(nx = 0.337125, ny = -0.941460, nz = 0, d = 0mm - 1.5851mm),
+      half_space(nx = -0.335751, ny = 0.941951, nz = 0, d = 1.5903mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.315935, ny = -0.948781, nz = 0, d = 0mm - 1.4531mm),
+      half_space(nx = 0.335751, ny = -0.941951, nz = 0, d = 0mm - 1.5901mm),
+      half_space(nx = -0.335094, ny = 0.942185, nz = 0, d = 1.5926mm),
+      box(x = 33mm, y = 33mm, z = datum.barrel_bridge_thickness()),
+    ),
   )
+
+
+
+
+
   let feet = union(
     common.bridge_foot(
       r = datum.bridge_foot_radius(),
@@ -101,18 +1143,31 @@ part eta_pos_16_barrel_bridge_envelope() -> Solid<Exact> {
       r = datum.crown_wheel_tip_radius() + datum.running_clearance(),
       h = datum.barrel_bridge_thickness() + 0.4mm,
     )
-      |> at(dx = 2.4417mm, dy = 0mm - 0.6388mm, dz = 0mm),
-    -- and the ratchet wheel is countersunk into the top face
+      |> at(
+        dx = datum.crown_wheel_centre_x() - 6.3586mm,
+        dy = datum.crown_wheel_centre_y() - 3.6287mm,
+        dz = 0mm,
+      ),
+    -- the automatic module's driving pinion drops through here to the ratchet
+    cylinder(r = 0.9mm, h = datum.barrel_bridge_thickness() + 0.4mm)
+      |> at(dx = 0mm - 0.8175mm - 6.3586mm, dy = 3.5109mm - 3.6287mm, dz = 0mm),
+    -- and the ratchet wheel is countersunk into its top face. A COUNTERBORE,
+    -- floored -- it used to be a 0.6 cylinder placed from the ratchet's own seat,
+    -- which put it at local -0.210 to +0.390 through a plate spanning -0.200 to
+    -- +0.200. It cut a 3.78 radius hole clean through the bridge. That did not
+    -- show while the blank was a stick figure barely wider than the hole; the
+    -- moment the blank became the measured 17.3 x 17.8 outline it tore the plate
+    -- into six pieces, which is the "shards" in the viewer.
     cylinder(
       r = datum.ratchet_wheel_tip_radius() + datum.running_clearance(),
-      h = 0.6mm,
+      h = datum.barrel_bridge_thickness(),
     )
       |> at(
         dx = 0mm - 3.5246mm,
         dy = 2.0763mm,
-        dz = datum.ratchet_wheel_seat_z() - datum.endshake()
-          - (datum.barrel_bridge_underside_z() + datum.barrel_bridge_top_z()) / 2
-          + 0.3mm,
+        dz = datum.barrel_bridge_thickness() / 2
+          + datum.barrel_bridge_thickness() / 2
+          - ratchet_countersink_depth(),
       ),
     common.screw_clearance_hole(
       head_r = 0.5mm,
@@ -144,9 +1199,15 @@ part eta_pos_16_barrel_bridge_envelope() -> Solid<Exact> {
   cut(union(blank, feet), union(clearances, train_bridge_relief))
 }
 
-part eta_pos_16_barrel_bridge_jewel() -> Solid<Exact> {
-  common.jewel_ring(r = 0.5mm, h = 0.3mm, bore_r = 0.14mm)
-}
+-- The barrel arbor's upper bearing is a plain hole in the bridge, not a jewel.
+-- Nothing in the technical communication shows a jewel there, and a barrel
+-- arbor turns once every six hours under high torque, which is the classic case
+-- for a plain brass bearing rather than a jewelled one. The plate's LOWER
+-- barrel bearing is jewelled and is evidenced -- it is one of the coloured
+-- jewels measured off the plate view -- and it stays.
+--
+-- Modelling one here had put a 0.14mm bore around a 0.34mm arbor with the
+-- ratchet screw through it as well, which is three bodies in one hole.
 
 part eta_pos_17_click_envelope() -> Solid<Exact> {
   -- Pivots on a post in the barrel bridge; its beak drops between the ratchet
@@ -171,31 +1232,39 @@ part eta_pos_18_click_spring_envelope() -> Solid<Exact> {
 }
 
 part eta_pos_19_crown_wheel_envelope(bevel_phase: Angle) -> Solid<Exact> {
-  -- 26 teeth on module 0.23, pitch radius 2.9900mm, meshing the ratchet wheel at
-  -- the 6.5550mm centre distance the two measured diameters require.
+  -- 26 teeth on module 0.2298 -- twice the ratchet wheel's -- engaging EVERY
+  -- OTHER tooth of the 63 on the ratchet. Pitch radius 2.9874, meshing at a
+  -- 6.6068 centre distance. See `datum.winding_module` and ERRORS.md E9.
+  --
+  -- The teeth are slender because they have to enter a ratchet space half
+  -- their own pitch: thinned to 0.166 at the pitch circle against the
+  -- ratchet's 0.1805 space, they come to a point at 3.1775. That is an outside
+  -- diameter of 6.355 against 6.29-6.41 measured off page 6 -- a number
+  -- nothing here was fitted to.
   --
   -- One 0.82mm disc does both jobs. Its upper part is coplanar with the
   -- ratchet wheel it drives; the band of teeth standing down from its
   -- underside is the 90-degree face-gear interface to the stem's winding
-  -- pinion, which reaches up through the plate to meet it. The stem's height
-  -- is derived from that mesh, not the other way round -- see
-  -- `datum.stem_axis_z`.
-  let wheel = common.toothed_disk(
-    root_r = 2.7025mm,
-    tooth_depth = 0.5175mm,
-    tooth_width = 0.322mm,
-    h = datum.crown_wheel_thickness(),
+  -- pinion, which reaches up through the plate to meet it.
+  let wheel = common.involute_disk(
+    root_r = 2.70015mm,
     bore_r = 0.44mm,
+    flank_nx = 0.32495,
+    flank_ny = 0.94573,
+    flank_d = 1.02482mm,
+    inner_x = 2.43013mm,
+    tip_r = datum.crown_wheel_tip_radius(),
+    h = datum.crown_wheel_thickness(),
     teeth = 26,
   )
   let underside_tooth = box(
-    x = 0.42mm,
-    y = 0.322mm,
+    x = 0.28mm,
+    y = 0.168mm,
     z = datum.crown_wheel_bevel_depth(),
   )
     |> rotate(ax = 0, ay = 1, az = 0, angle = 0deg - 26deg)
     |> at(
-      dx = 2.99mm,
+      dx = datum.crown_wheel_pitch_radius(),
       dy = 0mm,
       dz = 0mm - datum.crown_wheel_thickness() / 2
         - datum.crown_wheel_bevel_depth() / 2
@@ -211,19 +1280,27 @@ part eta_pos_19_crown_wheel_envelope(bevel_phase: Angle) -> Solid<Exact> {
 }
 
 part eta_pos_20_ratchet_wheel_envelope() -> Solid<Exact> {
-  -- Measured 7.40mm over the tips and 0.53mm thick; on module 0.23 that is 31
-  -- teeth, pitch radius 3.5650mm. Rides on the barrel arbor and is held by
-  -- the left-hand-threaded ratchet screw, position 903.
-  common.spoked_wheel(
-    root_r = 3.2775mm,
-    rim_width = 0.42mm,
-    tooth_depth = 0.5175mm,
-    tooth_width = 0.322mm,
+  -- 63 teeth on module 0.1149, pitch radius 3.61935, over a measured 7.40-7.54
+  -- outside diameter and 0.53 thick. Rides on the barrel arbor, held by the
+  -- left-hand-threaded ratchet screw, position 903.
+  --
+  -- This one toothing does three jobs. The click holds it. The automatic
+  -- module's driving pinion meshes it normally. And the crown wheel engages it
+  -- TWO TEETH AT A TIME, on twice this module -- which is why the crown wheel
+  -- carries 26 teeth against these 63 and still turns the barrel arbor.
+  common.involute_spoked_wheel(
+    root_r = 3.47572mm,
+    rim_width = 0.36mm,
     hub_r = 0.78mm,
     bore_r = 0.36mm,
     spoke_width = 0.3mm,
+    flank_nx = 0.30262,
+    flank_ny = 0.95311,
+    flank_d = 1.17143mm,
+    inner_x = 3.12815mm,
+    tip_r = 3.73425mm,
     h = datum.ratchet_wheel_thickness(),
-    teeth = 31,
+    teeth = 63,
     spokes = 5,
   )
     |> cut(
@@ -236,10 +1313,22 @@ part eta_pos_20_ratchet_wheel_envelope() -> Solid<Exact> {
 -- MAIN PLATE, not the bridge, because the bridge is open around the crown
 -- wheel to let the wheel reach down to the winding pinion.
 part crown_wheel_arbor() -> Solid<Exact> {
+  -- Stops below the screw's COLLAR, not just below its head. Position 902 is a
+  -- collared screw: an 0.34 collar sits in the crown wheel's 0.44 bore and only
+  -- the 0.22 shank enters the arbor. An arbor rising to the head's counterbore
+  -- floor puts its 0.26 bore around that collar, and no wall thin enough to
+  -- clear it would be a wall. So the arbor stops at the collar's underside,
+  -- 0.30 below the wheel's top face, leaving the collar in the wheel where it
+  -- belongs. That is asymmetric -- a centred cylinder shortened by 0.30 only
+  -- drops its top by 0.15 -- so the placement moves with the height. Bored 0.26
+  -- for the 0.22 shank.
   cut(
-    cylinder(r = 0.4mm, h = datum.crown_wheel_top_z() - datum.plate_train_face_z()),
     cylinder(
-      r = 0.24mm,
+      r = 0.4mm,
+      h = datum.crown_wheel_top_z() - datum.plate_train_face_z() - 0.3mm,
+    ),
+    cylinder(
+      r = 0.26mm,
       h = datum.crown_wheel_top_z() - datum.plate_train_face_z() + 0.4mm,
     ),
   )
@@ -251,8 +1340,16 @@ part click_post() -> Solid<Exact> {
 }
 
 part barrel_arbor_upper_pivot() -> Solid<Exact> {
-  -- Bored for the ratchet screw that clamps the ratchet wheel to it.
-  cut(cylinder(r = 0.34mm, h = 1.1mm), cylinder(r = 0.24mm, h = 1.5mm))
+  -- Stepped, because a bearing takes a PIVOT and not the arbor's body: the thin
+  -- end runs in the bridge and the shoulder stops on its underside. Bored from
+  -- the top for the ratchet screw, which stops well short of the pivot.
+  let pivot = cylinder(r = 0.13mm, h = 0.42mm)
+    |> at(dx = 0mm, dy = 0mm, dz = 0mm - 0.34mm)
+  let body = cylinder(r = 0.34mm, h = 0.68mm)
+    |> at(dx = 0mm, dy = 0mm, dz = 0.21mm)
+
+  cut(union(pivot, body), cylinder(r = 0.28mm, h = 0.62mm)
+    |> at(dx = 0mm, dy = 0mm, dz = 0.34mm))
 }
 
 part barrel_and_winding_assembly() -> Assembly {
@@ -296,19 +1393,6 @@ part barrel_and_winding_assembly() -> Assembly {
         ),
         color = rgb(r = 179, g = 176, b = 167),
       ),
-    eta_pos_16_barrel_bridge_jewel()
-      |> place(
-        frame = frame(
-          origin = point(
-            x = 2.834mm,
-            y = 5.705mm,
-            z = datum.barrel_bridge_underside_z() + 0.15mm,
-          ),
-          axis = Z,
-          angle = 0deg,
-        ),
-        color = rgba(r = 190, g = 20, b = 62, a = 210),
-      ),
     eta_pos_17_click_envelope()
       |> place(
         frame = frame(
@@ -335,16 +1419,16 @@ part barrel_and_winding_assembly() -> Assembly {
         ),
         color = rgb(r = 100, g = 112, b = 126),
       ),
-    eta_pos_19_crown_wheel_envelope(bevel_phase = 121.827deg)
+    eta_pos_19_crown_wheel_envelope(bevel_phase = 116.942deg)
       |> place(
         frame = frame(
           origin = point(
-            x = 8.8003mm,
-            y = 2.9899mm,
+            x = datum.crown_wheel_centre_x(),
+            y = datum.crown_wheel_centre_y(),
             z = datum.crown_wheel_seat_z() + datum.crown_wheel_thickness() / 2,
           ),
           axis = Z,
-          angle = 155.531deg,
+          angle = 155.72deg,
         ),
         color = rgb(r = 205, g = 165, b = 58),
       ),
@@ -357,7 +1441,7 @@ part barrel_and_winding_assembly() -> Assembly {
             z = datum.ratchet_wheel_seat_z() + datum.ratchet_wheel_thickness() / 2,
           ),
           axis = Z,
-          angle = 341.337deg,
+          angle = 338.581deg,
         ),
         color = rgb(r = 211, g = 171, b = 63),
       ),
@@ -378,9 +1462,9 @@ part barrel_and_winding_assembly() -> Assembly {
       |> place(
         frame = frame(
           origin = point(
-            x = 8.8003mm,
-            y = 2.9899mm,
-            z = (datum.plate_train_face_z() + datum.crown_wheel_top_z()) / 2,
+            x = datum.crown_wheel_centre_x(),
+            y = datum.crown_wheel_centre_y(),
+            z = (datum.plate_train_face_z() + datum.crown_wheel_top_z() - 0.3mm) / 2,
           ),
           axis = Z,
           angle = 0deg,

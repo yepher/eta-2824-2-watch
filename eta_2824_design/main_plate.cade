@@ -38,12 +38,22 @@ fn dial_foot_depth() -> Len {
 -- The lever pocket in the dial-side face. The PINIONS are not in it: they sit
 -- in the measured through-slot, whose size and position come from
 -- `datum.keyless_slot_*`.
+--
+-- Its extent is set by the BARREL, not by the levers. The barrel counterbore
+-- comes down to y = +0.12 at this pocket's inner edge, and the two overlap in Z
+-- between 1.15 and 1.40, so a pocket reaching any further would open the plate
+-- straight into the barrel. The levers are laid out to fit the room that
+-- leaves rather than the other way round.
 fn lever_pocket_half_width() -> Len {
-  2.6mm
+  1.8mm
+}
+
+fn lever_pocket_centre_y() -> Len {
+  0mm - 2.1mm
 }
 
 fn lever_pocket_inner_x() -> Len {
-  3.9mm
+  4.2mm
 }
 
 part eta_pos_1_main_plate_envelope() -> Solid<Exact> {
@@ -93,7 +103,7 @@ part eta_pos_1_main_plate_envelope() -> Solid<Exact> {
   )
     |> at(
       dx = lever_pocket_inner_x() + 5mm,
-      dy = 0mm - 1.1mm,
+      dy = lever_pocket_centre_y(),
       dz = pocket_floor_local_z,
     )
   -- The stem runs in the plate outboard of that pocket, on the pocket's axis.
@@ -143,6 +153,15 @@ part eta_pos_1_main_plate_envelope() -> Solid<Exact> {
         dx = datum.unidentified_plate_jewel_x(),
         dy = datum.unidentified_plate_jewel_y(),
         dz = 0mm,
+      ),
+    -- The second wheel's pinion is long: it reaches down from the wheel's own
+    -- plane to the barrel's great wheel, which sits low in the barrel recess.
+    -- The plate is relieved under it, as it is under any long pinion.
+    cylinder(r = 1.25mm, h = 0.5mm)
+      |> at(
+        dx = datum.second_wheel_x(),
+        dy = datum.second_wheel_y(),
+        dz = train_face_local_z() - 0.15mm,
       ),
     -- balance, in its shock-absorber seat
     cylinder(

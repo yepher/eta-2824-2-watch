@@ -3,120 +3,2199 @@ import "./datums.cade" as datum
 
 -- ETA positions 25 to 31: the automatic winding module.
 --
--- Re-derived 2026-09-05. The chain, from the oscillating weight to the
--- mainspring:
+-- Re-derived 2026-09-06 on module 0.12, from the STEPPED PROFILES of the
+-- elevations on the materials page. Several of these parts are two diameters
+-- on one arbor and the bounding boxes hid it; reading width against height
+-- recovers both, and the pinion diameters are what settle the module. See
+-- `datum.winding_module` for that argument.
 --
---   rotor pinion 40 -> reversing wheels 27 and 28, 34 each  (module 0.120)
---   27 and 28 34    -> reduction wheel 29, 52               (module 0.120)
---   reduction pinion 12 -> driving wheel 26, 42             (module 0.100)
---   driving pinion 10   -> ratchet wheel 20, 63             (module 0.100)
+-- RE-SOLVED 2026-09-06 IN SERIES, from photographs of the module. The chain
+-- was previously wired in PARALLEL - the rotor driving both reversing wheels
+-- and both driving the reduction wheel - which left the two reversing wheels
+-- 8.14 apart with tip radii summing to 6.45. A 1.70 gap. They never touched,
+-- and a pair that has to carry the rotor's torque in both directions carried
+-- nothing. Every photograph of this module shows them side by side and
+-- meshing. See ERRORS.md E10.
 --
---   1 rotor turn = 0.03489 ratchet turns, so 28.7 turns of the weight wind the
---   ratchet wheel once. A full wind of about six barrel turns is roughly 170
---   turns of the weight, which is the right order for a calibre of this size.
+--   rotor ring 45 (5.61)       -> aux reversing ring A 36 (4.60)  C 4.8600
+--   aux reversing ring B 33    -> reversing ring A 36 (4.60)      C 4.1400
+--   reversing ring B 33 (4.24) -> reduction ring 40 (4.99)        C 4.3800
+--   reduction pinion 8 (1.16)  -> driving ring 47 (5.87)          C 3.3000
+--   driving pinion 10 (1.43)   -> ratchet wheel 63 (7.47)         C 4.1939
 --
--- The two reversing wheels both mesh the rotor pinion and both mesh the
--- reduction wheel: whichever way the weight swings, one of them locks and
--- drives while the other free-wheels. Their internal pawls are not modelled.
+--   1 rotor turn = 0.02554 ratchet turns, so 39.2 turns of the weight wind
+--   the ratchet once. It was 34.8 on the parallel wiring.
 --
--- A NOTE ON THE TEETH. Every mesh here is phased -- a tooth on the line of
--- centres for the driver, half a pitch off it for the driven wheel -- but three
--- wheels in this module carry more than one mesh on a single tooth ring: the
--- rotor pinion drives both reversers, and the reduction wheel is driven by both
--- of them while driving the driving wheel. A ring can only be phased for one of
--- its meshes; square tooth blocks then overlap slightly at the others, by
--- 0.003 to 0.021mm cubed. Real involute flanks roll through this; blocks
--- cannot. The teeth are drawn narrow to keep the artefact small, and it is an
--- artefact of the representation rather than an error in the layout -- the
--- centre distances and the ratio are exact.
+-- The driving pinion now meshes the ratchet wheel on the RATCHET's module,
+-- 0.1149, not 0.12 -- the ratchet is 63 teeth since E9 closed, and a pinion
+-- meshes the wheel it drives.
 --
--- The rotor pinion's pitch radius is 2.40mm because it has to clear the ball
--- bearing it is cut around; that is what sets the whole layout's scale.
+-- HOW THE POSITIONS WERE FOUND. The five centre distances above are exact:
+-- each is m(z1+z2)/2 from the counts, the way the going train and the winding
+-- train were solved. That leaves the chain free to fold either way about the
+-- rotor, and the photographs choose the fold: the wheels run as one arc
+-- hugging the rotor seat, not scattered across the plate. The angular branch
+-- is therefore photo-GUIDED rather than photo-measured - every frame of this
+-- module is oblique, and none of them has a scale in it. The centre distances
+-- are exact; the angles are good to a few degrees and no better.
 --
--- Everything is modelled and placed in movement coordinates, so the framework
--- sits at the origin and each opening is at its wheel's own centre.
-fn module_rotor_reversing() -> Len {
-  0.12mm
+-- The reversing wheels are NOT a wheel and pinion. Their elevations show two
+-- toothed rings of nearly the same diameter, 4.60 and 4.24, which is what a
+-- reversing wheel with internal pawls looks like: one ring takes the drive
+-- from the rotor, the other passes it on, and the pawls between them lock in
+-- one direction and slip in the other. Whichever way the weight swings, one
+-- of the pair drives and the other free-wheels. The pawls are not modelled.
+--
+-- Only the driving wheel's pinion reaches the ratchet. A 5.87mm ring dipping
+-- to the ratchet's level would cut through both bridges, so the ring stays
+-- above the automatic seat and the pinion drops through a relief in the
+-- barrel bridge.
+--
+--
+-- THE ROTOR'S RIM IS THE BINDING CONSTRAINT, and a first solve missed it. The
+-- weight carries its mass in a rim whose bore is 8.6, and the whole module runs
+-- inside that bore, so every wheel needs |r| + tip <= 8.6. A solve without it
+-- put the reversing wheel at |r| 7.72, tip reaching 10.0, straight into the rim
+-- - 0.093 of overlap, which the audit found. With the rim in, the four wheels
+-- close on an arc at -10.8, +30.1, +71.4 and +103.8 degrees about the rotor
+-- axis: a 115 degree span, against the 117 measured off the flat photograph of
+-- the module. That agreement was not fitted; the angles fall out of the five
+-- exact centre distances once the rim and the balance sweep are respected.
+--
+-- A NOTE ON THE TEETH. The chain is now a simple series, so every wheel has
+-- at most two meshes and each is phased against the one that drives it: a
+-- tooth of the driver on the line of centres, a space of the driven facing it.
+-- Axial levels. The order is forced: the reversing wheels take the drive from
+-- the rotor's ring at the top and hand it to the reduction wheel below, so
+-- each of them spans two levels -- which is also why ETA fits them between
+-- the driving wheel and the reduction wheel.
+--
+--   3.35  framework            0.20
+--   3.57  driving ring         0.14   with the reduction pinion
+--   3.75  reduction ring       0.14   with reversing ring B
+--   3.93  rotor ring           0.14   with reversing ring A
+--   4.11  lower bridge         0.14
+--   4.30  the weight's plate, inside whose rim the whole module runs
+-- Thinned 0.14 -> 0.11 and the pitch 0.18 -> 0.13. The old stack needed
+-- 0.14 + 0.50 + 0.20 = 0.86 of the 0.75 between the automatic seat at 3.35 and
+-- the weight's hub at 4.10, so the top two wheels ended up INSIDE the framework
+-- and had to be given 2.4 clearance holes -- which is why they read as sitting
+-- on top of the plate instead of under it. At 0.11 on 0.13 the whole chain fits
+-- beneath a solid framework, which is what the photographs show: the wheels are
+-- seen through narrow crescent openings, not through holes their own size.
+fn ring_thickness() -> Len {
+  0.11mm
 }
 
-fn module_reduction_driving() -> Len {
-  0.1mm
+fn ring_pitch() -> Len {
+  0.13mm
 }
 
--- Axial levels inside the module.
---
--- Two large discs 2.70mm apart cannot share a level -- that is what a mesh is,
--- and the reduction wheel's 3.24mm tip circle swallows the driving wheel's
--- 2.20mm one. So the module is staircased exactly like the going train: the
--- reversing wheels and the reduction WHEEL run on the upper level, and the
--- reduction PINION and the driving wheel on the lower one. The driving wheel's
--- own pinion then drops again to reach the ratchet wheel.
-fn reverser_level_z() -> Len {
-  datum.automatic_seat_z() + 0.33mm
+-- Dropped 0.06 from +0.29. The three rings sit at this, +0.18 and +0.36; with the
+-- framework now the OUTER member at 3.85 to 4.05, the reduction ring's top was at
+-- 3.89 and cut 0.249 mm^3 into it. At +0.23 the rings top out at 3.65, 3.83 and
+-- 4.01: the lower two pass under the plate, which is what lets it cover them, and
+-- only the rotor-level ring comes through -- which is 27's, and has its hole.
+-- Still 0.09 clear of the lower bridge at 3.49 underneath.
+fn driving_ring_z() -> Len {
+  datum.automatic_seat_z() + 0.20mm
 }
 
-fn driving_wheel_level_z() -> Len {
-  datum.automatic_seat_z() + 0.09mm
+fn reduction_ring_z() -> Len {
+  driving_ring_z() + ring_pitch()
+}
+
+fn rotor_ring_z() -> Len {
+  reduction_ring_z() + ring_pitch()
 }
 
 fn reduction_pinion_drop() -> Len {
-  reverser_level_z() - driving_wheel_level_z()
+  reduction_ring_z() - driving_ring_z()
+}
+
+-- The driving wheel's pinion reaches down to the ratchet wheel, through the
+-- automatic seat and a relief in the barrel bridge.
+fn driving_pinion_z() -> Len {
+  datum.ratchet_wheel_seat_z() + datum.ratchet_wheel_thickness() / 2
 }
 
 fn driving_pinion_drop() -> Len {
-  0.33mm
+  driving_ring_z() - driving_pinion_z()
+}
+
+-- The oscillating weight's toothed ring, cut around the bearing's races.
+-- Position 31-2 is one part: a ball bearing with this ring around its outer
+-- race. 5.61mm over the teeth on module 0.12 is 45 teeth.
+part eta_pos_31_3_rotor_pinion() -> Solid<Exact> {
+  common.involute_disk(
+    root_r = 2.55mm,
+    bore_r = datum.rotor_bearing_seat_radius(),
+    flank_nx = 0.28203,
+    flank_ny = 0.95941,
+    flank_d = 0.83768mm,
+    inner_x = 2.295mm,
+    tip_r = 2.82mm,
+    h = ring_thickness(),
+    teeth = 45,
+  )
+}
+
+-- Positions 27 and 28 are the same manufactured reversing wheel, so they are
+-- the same definition and carry the same colour: Cade groups identical
+-- definitions by content and refuses two colours on one (GAP-2026-09-05-05).
+part eta_pos_27_aux_reversing_wheel_envelope() -> Solid<Exact> {
+  -- Ring B below, taking the drive on to the reduction wheel; ring A above,
+  -- meshing the rotor. Measured 4.24 and 4.60 over the teeth.
+  union(
+    common.involute_disk(
+      root_r = 1.83mm,
+      bore_r = 0.22mm,
+      flank_nx = 0.28378,
+      flank_ny = 0.95889,
+      flank_d = 0.63688mm,
+      inner_x = 1.647mm,
+      tip_r = 2.1mm,
+      h = ring_thickness(),
+      teeth = 33,
+    ),
+    common.involute_disk(
+      root_r = 2.01mm,
+      bore_r = 0.22mm,
+      flank_nx = 0.28003,
+      flank_ny = 0.95999,
+      flank_d = 0.67988mm,
+      inner_x = 1.809mm,
+      tip_r = 2.28mm,
+      h = ring_thickness(),
+      teeth = 36,
+    )
+      |> at(dx = 0mm, dy = 0mm, dz = ring_pitch()),
+    cylinder(r = 0.34mm, h = ring_pitch() + ring_thickness())
+      |> at(dx = 0mm, dy = 0mm, dz = ring_pitch() / 2),
+  )
+}
+
+part eta_pos_28_reversing_wheel_envelope() -> Solid<Exact> {
+  eta_pos_27_aux_reversing_wheel_envelope()
+}
+
+part eta_pos_29_reduction_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
+  -- Measured 4.99 over the ring and 1.16 over the pinion: 40 teeth and 8
+  -- leaves on module 0.12. The pinion hangs below, on the driving wheel.
+  union(
+    common.involute_disk(
+      root_r = 2.25mm,
+      bore_r = 0.22mm,
+      flank_nx = 0.27573,
+      flank_ny = 0.96123,
+      flank_d = 0.7368mm,
+      inner_x = 2.025mm,
+      tip_r = 2.52mm,
+      h = ring_thickness(),
+      teeth = 40,
+    ),
+    common.involute_disk(
+      root_r = 0.33mm,
+      bore_r = 0.12mm,
+      flank_nx = 0.36933,
+      flank_ny = 0.9293,
+      flank_d = 0.24939mm,
+      inner_x = 0.297mm,
+      tip_r = 0.6mm,
+      h = reduction_pinion_drop() + ring_thickness(),
+      teeth = 8,
+    )
+      |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
+      |> at(dx = 0mm, dy = 0mm, dz = 0mm - reduction_pinion_drop() / 2),
+  )
+}
+
+part eta_pos_26_driving_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
+  -- Measured 5.87 over the ring and 1.43 over the pinion: 47 teeth and 10
+  -- leaves on module 0.12. The pinion is what turns the ratchet wheel.
+  union(
+    common.involute_disk(
+      root_r = 2.67mm,
+      bore_r = 0.22mm,
+      flank_nx = 0.28548,
+      flank_ny = 0.95838,
+      flank_d = 0.88179mm,
+      inner_x = 2.403mm,
+      tip_r = 2.94mm,
+      h = ring_thickness(),
+      teeth = 47,
+    ),
+    common.involute_disk(
+      root_r = 0.45mm,
+      bore_r = 0.15mm,
+      flank_nx = 0.35346,
+      flank_ny = 0.93545,
+      flank_d = 0.28518mm,
+      inner_x = 0.405mm,
+      tip_r = 0.72mm,
+      h = driving_pinion_drop() + ring_thickness(),
+      teeth = 10,
+    )
+      |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
+      |> at(dx = 0mm, dy = 0mm, dz = 0mm - driving_pinion_drop() / 2),
+  )
+}
+
+-- A pocket for one wheel, sunk from the framework's UNDERSIDE and floored
+-- `running_clearance` above the wheel's own top. Local to the framework, whose
+-- origin is at mid-thickness.
+-- POSITION 25 IS A STACK OF ROUND PLATES, and this is the arithmetic of the
+-- stack. Corrected 2026-09-07 from photographs the project lead annotated: the
+-- module dismantled with 25, 26, 27, 28, 29, 30 and 905 labelled on it, and the
+-- assembled movement with 25's own outline drawn on the back. The second of
+-- those is concentric -- eight circles about the rotor axis -- and
+-- `tools/framework_steps.py` reads their radii off it rather than by eye:
+--
+--     step   r / r_outer   radius mm
+--        1       0.1495       1.250     the central post
+--        2       0.3633       3.039
+--        3       0.4945       4.137
+--        4       0.7303       6.109
+--        5       0.8032       6.719
+--        6       0.8518       7.126     the rim's inner edge
+--        7       0.9733       8.142
+--        8       1.0000       8.366     the plate's own outer radius
+--
+-- The ratio column is the measurement; the millimetres are that column against
+-- `framework_outline.py`'s 8.366, so steps 7 and 8 landing on the outline this
+-- project measured independently is the check rather than the input.
+--
+-- WHAT THE MODEL HAD. A flat 0.56 slab spanning 3.49 to 4.05, with a blind
+-- pocket sunk over each wheel and floored 0.05 above it -- which left a lid of
+-- plate over every wheel: MEASURED at 6.228, 2.067, 2.029 and 2.769 mm^3 above
+-- 26, 27, 28 and 29, a skin 0.135 thick. **The interference audit passed it.**
+-- `intersect(25, wheel)` is 0.000 mm^3 for all four, before and after, because
+-- a lid 135 microns thick is not an interference -- it is a wrong part that
+-- clears, and no instrument here asks whether a part is the right one. What
+-- found it was the picture, where the wheels read as buried in the plate.
+--
+-- WHAT IT IS INSTEAD. Four bands, and every height is forced by what the band
+-- has to clear rather than chosen:
+--
+--   4.26  the post's top, inside the bearing's bore
+--   4.05  the plate's top: `automatic_framework_top_z`, the rotor hub's floor
+--         less running clearance
+--   3.915 the roof's underside: the wheels top out at 3.865, plus running
+--         clearance. Everything from here up may pass over a wheel
+--   3.70  the counterbore's floor, where the bearing lands
+--   3.49  the rim's underside: it sits on the lower bridge
+--   3.35  the automatic seat, where the central foot and the two screw feet land
+--
+-- and the only radius that is a choice rather than a measurement is the central
+-- foot's, which is expert_estimate below.
+fn fw_local(z: Len) -> Len {
+  z - datum.automatic_framework_seat_z() - datum.automatic_framework_thickness() / 2
+}
+
+-- A band of the stack: everything inside `r`, between two WORLD heights, in the
+-- part's own local frame.
+fn fw_band(r: Len, z0: Len, z1: Len) -> Solid<Exact> {
+  cylinder(r = r, h = z1 - z0)
+    |> at(dx = 0mm, dy = 0mm, dz = fw_local(z = (z0 + z1) / 2))
+}
+
+-- The wheels reach from 1.67 to 7.59 of the rotor axis, so the plate can only
+-- go deep inside the first and outside the second. 1.60 is that inner figure
+-- less clearance; it is the one radius in this part that is not measured.
+-- expert_estimate: bounded above by 26's teeth at 1.67 and below by the post.
+fn fw_foot_radius() -> Len {
+  1.6mm
+}
+
+-- The top of the roof band -- the wheels' own ceiling plus running clearance.
+fn fw_roof_floor_z() -> Len {
+  rotor_ring_z() + ring_thickness() / 2 + datum.running_clearance()
+}
+
+fn wheel_pocket(r: Len, top_z: Len) -> Solid<Exact> {
+  let floor_z = top_z + datum.running_clearance()
+  let depth = floor_z - datum.automatic_framework_seat_z()
+  cylinder(r = r + datum.running_clearance(), h = depth)
+    |> at(
+      dx = 0mm,
+      dy = 0mm,
+      dz = 0mm - datum.automatic_framework_thickness() / 2 + depth / 2,
+    )
 }
 
 part eta_pos_25_automatic_framework_envelope() -> Solid<Exact> {
-  -- The framework the module runs in: openings at each wheel and at the rotor
-  -- bearing, and two feet that carry the whole module to the main plate.
+  -- MEASURED. The outline below is the part's own silhouette, read off page 6
+  -- of the technical communication -- which draws every component in plan,
+  -- orthographically, and which this project has been calibrating on since the
+  -- first session without ever reading the shapes. Four drawn shapes preceded
+  -- this one. See ERRORS.md E12.
+  --
+  -- 13.41 x 16.36 as drawn, against the 20.8 across this part had been given.
+  -- It was not only the wrong shape; it was half again too big.
+  --
+  -- Cade has no polygon, so the silhouette is triangulated and each triangle is
+  -- the intersection of its three edge half-spaces with a slab of the part's
+  -- thickness. 23 vertices, 21 triangles. Placed by fitting the measured
+  -- outline over the pivots it carries and the screws it reaches: all four
+  -- pivots sit 1.9 to 3.3 inside the edge, and the two screw datums fall 0.24
+  -- outside -- which is a real discrepancy and is recorded, not absorbed.
+  -- MEASURED, page 6 blob 92, and now GENERATED: `tools/framework_outline.py`
+  -- emits these triangles from the drawing's own contour so the rotation is one
+  -- number, not a hand-pasted table. Taken relative to the BEARING BORE, because
+  -- that bore is the rotor axis and the plate must be concentric with it. Placing
+  -- it by the centroid put the hub 3.7 off the rotor, and the plate stopped
+  -- covering the wheels -- which is the entire job of the part.
+  -- MEASURED and GENERATED: `tools/framework_outline.py 91.3`.
+  --
+  -- 91.3 degrees is TRACED, not fitted. The project lead drew this part's outline
+  -- in red on a square-on photograph of the movement. That trace fits the page 6
+  -- silhouette at IoU 0.94 and 54.00 px/mm, and it puts the part's BEARING BORE
+  -- where the balance's own shock setting reads 7.001 from it -- against the
+  -- 6.990 of `balance_staff`. An 0.011 agreement on a datum nothing here was
+  -- fitted to. Tying the photograph to this frame through that balance gives
+  -- 91.3, and an INDEPENDENT sweep -- clear the balance bridge, cover the wheels
+  -- -- had already landed on 88. Three supports, two of them measurements.
+  --
+  -- IT WAS 241.5, AND THAT WAS WRONG. 241.5 came from a bench photograph and was
+  -- 'confirmed' by the driving wheel landing 4.183 from the ratchet against the
+  -- 4.194 its mesh wants. But that 4.194 is derived from the module-0.12 tooth
+  -- counts, and E16 had already shown three of the five chain distances those
+  -- counts predict are out by 1.0 to 1.7. I validated a pose against a number I
+  -- had myself proved unreliable. The mirror still holds: the trace cannot tell
+  -- handedness (0.9056 as drawn against 0.9065 mirrored) and E18's twist arrow
+  -- decides it.
   let blank = union(
-    cylinder(r = 2.75mm, h = datum.automatic_framework_thickness())
-      |> at(dx = 3.1396mm, dy = 3.1396mm, dz = 0mm),
-    cylinder(r = 2.75mm, h = datum.automatic_framework_thickness())
-      |> at(dx = 0.9988mm, dy = -4.3262mm, dz = 0mm),
-    cylinder(r = 3.8mm, h = datum.automatic_framework_thickness())
-      |> at(dx = 5.3354mm, dy = -1.5299mm, dz = 0mm),
-    cylinder(r = 2.8mm, h = datum.automatic_framework_thickness())
-      |> at(dx = 6.9566mm, dy = 0.6292mm, dz = 0mm),
-    cylinder(r = 0.95mm, h = datum.automatic_framework_thickness())
-      |> at(dx = 9.966mm, dy = -0.289mm, dz = 0mm),
-    cylinder(r = 0.95mm, h = datum.automatic_framework_thickness())
-      |> at(dx = -5.607mm, dy = -4.972mm, dz = 0mm),
-    box(x = 5.16mm, y = 2.4mm, z = datum.automatic_framework_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = -64.814deg)
-      |> at(dx = 4.2375mm, dy = 0.8048mm, dz = 0mm),
-    box(x = 5.16mm, y = 2.4mm, z = datum.automatic_framework_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = 32.814deg)
-      |> at(dx = 3.1671mm, dy = -2.9281mm, dz = 0mm),
-    box(x = 2.7mm, y = 2.4mm, z = datum.automatic_framework_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = 53.097deg)
-      |> at(dx = 6.146mm, dy = -0.4504mm, dz = 0mm),
-    box(x = 3.1463mm, y = 1.6mm, z = datum.automatic_framework_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = -16.967deg)
-      |> at(dx = 8.4613mm, dy = 0.1701mm, dz = 0mm),
-    box(x = 5.0712mm, y = 1.6mm, z = datum.automatic_framework_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = -2.541deg)
-      |> at(dx = 3.5319mm, dy = -4.4386mm, dz = 0mm),
+    intersect(
+      half_space(nx = -0.887472, ny = -0.460862, nz = 0, d = 8.2933mm),
+      half_space(nx = -0.130236, ny = -0.991483, nz = 0, d = 5.2374mm),
+      half_space(nx = 0.579162, ny = 0.815212, nz = 0, d = 0mm - 7.4928mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.536069, ny = 0.844174, nz = 0, d = 6.3994mm),
+      half_space(nx = -0.989169, ny = 0.146783, nz = 0, d = 3.1276mm),
+      half_space(nx = 0.838285, ny = -0.545233, nz = 0, d = 0mm - 5.0980mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.294985, ny = 0.955502, nz = 0, d = 6.6311mm),
+      half_space(nx = -0.838285, ny = 0.545233, nz = 0, d = 5.1015mm),
+      half_space(nx = 0.683818, ny = -0.729652, nz = 0, d = 0mm - 5.8175mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.683818, ny = 0.729652, nz = 0, d = 5.8215mm),
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 2.1689mm),
+      half_space(nx = 0.829418, ny = -0.558628, nz = 0, d = 0mm - 4.9588mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.358069, ny = 0.933695, nz = 0, d = 6.5980mm),
+      half_space(nx = -0.829418, ny = 0.558628, nz = 0, d = 4.9627mm),
+      half_space(nx = 0.747477, ny = -0.664287, nz = 0, d = 0mm - 5.3513mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.077287, ny = 0.997009, nz = 0, d = 6.6376mm),
+      half_space(nx = -0.747477, ny = 0.664287, nz = 0, d = 5.3551mm),
+      half_space(nx = 0.647358, ny = -0.762186, nz = 0, d = 0mm - 5.6587mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.647358, ny = 0.762186, nz = 0, d = 5.6629mm),
+      half_space(nx = -0.992885, ny = 0.119077, nz = 0, d = 2.9355mm),
+      half_space(nx = 0.731971, ny = -0.681336, nz = 0, d = 0mm - 5.2130mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 6.6045mm),
+      half_space(nx = -0.731971, ny = 0.681336, nz = 0, d = 5.2174mm),
+      half_space(nx = 0.651436, ny = -0.758704, nz = 0, d = 0mm - 5.4242mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 6.6045mm),
+      half_space(nx = -0.651436, ny = 0.758704, nz = 0, d = 5.4285mm),
+      half_space(nx = 0.582344, ny = -0.812943, nz = 0, d = 0mm - 5.5432mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 6.6045mm),
+      half_space(nx = -0.582344, ny = 0.812943, nz = 0, d = 5.5470mm),
+      half_space(nx = 0.524139, ny = -0.851633, nz = 0, d = 0mm - 5.6073mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 6.6045mm),
+      half_space(nx = -0.524139, ny = 0.851633, nz = 0, d = 5.6108mm),
+      half_space(nx = 0.475275, ny = -0.879837, nz = 0, d = 0mm - 5.6392mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 6.6045mm),
+      half_space(nx = -0.475275, ny = 0.879837, nz = 0, d = 5.6423mm),
+      half_space(nx = 0.434106, ny = -0.900862, nz = 0, d = 0mm - 5.6519mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.148697, ny = 0.988883, nz = 0, d = 6.6560mm),
+      half_space(nx = -0.434106, ny = 0.900862, nz = 0, d = 5.6551mm),
+      half_space(nx = 0.387295, ny = -0.921956, nz = 0, d = 0mm - 5.6514mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.198667, ny = 0.980067, nz = 0, d = 6.6505mm),
+      half_space(nx = -0.387295, ny = 0.921956, nz = 0, d = 5.6549mm),
+      half_space(nx = 0.343084, ny = -0.939305, nz = 0, d = 0mm - 5.6379mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.344714, ny = 0.938708, nz = 0, d = 6.5824mm),
+      half_space(nx = -0.343084, ny = 0.939305, nz = 0, d = 5.6418mm),
+      half_space(nx = 0.294443, ny = -0.955669, nz = 0, d = 0mm - 5.6088mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.256822, ny = 0.966459, nz = 0, d = 6.6113mm),
+      half_space(nx = -0.294443, ny = 0.955669, nz = 0, d = 5.6125mm),
+      half_space(nx = 0.256636, ny = -0.966508, nz = 0, d = 0mm - 5.5770mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.256636, ny = 0.966508, nz = 0, d = 5.5804mm),
+      half_space(nx = -0.729551, ny = 0.683926, nz = 0, d = 5.2462mm),
+      half_space(nx = 0.292757, ny = -0.956187, nz = 0, d = 0mm - 5.4409mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.232543, ny = 0.972586, nz = 0, d = 6.6040mm),
+      half_space(nx = -0.292757, ny = 0.956187, nz = 0, d = 5.4443mm),
+      half_space(nx = 0.260593, ny = -0.965449, nz = 0, d = 0mm - 5.4042mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.442674, ny = 0.896683, nz = 0, d = 6.6227mm),
+      half_space(nx = -0.260593, ny = 0.965449, nz = 0, d = 5.4080mm),
+      half_space(nx = 0.219662, ny = -0.975576, nz = 0, d = 0mm - 5.3488mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.233389, ny = 0.972383, nz = 0, d = 6.5295mm),
+      half_space(nx = -0.219662, ny = 0.975576, nz = 0, d = 5.3524mm),
+      half_space(nx = 0.194015, ny = -0.980999, nz = 0, d = 0mm - 5.3106mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.622016, ny = 0.783004, nz = 0, d = 6.5469mm),
+      half_space(nx = -0.194015, ny = 0.980999, nz = 0, d = 5.3145mm),
+      half_space(nx = 0.150508, ny = -0.988609, nz = 0, d = 0mm - 5.2356mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.578818, ny = 0.815457, nz = 0, d = 6.5951mm),
+      half_space(nx = -0.150508, ny = 0.988609, nz = 0, d = 5.2404mm),
+      half_space(nx = 0.112531, ny = -0.993648, nz = 0, d = 0mm - 5.1635mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.444319, ny = 0.895869, nz = 0, d = 6.5730mm),
+      half_space(nx = -0.112531, ny = 0.993648, nz = 0, d = 5.1676mm),
+      half_space(nx = 0.083839, ny = -0.996479, nz = 0, d = 0mm - 5.1045mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.897750, ny = -0.440506, nz = 0, d = 8.2854mm),
+      half_space(nx = -0.579162, ny = -0.815212, nz = 0, d = 7.4959mm),
+      half_space(nx = 0.715118, ny = 0.699004, nz = 0, d = 0mm - 7.9016mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.715118, ny = -0.699004, nz = 0, d = 7.9040mm),
+      half_space(nx = -0.367272, ny = -0.930113, nz = 0, d = 6.5707mm),
+      half_space(nx = 0.632079, ny = 0.774904, nz = 0, d = 0mm - 7.5729mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.632079, ny = -0.774904, nz = 0, d = 7.5761mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.3747mm),
+      half_space(nx = 0.509880, ny = 0.860246, nz = 0, d = 0mm - 6.9894mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.891471, ny = -0.453077, nz = 0, d = 8.2913mm),
+      half_space(nx = -0.509880, ny = -0.860246, nz = 0, d = 6.9930mm),
+      half_space(nx = 0.594436, ny = 0.804143, nz = 0, d = 0mm - 7.2534mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.594436, ny = -0.804143, nz = 0, d = 7.2568mm),
+      half_space(nx = -0.024452, ny = -0.999701, nz = 0, d = 4.6648mm),
+      half_space(nx = 0.516112, ny = 0.856521, nz = 0, d = 0mm - 6.8434mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.936896, ny = -0.349609, nz = 0, d = 8.2818mm),
+      half_space(nx = -0.516112, ny = -0.856521, nz = 0, d = 6.8471mm),
+      half_space(nx = 0.589222, ny = 0.807971, nz = 0, d = 0mm - 7.0459mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.913809, ny = -0.406143, nz = 0, d = 8.2814mm),
+      half_space(nx = -0.589222, ny = -0.807971, nz = 0, d = 7.0494mm),
+      half_space(nx = 0.639134, ny = 0.769096, nz = 0, d = 0mm - 7.1587mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.924834, ny = -0.380372, nz = 0, d = 8.2948mm),
+      half_space(nx = -0.639134, ny = -0.769096, nz = 0, d = 7.1617mm),
+      half_space(nx = 0.678938, ny = 0.734196, nz = 0, d = 0mm - 7.2309mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.996485, ny = -0.083776, nz = 0, d = 8.1184mm),
+      half_space(nx = -0.678938, ny = -0.734196, nz = 0, d = 7.2346mm),
+      half_space(nx = 0.729931, ny = 0.683521, nz = 0, d = 0mm - 7.2956mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.729931, ny = -0.683521, nz = 0, d = 7.2993mm),
+      half_space(nx = -0.322999, ny = -0.946399, nz = 0, d = 6.1515mm),
+      half_space(nx = 0.698755, ny = 0.715361, nz = 0, d = 0mm - 7.1186mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.698755, ny = -0.715361, nz = 0, d = 7.1224mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.5209mm),
+      half_space(nx = 0.650501, ny = 0.759506, nz = 0, d = 0mm - 6.8313mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.650501, ny = -0.759506, nz = 0, d = 6.8358mm),
+      half_space(nx = 0.013646, ny = -0.999907, nz = 0, d = 4.5677mm),
+      half_space(nx = 0.606603, ny = 0.795005, nz = 0, d = 0mm - 6.5607mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.924019, ny = -0.382347, nz = 0, d = 8.1984mm),
+      half_space(nx = -0.606603, ny = -0.795005, nz = 0, d = 6.5645mm),
+      half_space(nx = 0.637054, ny = 0.770819, nz = 0, d = 0mm - 6.5954mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 8.1420mm),
+      half_space(nx = -0.637054, ny = -0.770819, nz = 0, d = 6.5995mm),
+      half_space(nx = 0.680072, ny = 0.733145, nz = 0, d = 0mm - 6.6264mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.924567, ny = -0.381019, nz = 0, d = 8.0767mm),
+      half_space(nx = -0.680072, ny = -0.733145, nz = 0, d = 6.6302mm),
+      half_space(nx = 0.700906, ny = 0.713254, nz = 0, d = 0mm - 6.6354mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.998569, ny = -0.053485, nz = 0, d = 8.2897mm),
+      half_space(nx = -0.700906, ny = -0.713254, nz = 0, d = 6.6390mm),
+      half_space(nx = 0.732460, ny = 0.680810, nz = 0, d = 0mm - 6.6358mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 8.2726mm),
+      half_space(nx = -0.732460, ny = -0.680810, nz = 0, d = 6.6403mm),
+      half_space(nx = 0.760722, ny = 0.649077, nz = 0, d = 0mm - 6.6247mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 8.2726mm),
+      half_space(nx = -0.760722, ny = -0.649077, nz = 0, d = 6.6290mm),
+      half_space(nx = 0.785132, ny = 0.619328, nz = 0, d = 0mm - 6.6043mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 8.2726mm),
+      half_space(nx = -0.785132, ny = -0.619328, nz = 0, d = 6.6084mm),
+      half_space(nx = 0.806274, ny = 0.591543, nz = 0, d = 0mm - 6.5774mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 8.2726mm),
+      half_space(nx = -0.806274, ny = -0.591543, nz = 0, d = 6.5813mm),
+      half_space(nx = 0.824644, ny = 0.565652, nz = 0, d = 0mm - 6.5459mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.999147, ny = 0.041296, nz = 0, d = 8.3000mm),
+      half_space(nx = -0.824644, ny = -0.565652, nz = 0, d = 6.5498mm),
+      half_space(nx = 0.842046, ny = 0.539406, nz = 0, d = 0mm - 6.5081mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.951974, ny = 0.306178, nz = 0, d = 8.1335mm),
+      half_space(nx = -0.842046, ny = -0.539406, nz = 0, d = 6.5125mm),
+      half_space(nx = 0.862073, ny = 0.506784, nz = 0, d = 0mm - 6.4529mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.862073, ny = -0.506784, nz = 0, d = 6.4574mm),
+      half_space(nx = -0.359137, ny = -0.933285, nz = 0, d = 6.0588mm),
+      half_space(nx = 0.846482, ny = 0.532417, nz = 0, d = 0mm - 6.2982mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.846482, ny = -0.532417, nz = 0, d = 6.3031mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.6845mm),
+      half_space(nx = 0.823781, ny = 0.566908, nz = 0, d = 0mm - 6.0746mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.823781, ny = -0.566908, nz = 0, d = 6.0803mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.6845mm),
+      half_space(nx = 0.800945, ny = 0.598738, nz = 0, d = 0mm - 5.8537mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.800945, ny = -0.598738, nz = 0, d = 5.8593mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.6845mm),
+      half_space(nx = 0.778183, ny = 0.628038, nz = 0, d = 0mm - 5.6362mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.778183, ny = -0.628038, nz = 0, d = 5.6416mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.6845mm),
+      half_space(nx = 0.755664, ny = 0.654959, nz = 0, d = 0mm - 5.4234mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.755664, ny = -0.654959, nz = 0, d = 5.4286mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.6845mm),
+      half_space(nx = 0.733526, ny = 0.679662, nz = 0, d = 0mm - 5.2160mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.733526, ny = -0.679662, nz = 0, d = 5.2211mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.6845mm),
+      half_space(nx = 0.711873, ny = 0.702308, nz = 0, d = 0mm - 5.0149mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.711873, ny = -0.702308, nz = 0, d = 5.0199mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.6845mm),
+      half_space(nx = 0.690787, ny = 0.723059, nz = 0, d = 0mm - 4.8205mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 8.1689mm),
+      half_space(nx = -0.690787, ny = -0.723059, nz = 0, d = 4.8253mm),
+      half_space(nx = 0.710717, ny = 0.703478, nz = 0, d = 0mm - 4.7707mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.934117, ny = 0.356966, nz = 0, d = 8.2017mm),
+      half_space(nx = -0.710717, ny = -0.703478, nz = 0, d = 4.7761mm),
+      half_space(nx = 0.734585, ny = 0.678517, nz = 0, d = 0mm - 4.7033mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.734585, ny = -0.678517, nz = 0, d = 4.7088mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.6910mm),
+      half_space(nx = 0.715022, ny = 0.699102, nz = 0, d = 0mm - 4.5107mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.715022, ny = -0.699102, nz = 0, d = 4.5156mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.6910mm),
+      half_space(nx = 0.695910, ny = 0.718129, nz = 0, d = 0mm - 4.3240mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.998527, ny = 0.054257, nz = 0, d = 8.1791mm),
+      half_space(nx = -0.695910, ny = -0.718129, nz = 0, d = 4.3289mm),
+      half_space(nx = 0.715005, ny = 0.699120, nz = 0, d = 0mm - 4.2623mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.952435, ny = 0.304743, nz = 0, d = 8.3473mm),
+      half_space(nx = -0.715005, ny = -0.699120, nz = 0, d = 4.2677mm),
+      half_space(nx = 0.735844, ny = 0.677151, nz = 0, d = 0mm - 4.1889mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.920647, ny = 0.390397, nz = 0, d = 8.3057mm),
+      half_space(nx = -0.735844, ny = -0.677151, nz = 0, d = 4.1948mm),
+      half_space(nx = 0.756702, ny = 0.653760, nz = 0, d = 0mm - 4.1092mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.938930, ny = 0.344108, nz = 0, d = 8.3201mm),
+      half_space(nx = -0.756702, ny = -0.653760, nz = 0, d = 4.1151mm),
+      half_space(nx = 0.775459, ny = 0.631398, nz = 0, d = 0mm - 4.0316mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.930138, ny = 0.367210, nz = 0, d = 8.3238mm),
+      half_space(nx = -0.775459, ny = -0.631398, nz = 0, d = 4.0374mm),
+      half_space(nx = 0.793327, ny = 0.608796, nz = 0, d = 0mm - 3.9515mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.914410, ny = 0.404790, nz = 0, d = 8.3324mm),
+      half_space(nx = -0.793327, ny = -0.608796, nz = 0, d = 3.9573mm),
+      half_space(nx = 0.810549, ny = 0.585670, nz = 0, d = 0mm - 3.8680mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.899557, ny = 0.436803, nz = 0, d = 8.3407mm),
+      half_space(nx = -0.810549, ny = -0.585670, nz = 0, d = 3.8739mm),
+      half_space(nx = 0.826922, ny = 0.562316, nz = 0, d = 0mm - 3.7823mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.792855, ny = 0.609410, nz = 0, d = 8.2552mm),
+      half_space(nx = -0.826922, ny = -0.562316, nz = 0, d = 3.7884mm),
+      half_space(nx = 0.843567, ny = 0.537025, nz = 0, d = 0mm - 3.6877mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.835666, ny = 0.549237, nz = 0, d = 8.3011mm),
+      half_space(nx = -0.843567, ny = -0.537025, nz = 0, d = 3.6938mm),
+      half_space(nx = 0.858388, ny = 0.513001, nz = 0, d = 0mm - 3.5969mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.802607, ny = 0.596508, nz = 0, d = 8.2883mm),
+      half_space(nx = -0.858388, ny = -0.513001, nz = 0, d = 3.6029mm),
+      half_space(nx = 0.872697, ny = 0.488263, nz = 0, d = 0mm - 3.5017mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.872697, ny = -0.488263, nz = 0, d = 3.5077mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.7206mm),
+      half_space(nx = 0.858965, ny = 0.512034, nz = 0, d = 0mm - 3.2972mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.824958, ny = 0.565194, nz = 0, d = 8.2897mm),
+      half_space(nx = -0.858965, ny = -0.512034, nz = 0, d = 3.3032mm),
+      half_space(nx = 0.872517, ny = 0.488585, nz = 0, d = 0mm - 3.2027mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.714339, ny = 0.699800, nz = 0, d = 8.2553mm),
+      half_space(nx = -0.872517, ny = -0.488585, nz = 0, d = 3.2088mm),
+      half_space(nx = 0.886232, ny = 0.463241, nz = 0, d = 0mm - 3.0992mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.495623, ny = 0.868538, nz = 0, d = 7.7814mm),
+      half_space(nx = -0.886232, ny = -0.463241, nz = 0, d = 3.1056mm),
+      half_space(nx = 0.899136, ny = 0.437669, nz = 0, d = 0mm - 2.9941mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.403443, ny = 0.915005, nz = 0, d = 7.4830mm),
+      half_space(nx = -0.899136, ny = -0.437669, nz = 0, d = 3.0006mm),
+      half_space(nx = 0.911721, ny = 0.410810, nz = 0, d = 0mm - 2.8825mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.029070, ny = 0.999577, nz = 0, d = 5.8220mm),
+      half_space(nx = -0.911721, ny = -0.410810, nz = 0, d = 2.8890mm),
+      half_space(nx = 0.923001, ny = 0.384797, nz = 0, d = 0mm - 2.7738mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 5.7887mm),
+      half_space(nx = -0.923001, ny = -0.384797, nz = 0, d = 2.7801mm),
+      half_space(nx = 0.933745, ny = 0.357939, nz = 0, d = 0mm - 2.6603mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 5.7887mm),
+      half_space(nx = -0.933745, ny = -0.357939, nz = 0, d = 2.6667mm),
+      half_space(nx = 0.943910, ny = 0.330204, nz = 0, d = 0mm - 2.5422mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.943910, ny = -0.330204, nz = 0, d = 2.5486mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.7285mm),
+      half_space(nx = 0.933745, ny = 0.357939, nz = 0, d = 0mm - 2.3401mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.933745, ny = -0.357939, nz = 0, d = 2.3465mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.7285mm),
+      half_space(nx = 0.923001, ny = 0.384797, nz = 0, d = 0mm - 2.1403mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.923001, ny = -0.384797, nz = 0, d = 2.1466mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 4.7285mm),
+      half_space(nx = 0.911747, ny = 0.410751, nz = 0, d = 0mm - 1.9432mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.911747, ny = -0.410751, nz = 0, d = 1.9494mm),
+      half_space(nx = -0.002303, ny = -0.999997, nz = 0, d = 4.7298mm),
+      half_space(nx = 0.900216, ny = 0.435444, nz = 0, d = 0mm - 1.7518mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.267264, ny = 0.963623, nz = 0, d = 4.2211mm),
+      half_space(nx = -0.900216, ny = -0.435444, nz = 0, d = 1.7573mm),
+      half_space(nx = 0.909637, ny = 0.415403, nz = 0, d = 0mm - 1.6569mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.232543, ny = 0.972586, nz = 0, d = 4.4233mm),
+      half_space(nx = -0.909637, ny = -0.415403, nz = 0, d = 1.6620mm),
+      half_space(nx = 0.919306, ny = 0.393544, nz = 0, d = 0mm - 1.5527mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.919306, ny = -0.393544, nz = 0, d = 1.5576mm),
+      half_space(nx = -0.420634, ny = -0.907230, nz = 0, d = 4.1504mm),
+      half_space(nx = 0.911200, ny = 0.411965, nz = 0, d = 0mm - 1.4209mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.911200, ny = -0.411965, nz = 0, d = 1.4246mm),
+      half_space(nx = -0.619687, ny = -0.784849, nz = 0, d = 3.4266mm),
+      half_space(nx = 0.905573, ny = 0.424191, nz = 0, d = 0mm - 1.3328mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.905573, ny = -0.424191, nz = 0, d = 1.3361mm),
+      half_space(nx = -0.527383, ny = -0.849627, nz = 0, d = 3.8395mm),
+      half_space(nx = 0.898981, ny = 0.437989, nz = 0, d = 0mm - 1.2314mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.898981, ny = -0.437989, nz = 0, d = 1.2343mm),
+      half_space(nx = -0.679029, ny = -0.734111, nz = 0, d = 3.0517mm),
+      half_space(nx = 0.894513, ny = 0.447042, nz = 0, d = 0mm - 1.1650mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.894513, ny = -0.447042, nz = 0, d = 1.1674mm),
+      half_space(nx = -0.659069, ny = -0.752083, nz = 0, d = 3.1791mm),
+      half_space(nx = 0.889885, ny = 0.456186, nz = 0, d = 0mm - 1.0968mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.889885, ny = -0.456186, nz = 0, d = 1.1001mm),
+      half_space(nx = -0.416634, ny = -0.909074, nz = 0, d = 4.4865mm),
+      half_space(nx = 0.882251, ny = 0.470780, nz = 0, d = 0mm - 0.9864mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.882251, ny = -0.470780, nz = 0, d = 0.9905mm),
+      half_space(nx = -0.399071, ny = -0.916920, nz = 0, d = 4.5676mm),
+      half_space(nx = 0.874528, ny = 0.484975, nz = 0, d = 0mm - 0.8785mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.874528, ny = -0.484975, nz = 0, d = 0.8827mm),
+      half_space(nx = -0.348531, ny = -0.937297, nz = 0, d = 4.8065mm),
+      half_space(nx = 0.866480, ny = 0.499212, nz = 0, d = 0mm - 0.7690mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.866480, ny = -0.499212, nz = 0, d = 0.7732mm),
+      half_space(nx = -0.364517, ny = -0.931197, nz = 0, d = 4.7273mm),
+      half_space(nx = 0.858651, ny = 0.512560, nz = 0, d = 0mm - 0.6654mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.858651, ny = -0.512560, nz = 0, d = 0.6695mm),
+      half_space(nx = -0.370520, ny = -0.928825, nz = 0, d = 4.6949mm),
+      half_space(nx = 0.850982, ny = 0.525195, nz = 0, d = 0mm - 0.5662mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.850982, ny = -0.525195, nz = 0, d = 0.5703mm),
+      half_space(nx = -0.340236, ny = -0.940340, nz = 0, d = 4.8665mm),
+      half_space(nx = 0.843163, ny = 0.537658, nz = 0, d = 0mm - 0.4673mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.843163, ny = -0.537658, nz = 0, d = 0.4715mm),
+      half_space(nx = -0.298451, ny = -0.954425, nz = 0, d = 5.1066mm),
+      half_space(nx = 0.835010, ny = 0.550235, nz = 0, d = 0mm - 0.3664mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.835010, ny = -0.550235, nz = 0, d = 0.3703mm),
+      half_space(nx = -0.432770, ny = -0.901504, nz = 0, d = 4.2374mm),
+      half_space(nx = 0.828373, ny = 0.560176, nz = 0, d = 0mm - 0.2864mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.828373, ny = -0.560176, nz = 0, d = 0.2903mm),
+      half_space(nx = -0.243107, ny = -0.969999, nz = 0, d = 5.4921mm),
+      half_space(nx = 0.819902, ny = 0.572504, nz = 0, d = 0mm - 0.1851mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.819902, ny = -0.572504, nz = 0, d = 0.1899mm),
+      half_space(nx = -0.020010, ny = -0.999800, nz = 0, d = 6.7019mm),
+      half_space(nx = 0.809910, ny = 0.586554, nz = 0, d = 0mm - 0.0686mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.809910, ny = -0.586554, nz = 0, d = 0.0745mm),
+      half_space(nx = 0.482895, ny = -0.875678, nz = 0, d = 8.2903mm),
+      half_space(nx = 0.796628, ny = 0.604470, nz = 0, d = 0.0825mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.796628, ny = -0.604470, nz = 0, d = 0mm - 0.0759mm),
+      half_space(nx = 0.734146, ny = -0.678992, nz = 0, d = 8.2752mm),
+      half_space(nx = 0.783028, ny = 0.621986, nz = 0, d = 0.2319mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.783028, ny = -0.621986, nz = 0, d = 0mm - 0.2253mm),
+      half_space(nx = 0.726284, ny = -0.687395, nz = 0, d = 8.2867mm),
+      half_space(nx = 0.768943, ny = 0.639317, nz = 0, d = 0.3823mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.768943, ny = -0.639317, nz = 0, d = 0mm - 0.3756mm),
+      half_space(nx = 0.715517, ny = -0.698596, nz = 0, d = 8.2952mm),
+      half_space(nx = 0.754370, ny = 0.656450, nz = 0, d = 0.5336mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.754370, ny = -0.656450, nz = 0, d = 0mm - 0.5269mm),
+      half_space(nx = 0.710703, ny = -0.703492, nz = 0, d = 8.2960mm),
+      half_space(nx = 0.739336, ny = 0.673337, nz = 0, d = 0.6854mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.739336, ny = -0.673337, nz = 0, d = 0mm - 0.6787mm),
+      half_space(nx = 0.717542, ny = -0.696515, nz = 0, d = 8.2981mm),
+      half_space(nx = 0.723910, ny = 0.689894, nz = 0, d = 0.8369mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = -0.723910, ny = -0.689894, nz = 0, d = 0mm - 0.8302mm),
+      half_space(nx = 0.731586, ny = -0.681749, nz = 0, d = 8.3068mm),
+      half_space(nx = 0.708086, ny = 0.706126, nz = 0, d = 0.9883mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.145942, ny = 0.989293, nz = 0, d = 5.9436mm),
+      half_space(nx = -0.083839, ny = 0.996479, nz = 0, d = 5.1070mm),
+      half_space(nx = 0.072508, ny = -0.997368, nz = 0, d = 0mm - 5.0810mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.838160, ny = 0.545424, nz = 0, d = 8.0785mm),
+      half_space(nx = 0.530133, ny = 0.847914, nz = 0, d = 7.6932mm),
+      half_space(nx = -0.702884, ny = -0.711305, nz = 0, d = 0mm - 8.0065mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.702884, ny = 0.711305, nz = 0, d = 8.0086mm),
+      half_space(nx = 0.345575, ny = 0.938391, nz = 0, d = 7.0631mm),
+      half_space(nx = -0.592849, ny = -0.805314, nz = 0, d = 0mm - 7.7505mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.592849, ny = 0.805314, nz = 0, d = 7.7535mm),
+      half_space(nx = 0.000836, ny = 1.000000, nz = 0, d = 5.4311mm),
+      half_space(nx = -0.454285, ny = -0.890856, nz = 0, d = 0mm - 7.2683mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.859400, ny = 0.511304, nz = 0, d = 8.0555mm),
+      half_space(nx = 0.454285, ny = 0.890856, nz = 0, d = 7.2716mm),
+      half_space(nx = -0.554829, ny = -0.831964, nz = 0, d = 0mm - 7.4893mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.778821, ny = 0.627246, nz = 0, d = 8.0481mm),
+      half_space(nx = 0.554829, ny = 0.831964, nz = 0, d = 7.4918mm),
+      half_space(nx = -0.598925, ny = -0.800805, nz = 0, d = 0mm - 7.5579mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.898061, ny = 0.439872, nz = 0, d = 8.0613mm),
+      half_space(nx = 0.598925, ny = 0.800805, nz = 0, d = 7.5603mm),
+      half_space(nx = -0.654285, ny = -0.756248, nz = 0, d = 0mm - 7.6133mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.884652, ny = 0.466253, nz = 0, d = 8.0726mm),
+      half_space(nx = 0.654285, ny = 0.756248, nz = 0, d = 7.6158mm),
+      half_space(nx = -0.690961, ny = -0.722892, nz = 0, d = 0mm - 7.6298mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.690961, ny = 0.722892, nz = 0, d = 7.6321mm),
+      half_space(nx = 0.345903, ny = 0.938270, nz = 0, d = 6.9545mm),
+      half_space(nx = -0.655914, ny = -0.754836, nz = 0, d = 0mm - 7.4973mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.655914, ny = 0.754836, nz = 0, d = 7.5007mm),
+      half_space(nx = 0.000488, ny = 1.000000, nz = 0, d = 5.5561mm),
+      half_space(nx = -0.598989, ny = -0.800757, nz = 0, d = 0mm - 7.2594mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.598989, ny = 0.800757, nz = 0, d = 7.2639mm),
+      half_space(nx = -0.207762, ny = 0.978179, nz = 0, d = 4.4565mm),
+      half_space(nx = -0.536474, ny = -0.843917, nz = 0, d = 0mm - 6.9718mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.536474, ny = 0.843917, nz = 0, d = 6.9765mm),
+      half_space(nx = -0.228597, ny = 0.973521, nz = 0, d = 4.3398mm),
+      half_space(nx = -0.478534, ny = -0.878069, nz = 0, d = 0mm - 6.6839mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.478534, ny = 0.878069, nz = 0, d = 6.7221mm),
+      half_space(nx = -0.072508, ny = 0.997368, nz = 0, d = 5.1007mm),
+      half_space(nx = -0.122224, ny = -0.992503, nz = 0, d = 0mm - 4.5471mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.875678, ny = 0.482895, nz = 0, d = 8.1416mm),
+      half_space(nx = 0.122224, ny = 0.992503, nz = 0, d = 4.5627mm),
+      half_space(nx = -0.149267, ny = -0.988797, nz = 0, d = 0mm - 4.4700mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.875678, ny = 0.482895, nz = 0, d = 8.1416mm),
+      half_space(nx = 0.149267, ny = 0.988797, nz = 0, d = 4.4753mm),
+      half_space(nx = -0.175121, ny = -0.984547, nz = 0, d = 0mm - 4.3830mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.961036, ny = 0.276423, nz = 0, d = 8.1478mm),
+      half_space(nx = 0.175121, ny = 0.984547, nz = 0, d = 4.3886mm),
+      half_space(nx = -0.203352, ny = -0.979106, nz = 0, d = 0mm - 4.2838mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.949874, ny = 0.312632, nz = 0, d = 8.1629mm),
+      half_space(nx = 0.203352, ny = 0.979106, nz = 0, d = 4.2896mm),
+      half_space(nx = -0.229832, ny = -0.973230, nz = 0, d = 0mm - 4.1874mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.918611, ny = 0.395162, nz = 0, d = 8.1233mm),
+      half_space(nx = 0.229832, ny = 0.973230, nz = 0, d = 4.1929mm),
+      half_space(nx = -0.253928, ny = -0.967223, nz = 0, d = 0mm - 4.0965mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.975136, ny = 0.221607, nz = 0, d = 8.1957mm),
+      half_space(nx = 0.253928, ny = 0.967223, nz = 0, d = 4.1021mm),
+      half_space(nx = -0.279865, ny = -0.960039, nz = 0, d = 0mm - 3.9947mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.976666, ny = 0.214764, nz = 0, d = 8.1954mm),
+      half_space(nx = 0.279865, ny = 0.960039, nz = 0, d = 4.0005mm),
+      half_space(nx = -0.304939, ny = -0.952372, nz = 0, d = 0mm - 3.8930mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.999244, ny = 0.038885, nz = 0, d = 8.1117mm),
+      half_space(nx = 0.304939, ny = 0.952372, nz = 0, d = 3.8990mm),
+      half_space(nx = -0.332060, ny = -0.943258, nz = 0, d = 0mm - 3.7786mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.918852, ny = 0.394602, nz = 0, d = 7.8780mm),
+      half_space(nx = 0.332060, ny = 0.943258, nz = 0, d = 3.7842mm),
+      half_space(nx = -0.352179, ny = -0.935933, nz = 0, d = 0mm - 3.6920mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.999743, ny = 0.022687, nz = 0, d = 8.2218mm),
+      half_space(nx = 0.352179, ny = 0.935933, nz = 0, d = 3.6975mm),
+      half_space(nx = -0.377686, ny = -0.925934, nz = 0, d = 0mm - 3.5769mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.999743, ny = 0.022687, nz = 0, d = 8.2218mm),
+      half_space(nx = 0.377686, ny = 0.925934, nz = 0, d = 3.5832mm),
+      half_space(nx = -0.402326, ny = -0.915497, nz = 0, d = 0mm - 3.4627mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.999743, ny = 0.022687, nz = 0, d = 8.2218mm),
+      half_space(nx = 0.402326, ny = 0.915497, nz = 0, d = 3.4689mm),
+      half_space(nx = -0.426088, ny = -0.904682, nz = 0, d = 0mm - 3.3489mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.999743, ny = 0.022687, nz = 0, d = 8.2218mm),
+      half_space(nx = 0.426088, ny = 0.904682, nz = 0, d = 3.3550mm),
+      half_space(nx = -0.448967, ny = -0.893548, nz = 0, d = 0mm - 3.2358mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.999743, ny = 0.022687, nz = 0, d = 8.2218mm),
+      half_space(nx = 0.448967, ny = 0.893548, nz = 0, d = 3.2418mm),
+      half_space(nx = -0.470965, ny = -0.882152, nz = 0, d = 0mm - 3.1237mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.930723, ny = -0.365724, nz = 0, d = 7.9856mm),
+      half_space(nx = 0.470965, ny = 0.882152, nz = 0, d = 3.1300mm),
+      half_space(nx = -0.494762, ny = -0.869028, nz = 0, d = 0mm - 2.9981mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.999780, ny = 0.020961, nz = 0, d = 8.0942mm),
+      half_space(nx = 0.494762, ny = 0.869028, nz = 0, d = 3.0043mm),
+      half_space(nx = -0.515175, ny = -0.857085, nz = 0, d = 0mm - 2.8877mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.930674, ny = -0.365849, nz = 0, d = 8.1177mm),
+      half_space(nx = 0.515175, ny = 0.857085, nz = 0, d = 2.8938mm),
+      half_space(nx = -0.537675, ny = -0.843152, nz = 0, d = 0mm - 2.7614mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.995662, ny = -0.093046, nz = 0, d = 8.1398mm),
+      half_space(nx = 0.537675, ny = 0.843152, nz = 0, d = 2.7676mm),
+      half_space(nx = -0.557442, ny = -0.830216, nz = 0, d = 0mm - 2.6477mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.964012, ny = -0.265860, nz = 0, d = 8.2609mm),
+      half_space(nx = 0.557442, ny = 0.830216, nz = 0, d = 2.6537mm),
+      half_space(nx = -0.577748, ny = -0.816215, nz = 0, d = 0mm - 2.5269mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.933685, ny = -0.358095, nz = 0, d = 8.2507mm),
+      half_space(nx = 0.577748, ny = 0.816215, nz = 0, d = 2.5332mm),
+      half_space(nx = -0.598146, ny = -0.801387, nz = 0, d = 0mm - 2.4018mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.934999, ny = -0.354650, nz = 0, d = 8.2513mm),
+      half_space(nx = 0.598146, ny = 0.801387, nz = 0, d = 2.4082mm),
+      half_space(nx = -0.617843, ny = -0.786302, nz = 0, d = 0mm - 2.2774mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.962424, ny = -0.271551, nz = 0, d = 8.2027mm),
+      half_space(nx = 0.617843, ny = 0.786302, nz = 0, d = 2.2836mm),
+      half_space(nx = -0.636111, ny = -0.771598, nz = 0, d = 0mm - 2.1587mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.865389, ny = -0.501100, nz = 0, d = 8.2563mm),
+      half_space(nx = 0.636111, ny = 0.771598, nz = 0, d = 2.1650mm),
+      half_space(nx = -0.655238, ny = -0.755422, nz = 0, d = 0mm - 2.0302mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.878590, ny = -0.477576, nz = 0, d = 8.2664mm),
+      half_space(nx = 0.655238, ny = 0.755422, nz = 0, d = 2.0367mm),
+      half_space(nx = -0.673812, ny = -0.738903, nz = 0, d = 0mm - 1.9016mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.896683, ny = -0.442674, nz = 0, d = 8.2571mm),
+      half_space(nx = 0.673812, ny = 0.738903, nz = 0, d = 1.9081mm),
+      half_space(nx = -0.691704, ny = -0.722181, nz = 0, d = 0mm - 1.7738mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.888149, ny = -0.459556, nz = 0, d = 8.2696mm),
+      half_space(nx = 0.691704, ny = 0.722181, nz = 0, d = 1.7802mm),
+      half_space(nx = -0.708953, ny = -0.705255, nz = 0, d = 0mm - 1.6466mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.724154, ny = -0.689638, nz = 0, d = 8.1972mm),
+      half_space(nx = 0.708953, ny = 0.705255, nz = 0, d = 1.6532mm),
+      half_space(nx = -0.726494, ny = -0.687173, nz = 0, d = 0mm - 1.5128mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.878805, ny = -0.477181, nz = 0, d = 8.1981mm),
+      half_space(nx = 0.726494, ny = 0.687173, nz = 0, d = 1.5194mm),
+      half_space(nx = -0.742507, ny = -0.669839, nz = 0, d = 0mm - 1.3870mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.742507, ny = 0.669839, nz = 0, d = 1.3930mm),
+      half_space(nx = -0.191912, ny = 0.981412, nz = 0, d = 5.4237mm),
+      half_space(nx = -0.728367, ny = -0.685187, nz = 0, d = 0mm - 1.2187mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.728367, ny = 0.685187, nz = 0, d = 1.2240mm),
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 5.0110mm),
+      half_space(nx = -0.715716, ny = -0.698391, nz = 0, d = 0mm - 1.0707mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.715716, ny = 0.698391, nz = 0, d = 1.0746mm),
+      half_space(nx = 0.356578, ny = 0.934266, nz = 0, d = 3.4293mm),
+      half_space(nx = -0.708948, ny = -0.705261, nz = 0, d = 0mm - 0.9936mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.708948, ny = 0.705261, nz = 0, d = 0.9950mm),
+      half_space(nx = 0.683858, ny = 0.729615, nz = 0, d = 1.2089mm),
+      half_space(nx = -0.708375, ny = -0.705836, nz = 0, d = 0mm - 0.9882mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
+    intersect(
+      half_space(nx = 0.708375, ny = 0.705836, nz = 0, d = 0.9884mm),
+      half_space(nx = 0.695497, ny = 0.718529, nz = 0, d = 1.1053mm),
+      half_space(nx = -0.708086, ny = -0.706126, nz = 0, d = 0mm - 0.9849mm),
+      box(x = 20mm, y = 20mm, z = datum.automatic_framework_thickness()),
+    ),
   )
+
+
+
+
+
+
+
+
+
+
+
+  -- NO BALANCE RELIEF, deliberately. It used to cut the balance's whole 5.30
+  -- SWEEP out of this plate, but the swing sits at 3.34 and this plate's
+  -- underside is at 3.85, so the wheel was never the thing to clear. What it has
+  -- to clear is the balance BRIDGE, which reaches 3.89 -- and the 232 rotation
+  -- above is chosen so the plate's own notch does that in plan, to 0.1%. Cutting
+  -- the sweep as well took more than half the plate away.
+  -- The centre used to be a 2.44 bore with a pocket for the rotor's ring. Both
+  -- are gone: under the post architecture the bearing lands in a counterbore
+  -- cut at the bottom of this part, and 31-3's ring runs below the roof.
+  -- The six openings page 6 draws through the plate.
   let openings = union(
-    cylinder(r = 2.22mm, h = 1mm) |> at(dx = 3.1396mm, dy = 3.1396mm, dz = 0mm),
-    cylinder(r = 2.22mm, h = 1mm) |> at(dx = 0.9988mm, dy = -4.3262mm, dz = 0mm),
-    cylinder(r = 3.3mm, h = 1mm) |> at(dx = 5.3354mm, dy = -1.5299mm, dz = 0mm),
-    cylinder(r = 2.26mm, h = 1mm) |> at(dx = 6.9566mm, dy = 0.6292mm, dz = 0mm),
-    cylinder(r = 2.6mm, h = 1mm),
+    intersect(
+      half_space(nx = 0.868313, ny = -0.496016, nz = 0, d = 0mm - 5.5811mm),
+      half_space(nx = 0.905760, ny = 0.423791, nz = 0, d = 0mm - 5.4746mm),
+      half_space(nx = -0.998864, ny = 0.047652, nz = 0, d = 6.3136mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.509881, ny = -0.860245, nz = 0, d = 3.8253mm),
+      half_space(nx = 0.223065, ny = -0.974803, nz = 0, d = 0mm - 1.1788mm),
+      half_space(nx = 0.169080, ny = 0.985602, nz = 0, d = 0mm - 1.4569mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.169080, ny = -0.985602, nz = 0, d = 1.4587mm),
+      half_space(nx = 0.449927, ny = -0.893065, nz = 0, d = 0mm - 2.7287mm),
+      half_space(nx = -0.053822, ny = 0.998551, nz = 0, d = 0.1097mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.053822, ny = -0.998551, nz = 0, d = 0mm - 0.1080mm),
+      half_space(nx = 0.571355, ny = -0.820703, nz = 0, d = 0mm - 3.5415mm),
+      half_space(nx = -0.200343, ny = 0.979726, nz = 0, d = 1.1468mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.200343, ny = -0.979726, nz = 0, d = 0mm - 1.1446mm),
+      half_space(nx = 0.924210, ny = -0.381884, nz = 0, d = 0mm - 5.8595mm),
+      half_space(nx = -0.387897, ny = 0.921703, nz = 0, d = 2.4842mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.387897, ny = -0.921703, nz = 0, d = 0mm - 2.4813mm),
+      half_space(nx = 0.991088, ny = -0.133208, nz = 0, d = 0mm - 6.2749mm),
+      half_space(nx = -0.546832, ny = 0.837242, nz = 0, d = 3.6266mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.546832, ny = -0.837242, nz = 0, d = 0mm - 3.6226mm),
+      half_space(nx = 0.998864, ny = -0.047652, nz = 0, d = 0mm - 6.3057mm),
+      half_space(nx = -0.730869, ny = 0.682517, nz = 0, d = 4.9655mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.730869, ny = -0.682517, nz = 0, d = 0mm - 4.9617mm),
+      half_space(nx = 0.914198, ny = 0.405268, nz = 0, d = 0mm - 5.5290mm),
+      half_space(nx = -0.820916, ny = 0.571049, nz = 0, d = 5.6294mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.820916, ny = -0.571049, nz = 0, d = 0mm - 5.6260mm),
+      half_space(nx = 0.735640, ny = 0.677373, nz = 0, d = 0mm - 4.2000mm),
+      half_space(nx = -0.894760, ny = 0.446548, nz = 0, d = 6.1833mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.894760, ny = -0.446548, nz = 0, d = 0mm - 6.1799mm),
+      half_space(nx = 0.690635, ny = 0.723203, nz = 0, d = 0mm - 3.8693mm),
+      half_space(nx = -0.946731, ny = 0.322026, nz = 0, d = 6.5830mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.946731, ny = -0.322026, nz = 0, d = 0mm - 6.5796mm),
+      half_space(nx = 0.256550, ny = 0.966531, nz = 0, d = 0mm - 0.7586mm),
+      half_space(nx = -0.982150, ny = 0.188098, nz = 0, d = 6.8689mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.982150, ny = -0.188098, nz = 0, d = 0mm - 6.8653mm),
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 1.1731mm),
+      half_space(nx = -0.998920, ny = 0.046458, nz = 0, d = 7.0254mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.998920, ny = -0.046458, nz = 0, d = 0mm - 7.0217mm),
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 1.1731mm),
+      half_space(nx = -0.995090, ny = -0.098974, nz = 0, d = 7.0377mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.052502, ny = -0.998621, nz = 0, d = 0.6526mm),
+      half_space(nx = 0.995090, ny = 0.098974, nz = 0, d = 0mm - 7.0341mm),
+      half_space(nx = -0.998931, ny = 0.046224, nz = 0, d = 7.2102mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.998931, ny = -0.046224, nz = 0, d = 0mm - 7.2066mm),
+      half_space(nx = -0.285697, ny = 0.958320, nz = 0, d = 3.0167mm),
+      half_space(nx = -0.995541, ny = -0.094325, nz = 0, d = 7.2223mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.513880, ny = -0.857862, nz = 0, d = 3.9479mm),
+      half_space(nx = 0.995541, ny = 0.094325, nz = 0, d = 0mm - 7.2190mm),
+      half_space(nx = -0.999268, ny = 0.038258, nz = 0, d = 7.3749mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.691130, ny = -0.722731, nz = 0, d = 5.2329mm),
+      half_space(nx = 0.999268, ny = -0.038258, nz = 0, d = 0mm - 7.3720mm),
+      half_space(nx = -0.984634, ny = 0.174632, nz = 0, d = 7.3965mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.898378, ny = -0.439224, nz = 0, d = 6.7771mm),
+      half_space(nx = 0.984634, ny = -0.174632, nz = 0, d = 0mm - 7.3939mm),
+      half_space(nx = -0.955284, ny = 0.295690, nz = 0, d = 7.2953mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.955284, ny = -0.295690, nz = 0, d = 0mm - 7.2932mm),
+      half_space(nx = -0.720886, ny = 0.693054, nz = 0, d = 5.9530mm),
+      half_space(nx = -0.983299, ny = 0.181997, nz = 0, d = 7.4939mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.983299, ny = -0.181997, nz = 0, d = 0mm - 7.4920mm),
+      half_space(nx = -0.758783, ny = 0.651344, nz = 0, d = 6.2017mm),
+      half_space(nx = -0.999867, ny = 0.016296, nz = 0, d = 7.5995mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.995453, ny = 0.095251, nz = 0, d = 7.6184mm),
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 7.5928mm),
+      half_space(nx = 0.999354, ny = -0.035944, nz = 0, d = 0mm - 7.6076mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.999354, ny = 0.035944, nz = 0, d = 7.6078mm),
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 7.5928mm),
+      half_space(nx = 0.999867, ny = -0.016296, nz = 0, d = 0mm - 7.5983mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.083262, ny = 0.996528, nz = 0, d = 2.6704mm),
+      half_space(nx = -0.921194, ny = -0.389104, nz = 0, d = 0mm - 0.1153mm),
+      half_space(nx = 0.835223, ny = -0.549912, nz = 0, d = 0mm - 2.1774mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.835223, ny = 0.549912, nz = 0, d = 2.1822mm),
+      half_space(nx = -0.676273, ny = -0.736651, nz = 0, d = 0mm - 1.2258mm),
+      half_space(nx = 0.988398, ny = 0.151883, nz = 0, d = 0mm - 0.3746mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.164750, ny = 0.986335, nz = 0, d = 2.5786mm),
+      half_space(nx = -0.988398, ny = -0.151883, nz = 0, d = 0.3789mm),
+      half_space(nx = 0.865720, ny = -0.500528, nz = 0, d = 0mm - 1.8148mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.865720, ny = 0.500528, nz = 0, d = 1.8200mm),
+      half_space(nx = -0.525225, ny = -0.850964, nz = 0, d = 0mm - 1.6047mm),
+      half_space(nx = 0.998854, ny = 0.047856, nz = 0, d = 0mm - 0.4059mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 2.7168mm),
+      half_space(nx = -0.998854, ny = -0.047856, nz = 0, d = 0.4109mm),
+      half_space(nx = 0.892687, ny = -0.450677, nz = 0, d = 0mm - 1.4519mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.892687, ny = 0.450677, nz = 0, d = 1.4570mm),
+      half_space(nx = -0.438862, ny = -0.898555, nz = 0, d = 0mm - 1.7527mm),
+      half_space(nx = 0.999942, ny = -0.010811, nz = 0, d = 0mm - 0.2894mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 2.7181mm),
+      half_space(nx = -0.999942, ny = 0.010811, nz = 0, d = 0.2947mm),
+      half_space(nx = 0.911398, ny = -0.411527, nz = 0, d = 0mm - 1.1024mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.911398, ny = 0.411527, nz = 0, d = 1.1076mm),
+      half_space(nx = -0.433535, ny = -0.901137, nz = 0, d = 0mm - 1.7582mm),
+      half_space(nx = 0.998782, ny = -0.049347, nz = 0, d = 0mm - 0.1187mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.345819, ny = 0.938301, nz = 0, d = 2.5570mm),
+      half_space(nx = -0.998782, ny = 0.049347, nz = 0, d = 0.1238mm),
+      half_space(nx = 0.914681, ny = -0.404177, nz = 0, d = 0mm - 0.8157mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.914681, ny = 0.404177, nz = 0, d = 0.8209mm),
+      half_space(nx = -0.218815, ny = -0.975766, nz = 0, d = 0mm - 1.9103mm),
+      half_space(nx = 0.999309, ny = -0.037158, nz = 0, d = 0.1684mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.092790, ny = 0.995686, nz = 0, d = 2.6407mm),
+      half_space(nx = -0.999309, ny = 0.037158, nz = 0, d = 0mm - 0.1630mm),
+      half_space(nx = 0.917589, ny = -0.397531, nz = 0, d = 0mm - 0.5400mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.917589, ny = 0.397531, nz = 0, d = 0.5452mm),
+      half_space(nx = -0.228406, ny = -0.973566, nz = 0, d = 0mm - 1.9080mm),
+      half_space(nx = 0.998783, ny = -0.049322, nz = 0, d = 0.4071mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.998783, ny = 0.049322, nz = 0, d = 0mm - 0.4017mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 0mm - 1.8317mm),
+      half_space(nx = 0.951545, ny = 0.307510, nz = 0, d = 1.3080mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.951545, ny = -0.307510, nz = 0, d = 0mm - 1.3027mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 0mm - 1.8317mm),
+      half_space(nx = 0.818431, ny = 0.574605, nz = 0, d = 1.9299mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.818431, ny = -0.574605, nz = 0, d = 0mm - 1.9253mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 0mm - 1.8317mm),
+      half_space(nx = 0.676868, ny = 0.736105, nz = 0, d = 2.2732mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.676868, ny = -0.736105, nz = 0, d = 0mm - 2.2694mm),
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 0mm - 1.8317mm),
+      half_space(nx = 0.559949, ny = 0.828527, nz = 0, d = 2.4504mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.559949, ny = -0.828527, nz = 0, d = 0mm - 2.4465mm),
+      half_space(nx = 0.460809, ny = -0.887499, nz = 0, d = 0mm - 0.9174mm),
+      half_space(nx = 0.418348, ny = 0.908287, nz = 0, d = 2.5824mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.998249, ny = 0.059158, nz = 0, d = 1.9491mm),
+      half_space(nx = 0.166470, ny = 0.986047, nz = 0, d = 2.4992mm),
+      half_space(nx = -0.698286, ny = -0.715819, nz = 0, d = 0mm - 2.7071mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.698286, ny = 0.715819, nz = 0, d = 2.7098mm),
+      half_space(nx = 0.314269, ny = 0.949334, nz = 0, d = 2.6446mm),
+      half_space(nx = -0.556327, ny = -0.830963, nz = 0, d = 0mm - 2.6779mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.556327, ny = 0.830963, nz = 0, d = 2.6791mm),
+      half_space(nx = 0.391589, ny = 0.920140, nz = 0, d = 2.6758mm),
+      half_space(nx = -0.509485, ny = -0.860479, nz = 0, d = 0mm - 2.6514mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.509485, ny = 0.860479, nz = 0, d = 2.6528mm),
+      half_space(nx = 0.159678, ny = 0.987169, nz = 0, d = 2.5991mm),
+      half_space(nx = -0.434431, ny = -0.900705, nz = 0, d = 0mm - 2.5939mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.434431, ny = 0.900705, nz = 0, d = 2.5949mm),
+      half_space(nx = 0.346763, ny = 0.937953, nz = 0, d = 2.6203mm),
+      half_space(nx = -0.418348, ny = -0.908287, nz = 0, d = 0mm - 2.5801mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.854615, ny = 0.519262, nz = 0, d = 3.8099mm),
+      half_space(nx = -0.379621, ny = 0.925142, nz = 0, d = 1.0351mm),
+      half_space(nx = -0.341869, ny = -0.939748, nz = 0, d = 0mm - 3.0457mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.341869, ny = 0.939748, nz = 0, d = 3.0510mm),
+      half_space(nx = -0.884053, ny = 0.467386, nz = 0, d = 0mm - 1.3766mm),
+      half_space(nx = 0.219992, ny = -0.975502, nz = 0, d = 0mm - 1.3278mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.949819, ny = 0.312799, nz = 0, d = 3.6867mm),
+      half_space(nx = -0.219992, ny = 0.975502, nz = 0, d = 1.3336mm),
+      half_space(nx = -0.253724, ny = -0.967277, nz = 0, d = 0mm - 2.5396mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.253724, ny = 0.967277, nz = 0, d = 2.5455mm),
+      half_space(nx = -0.859597, ny = 0.510973, nz = 0, d = 0mm - 1.2259mm),
+      half_space(nx = 0.112943, ny = -0.993601, nz = 0, d = 0mm - 1.3784mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.912698, ny = 0.408635, nz = 0, d = 3.7357mm),
+      half_space(nx = -0.112943, ny = 0.993601, nz = 0, d = 1.3842mm),
+      half_space(nx = -0.198692, ny = -0.980062, nz = 0, d = 0mm - 2.1113mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.198692, ny = 0.980062, nz = 0, d = 2.1172mm),
+      half_space(nx = -0.957817, ny = 0.287380, nz = 0, d = 0mm - 1.8332mm),
+      half_space(nx = 0.099676, ny = -0.995020, nz = 0, d = 0mm - 1.1095mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.921826, ny = 0.387605, nz = 0, d = 3.7385mm),
+      half_space(nx = -0.099676, ny = 0.995020, nz = 0, d = 1.1157mm),
+      half_space(nx = -0.155955, ny = -0.987764, nz = 0, d = 0mm - 1.6956mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.998865, ny = 0.047640, nz = 0, d = 3.6205mm),
+      half_space(nx = 0.155955, ny = 0.987764, nz = 0, d = 1.7017mm),
+      half_space(nx = -0.393111, ny = -0.919491, nz = 0, d = 0mm - 2.1557mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.393111, ny = 0.919491, nz = 0, d = 2.1620mm),
+      half_space(nx = -0.932388, ny = 0.361458, nz = 0, d = 0mm - 1.6705mm),
+      half_space(nx = -0.161323, ny = -0.986902, nz = 0, d = 0mm - 1.3825mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.161323, ny = 0.986902, nz = 0, d = 1.3891mm),
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 0mm - 2.2199mm),
+      half_space(nx = 0.085341, ny = -0.996352, nz = 0, d = 0mm - 0.5087mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.085341, ny = 0.996352, nz = 0, d = 0.5154mm),
+      half_space(nx = -0.992025, ny = -0.126038, nz = 0, d = 0mm - 2.2755mm),
+      half_space(nx = 0.321888, ny = -0.946778, nz = 0, d = 0.3771mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.983068, ny = 0.183244, nz = 0, d = 3.6769mm),
+      half_space(nx = -0.321888, ny = 0.946778, nz = 0, d = 0mm - 0.3706mm),
+      half_space(nx = 0.088228, ny = -0.996100, nz = 0, d = 0mm - 0.1694mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.088228, ny = 0.996100, nz = 0, d = 0.1759mm),
+      half_space(nx = -0.950360, ny = -0.311152, nz = 0, d = 0mm - 2.2507mm),
+      half_space(nx = 0.322226, ny = -0.946663, nz = 0, d = 0.7054mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.322226, ny = 0.946663, nz = 0, d = 0mm - 0.6989mm),
+      half_space(nx = -0.939320, ny = -0.343042, nz = 0, d = 0mm - 2.2266mm),
+      half_space(nx = 0.538090, ny = -0.842887, nz = 0, d = 1.5412mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.538090, ny = 0.842887, nz = 0, d = 0mm - 1.5347mm),
+      half_space(nx = -0.829865, ny = -0.557965, nz = 0, d = 0mm - 1.9028mm),
+      half_space(nx = 0.719984, ny = -0.693991, nz = 0, d = 2.2759mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.999965, ny = -0.008312, nz = 0, d = 3.6394mm),
+      half_space(nx = -0.719984, ny = 0.693991, nz = 0, d = 0mm - 2.2706mm),
+      half_space(nx = 0.592747, ny = -0.805389, nz = 0, d = 1.9946mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.993929, ny = -0.110024, nz = 0, d = 3.5964mm),
+      half_space(nx = -0.592747, ny = 0.805389, nz = 0, d = 0mm - 1.9898mm),
+      half_space(nx = 0.381587, ny = -0.924333, nz = 0, d = 1.4955mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.999743, ny = 0.022687, nz = 0, d = 3.6005mm),
+      half_space(nx = -0.381587, ny = 0.924333, nz = 0, d = 0mm - 1.4895mm),
+      half_space(nx = 0.050833, ny = -0.998707, nz = 0, d = 0.6555mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.988472, ny = -0.151405, nz = 0, d = 3.6415mm),
+      half_space(nx = -0.050833, ny = 0.998707, nz = 0, d = 0mm - 0.6489mm),
+      half_space(nx = -0.296075, ny = -0.955165, nz = 0, d = 0mm - 0.2891mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.980363, ny = -0.197201, nz = 0, d = 3.6491mm),
+      half_space(nx = 0.296075, ny = 0.955165, nz = 0, d = 0.2956mm),
+      half_space(nx = -0.585265, ny = -0.810842, nz = 0, d = 0mm - 1.1326mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.938516, ny = -0.345235, nz = 0, d = 3.6691mm),
+      half_space(nx = 0.585265, ny = 0.810842, nz = 0, d = 1.1387mm),
+      half_space(nx = -0.785174, ny = -0.619275, nz = 0, d = 0mm - 1.7632mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.950363, ny = -0.311145, nz = 0, d = 3.6602mm),
+      half_space(nx = 0.785174, ny = 0.619275, nz = 0, d = 1.7688mm),
+      half_space(nx = -0.895422, ny = -0.445218, nz = 0, d = 0mm - 2.1467mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.906260, ny = -0.422721, nz = 0, d = 3.7121mm),
+      half_space(nx = 0.895422, ny = 0.445218, nz = 0, d = 2.1517mm),
+      half_space(nx = -0.956184, ny = -0.292765, nz = 0, d = 0mm - 2.3873mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.784620, ny = -0.619977, nz = 0, d = 3.7389mm),
+      half_space(nx = 0.956184, ny = 0.292765, nz = 0, d = 2.3923mm),
+      half_space(nx = -0.989528, ny = -0.144343, nz = 0, d = 0mm - 2.5525mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.847094, ny = -0.531443, nz = 0, d = 3.7150mm),
+      half_space(nx = 0.989528, ny = 0.144343, nz = 0, d = 2.5571mm),
+      half_space(nx = -0.999107, ny = -0.042242, nz = 0, d = 0mm - 2.6314mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.906884, ny = -0.421380, nz = 0, d = 0.5223mm),
+      half_space(nx = 0.122552, ny = -0.992462, nz = 0, d = 3.8093mm),
+      half_space(nx = 0.449203, ny = 0.893430, nz = 0, d = 0mm - 2.5999mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 0mm - 0.9361mm),
+      half_space(nx = -0.449203, ny = -0.893430, nz = 0, d = 2.6047mm),
+      half_space(nx = 0.774821, ny = 0.632180, nz = 0, d = 0mm - 1.1651mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.774821, ny = -0.632180, nz = 0, d = 1.1705mm),
+      half_space(nx = 0.482600, ny = -0.875841, nz = 0, d = 3.9184mm),
+      half_space(nx = 0.472560, ny = 0.881299, nz = 0, d = 0mm - 2.2385mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.472560, ny = -0.881299, nz = 0, d = 2.2446mm),
+      half_space(nx = 0.732725, ny = -0.680525, nz = 0, d = 3.6799mm),
+      half_space(nx = 0.160964, ny = 0.986960, nz = 0, d = 0mm - 2.8795mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.999139, ny = 0.041497, nz = 0, d = 0mm - 1.1281mm),
+      half_space(nx = -0.160964, ny = -0.986960, nz = 0, d = 2.8857mm),
+      half_space(nx = 0.454983, ny = 0.890500, nz = 0, d = 0mm - 1.9793mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.896831, ny = 0.442373, nz = 0, d = 0mm - 2.1245mm),
+      half_space(nx = -0.454983, ny = -0.890500, nz = 0, d = 1.9857mm),
+      half_space(nx = 0.695810, ny = 0.718226, nz = 0, d = 0mm - 0.9392mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.695810, ny = -0.718226, nz = 0, d = 0.9456mm),
+      half_space(nx = 0.486125, ny = -0.873889, nz = 0, d = 3.8179mm),
+      half_space(nx = 0.494094, ny = 0.869408, nz = 0, d = 0mm - 1.5464mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.896831, ny = 0.442373, nz = 0, d = 0mm - 2.1226mm),
+      half_space(nx = -0.494094, ny = -0.869408, nz = 0, d = 1.5526mm),
+      half_space(nx = 0.694976, ny = 0.719033, nz = 0, d = 0mm - 0.6226mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.694976, ny = -0.719033, nz = 0, d = 0.6292mm),
+      half_space(nx = 0.735464, ny = -0.677564, nz = 0, d = 3.7859mm),
+      half_space(nx = 0.499430, ny = 0.866354, nz = 0, d = 0mm - 1.1974mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.828940, ny = 0.559337, nz = 0, d = 0mm - 2.2832mm),
+      half_space(nx = -0.499430, ny = -0.866354, nz = 0, d = 1.2040mm),
+      half_space(nx = 0.689323, ny = 0.724454, nz = 0, d = 0mm - 0.3171mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.689323, ny = -0.724454, nz = 0, d = 0.3237mm),
+      half_space(nx = 0.729199, ny = -0.684301, nz = 0, d = 3.7898mm),
+      half_space(nx = 0.500953, ny = 0.865474, nz = 0, d = 0mm - 0.8652mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.797073, ny = 0.603883, nz = 0, d = 0mm - 2.3183mm),
+      half_space(nx = -0.500953, ny = -0.865474, nz = 0, d = 0.8717mm),
+      half_space(nx = 0.687441, ny = 0.726240, nz = 0, d = 0.0078mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.492625, ny = 0.870242, nz = 0, d = 0mm - 2.2278mm),
+      half_space(nx = -0.687441, ny = -0.726240, nz = 0, d = 0mm - 0.0013mm),
+      half_space(nx = 0.838121, ny = 0.545484, nz = 0, d = 0.8901mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.605053, ny = 0.796185, nz = 0, d = 0mm - 2.3455mm),
+      half_space(nx = -0.838121, ny = -0.545484, nz = 0, d = 0mm - 0.8835mm),
+      half_space(nx = 0.940873, ny = 0.338761, nz = 0, d = 1.7079mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.365016, ny = 0.931001, nz = 0, d = 0mm - 1.9702mm),
+      half_space(nx = -0.940873, ny = -0.338761, nz = 0, d = 0mm - 1.7015mm),
+      half_space(nx = 0.992327, ny = 0.123639, nz = 0, d = 2.4068mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.966519, ny = 0.256597, nz = 0, d = 0mm - 2.7605mm),
+      half_space(nx = -0.992327, ny = -0.123639, nz = 0, d = 0mm - 2.4024mm),
+      half_space(nx = 0.998483, ny = 0.055053, nz = 0, d = 2.5994mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.999107, ny = 0.042242, nz = 0, d = 2.6335mm),
+      half_space(nx = -0.999341, ny = 0.036289, nz = 0, d = 0mm - 2.6729mm),
+      half_space(nx = -0.998483, ny = -0.055053, nz = 0, d = 0mm - 2.5981mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.614668, ny = 0.788786, nz = 0, d = 0mm - 5.7702mm),
+      half_space(nx = -0.735719, ny = -0.677287, nz = 0, d = 1.4718mm),
+      half_space(nx = 0.986784, ny = -0.162040, nz = 0, d = 3.7824mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.986784, ny = 0.162040, nz = 0, d = 0mm - 3.7770mm),
+      half_space(nx = -0.267329, ny = -0.963605, nz = 0, d = 4.3918mm),
+      half_space(nx = 0.893846, ny = 0.448374, nz = 0, d = 0.4690mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.461102, ny = 0.887347, nz = 0, d = 0mm - 5.7944mm),
+      half_space(nx = -0.893846, ny = -0.448374, nz = 0, d = 0mm - 0.4633mm),
+      half_space(nx = 0.997113, ny = -0.075926, nz = 0, d = 3.6676mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.997113, ny = 0.075926, nz = 0, d = 0mm - 3.6619mm),
+      half_space(nx = 0.388960, ny = -0.921255, nz = 0, d = 6.3017mm),
+      half_space(nx = 0.899027, ny = 0.437893, nz = 0, d = 0.8685mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.899027, ny = -0.437893, nz = 0, d = 0mm - 0.8622mm),
+      half_space(nx = 0.080312, ny = -0.996770, nz = 0, d = 5.6054mm),
+      half_space(nx = 0.642016, ny = 0.766691, nz = 0, d = 0mm - 1.5665mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.738696, ny = 0.674039, nz = 0, d = 0mm - 5.6832mm),
+      half_space(nx = -0.642016, ny = -0.766691, nz = 0, d = 1.5722mm),
+      half_space(nx = 0.896368, ny = 0.443310, nz = 0, d = 1.1393mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.896368, ny = -0.443310, nz = 0, d = 0mm - 1.1330mm),
+      half_space(nx = 0.469628, ny = -0.882864, nz = 0, d = 6.5189mm),
+      half_space(nx = 0.660437, ny = 0.750882, nz = 0, d = 0mm - 1.1004mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.527368, ny = 0.849637, nz = 0, d = 0mm - 5.7397mm),
+      half_space(nx = -0.660437, ny = -0.750882, nz = 0, d = 1.1066mm),
+      half_space(nx = 0.893173, ny = 0.449712, nz = 0, d = 1.4242mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.893173, ny = -0.449712, nz = 0, d = 0mm - 1.4177mm),
+      half_space(nx = 0.481323, ny = -0.876543, nz = 0, d = 6.5355mm),
+      half_space(nx = 0.661484, ny = 0.749959, nz = 0, d = 0mm - 0.7798mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.704864, ny = 0.709342, nz = 0, d = 0mm - 5.7974mm),
+      half_space(nx = -0.661484, ny = -0.749959, nz = 0, d = 0.7862mm),
+      half_space(nx = 0.884828, ny = 0.465918, nz = 0, d = 1.6368mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.884828, ny = -0.465918, nz = 0, d = 0mm - 1.6305mm),
+      half_space(nx = 0.729203, ny = -0.684297, nz = 0, d = 6.6855mm),
+      half_space(nx = 0.661084, ny = 0.750312, nz = 0, d = 0mm - 0.4531mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.710607, ny = 0.703589, nz = 0, d = 0mm - 5.7967mm),
+      half_space(nx = -0.661084, ny = -0.750312, nz = 0, d = 0.4597mm),
+      half_space(nx = 0.886403, ny = 0.462915, nz = 0, d = 1.9705mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.886403, ny = -0.462915, nz = 0, d = 0mm - 1.9642mm),
+      half_space(nx = 0.713633, ny = -0.700520, nz = 0, d = 6.6894mm),
+      half_space(nx = 0.661212, ny = 0.750199, nz = 0, d = 0mm - 0.1221mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.661212, ny = -0.750199, nz = 0, d = 0.1286mm),
+      half_space(nx = 0.897475, ny = -0.441065, nz = 0, d = 6.4246mm),
+      half_space(nx = 0.331193, ny = 0.943563, nz = 0, d = 0mm - 2.2935mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.793000, ny = 0.609221, nz = 0, d = 0mm - 5.7783mm),
+      half_space(nx = -0.331193, ny = -0.943563, nz = 0, d = 2.2999mm),
+      half_space(nx = 0.669342, ny = 0.742954, nz = 0, d = 0.2691mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.669342, ny = -0.742954, nz = 0, d = 0mm - 0.2627mm),
+      half_space(nx = 0.900975, ny = -0.433870, nz = 0, d = 6.4114mm),
+      half_space(nx = 0.311204, ny = 0.950343, nz = 0, d = 0mm - 2.0953mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.311204, ny = -0.950343, nz = 0, d = 2.1017mm),
+      half_space(nx = 0.999308, ny = -0.037183, nz = 0, d = 5.3704mm),
+      half_space(nx = -0.115565, ny = 0.993300, nz = 0, d = 0mm - 4.1627mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.832563, ny = 0.553930, nz = 0, d = 0mm - 5.7545mm),
+      half_space(nx = 0.115565, ny = -0.993300, nz = 0, d = 4.1685mm),
+      half_space(nx = 0.299608, ny = 0.954062, nz = 0, d = 0mm - 1.8495mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.798244, ny = 0.602334, nz = 0, d = 0mm - 5.7596mm),
+      half_space(nx = -0.299608, ny = -0.954062, nz = 0, d = 1.8558mm),
+      half_space(nx = 0.758855, ny = 0.651259, nz = 0, d = 1.6395mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.758855, ny = -0.651259, nz = 0, d = 0mm - 1.6334mm),
+      half_space(nx = 0.936091, ny = -0.351757, nz = 0, d = 6.1650mm),
+      half_space(nx = 0.270554, ny = 0.962705, nz = 0, d = 0mm - 1.7081mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.270554, ny = -0.962705, nz = 0, d = 1.7146mm),
+      half_space(nx = 0.999109, ny = 0.042210, nz = 0, d = 5.2093mm),
+      half_space(nx = -0.374332, ny = 0.927295, nz = 0, d = 0mm - 4.7261mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.218262, ny = 0.975890, nz = 0, d = 0mm - 1.7089mm),
+      half_space(nx = -0.806034, ny = 0.591870, nz = 0, d = 0mm - 5.7675mm),
+      half_space(nx = 0.374332, ny = -0.927295, nz = 0, d = 4.7309mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.065299, ny = 0.997866, nz = 0, d = 2.3080mm),
+      half_space(nx = -0.986647, ny = -0.162872, nz = 0, d = 0mm - 5.4970mm),
+      half_space(nx = 0.792795, ny = -0.609488, nz = 0, d = 2.6950mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.610112, ny = 0.792315, nz = 0, d = 5.4394mm),
+      half_space(nx = -0.792795, ny = 0.609488, nz = 0, d = 0mm - 2.6894mm),
+      half_space(nx = 0.246651, ny = -0.969104, nz = 0, d = 0mm - 0.9776mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.246651, ny = 0.969104, nz = 0, d = 0.9834mm),
+      half_space(nx = -0.876323, ny = -0.481724, nz = 0, d = 0mm - 5.6660mm),
+      half_space(nx = 0.763031, ny = -0.646362, nz = 0, d = 2.7659mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.570198, ny = 0.821507, nz = 0, d = 5.2848mm),
+      half_space(nx = -0.763031, ny = 0.646362, nz = 0, d = 0mm - 2.7595mm),
+      half_space(nx = 0.357696, ny = -0.933838, nz = 0, d = 0.0103mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.838398, ny = 0.545059, nz = 0, d = 6.2577mm),
+      half_space(nx = -0.357696, ny = 0.933838, nz = 0, d = 0mm - 0.0045mm),
+      half_space(nx = -0.043314, ny = -0.999062, nz = 0, d = 0mm - 2.2681mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.043314, ny = 0.999062, nz = 0, d = 2.2740mm),
+      half_space(nx = -0.990087, ny = -0.140456, nz = 0, d = 0mm - 5.5754mm),
+      half_space(nx = 0.359870, ny = -0.933003, nz = 0, d = 0.3453mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.359870, ny = 0.933003, nz = 0, d = 0mm - 0.3388mm),
+      half_space(nx = -0.910472, ny = -0.413572, nz = 0, d = 0mm - 5.6139mm),
+      half_space(nx = 0.690246, ny = -0.723574, nz = 0, d = 2.7978mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.859876, ny = 0.510504, nz = 0, d = 6.3223mm),
+      half_space(nx = -0.690246, ny = 0.723574, nz = 0, d = 0mm - 2.7915mm),
+      half_space(nx = 0.363728, ny = -0.931505, nz = 0, d = 0.6974mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.956843, ny = 0.290604, nz = 0, d = 6.5565mm),
+      half_space(nx = -0.363728, ny = 0.931505, nz = 0, d = 0mm - 0.6909mm),
+      half_space(nx = -0.004835, ny = -0.999988, nz = 0, d = 0mm - 1.4385mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.004835, ny = 0.999988, nz = 0, d = 1.4449mm),
+      half_space(nx = -0.990112, ny = -0.140281, nz = 0, d = 0mm - 5.6671mm),
+      half_space(nx = 0.358813, ny = -0.933409, nz = 0, d = 0.9883mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.922027, ny = 0.387126, nz = 0, d = 6.4698mm),
+      half_space(nx = -0.358813, ny = 0.933409, nz = 0, d = 0mm - 0.9818mm),
+      half_space(nx = 0.021560, ny = -0.999768, nz = 0, d = 0mm - 0.9654mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.999743, ny = 0.022687, nz = 0, d = 6.5744mm),
+      half_space(nx = -0.021560, ny = 0.999768, nz = 0, d = 0.9718mm),
+      half_space(nx = -0.308681, ny = -0.951165, nz = 0, d = 0mm - 2.7545mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.992123, ny = -0.125268, nz = 0, d = 6.4103mm),
+      half_space(nx = 0.308681, ny = 0.951165, nz = 0, d = 2.7609mm),
+      half_space(nx = -0.567049, ny = -0.823684, nz = 0, d = 0mm - 4.0572mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.968609, ny = -0.248590, nz = 0, d = 6.2025mm),
+      half_space(nx = 0.567049, ny = 0.823684, nz = 0, d = 4.0632mm),
+      half_space(nx = -0.747790, ny = -0.663935, nz = 0, d = 0mm - 4.8917mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.906247, ny = -0.422749, nz = 0, d = 5.7797mm),
+      half_space(nx = 0.747790, ny = 0.663935, nz = 0, d = 4.8974mm),
+      half_space(nx = -0.871303, ny = -0.490745, nz = 0, d = 0mm - 5.3921mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.897273, ny = -0.441475, nz = 0, d = 5.7266mm),
+      half_space(nx = 0.871303, ny = 0.490745, nz = 0, d = 5.3975mm),
+      half_space(nx = -0.940635, ny = -0.339421, nz = 0, d = 0mm - 5.6143mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.569089, ny = -0.822276, nz = 0, d = 0mm - 2.7807mm),
+      half_space(nx = 0.715073, ny = -0.699050, nz = 0, d = 4.7186mm),
+      half_space(nx = -0.219072, ny = 0.975709, nz = 0, d = 0mm - 1.7982mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 0mm - 5.6877mm),
+      half_space(nx = 0.219072, ny = -0.975709, nz = 0, d = 1.8033mm),
+      half_space(nx = 0.475874, ny = 0.879513, nz = 0, d = 2.5144mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 0mm - 5.6877mm),
+      half_space(nx = -0.475874, ny = -0.879513, nz = 0, d = 0mm - 2.5085mm),
+      half_space(nx = 0.788174, ny = 0.615453, nz = 0, d = 4.5540mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 0mm - 5.6877mm),
+      half_space(nx = -0.788174, ny = -0.615453, nz = 0, d = 0mm - 4.5500mm),
+      half_space(nx = 0.894024, ny = 0.448020, nz = 0, d = 5.2813mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 0mm - 5.6877mm),
+      half_space(nx = -0.894024, ny = -0.448020, nz = 0, d = 0mm - 5.2785mm),
+      half_space(nx = 0.937195, ny = 0.348806, nz = 0, d = 5.5923mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.953742, ny = -0.300627, nz = 0, d = 0mm - 5.6469mm),
+      half_space(nx = -0.937195, ny = -0.348806, nz = 0, d = 0mm - 5.5911mm),
+      half_space(nx = 0.940635, ny = 0.339421, nz = 0, d = 5.6168mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.226699, ny = -0.973965, nz = 0, d = 2.5831mm),
+      half_space(nx = 0.559106, ny = -0.829096, nz = 0, d = 4.8716mm),
+      half_space(nx = -0.400354, ny = 0.916361, nz = 0, d = 0mm - 3.7808mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.022687, ny = -0.999743, nz = 0, d = 1.1351mm),
+      half_space(nx = 0.400354, ny = -0.916361, nz = 0, d = 3.7812mm),
+      half_space(nx = -0.277248, ny = 0.960798, nz = 0, d = 0mm - 2.9141mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.245797, ny = -0.969321, nz = 0, d = 0mm - 0.8109mm),
+      half_space(nx = 0.277248, ny = -0.960798, nz = 0, d = 2.9147mm),
+      half_space(nx = -0.148244, ny = 0.988951, nz = 0, d = 0mm - 1.9891mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.535680, ny = -0.844421, nz = 0, d = 0mm - 2.9764mm),
+      half_space(nx = 0.148244, ny = -0.988951, nz = 0, d = 1.9899mm),
+      half_space(nx = -0.005787, ny = 0.999983, nz = 0, d = 0mm - 0.9495mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.710729, ny = -0.703466, nz = 0, d = 0mm - 4.3281mm),
+      half_space(nx = 0.005787, ny = -0.999983, nz = 0, d = 0.9505mm),
+      half_space(nx = 0.126563, ny = 0.991959, nz = 0, d = 0.0329mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.126563, ny = -0.991959, nz = 0, d = 0mm - 0.0318mm),
+      half_space(nx = 0.703466, ny = -0.710729, nz = 0, d = 5.8309mm),
+      half_space(nx = -0.003242, ny = 0.999995, nz = 0, d = 0mm - 0.8743mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.003242, ny = -0.999995, nz = 0, d = 0.8756mm),
+      half_space(nx = 0.844421, ny = -0.535680, nz = 0, d = 6.7291mm),
+      half_space(nx = -0.131207, ny = 0.991355, nz = 0, d = 0mm - 1.7546mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.131207, ny = -0.991355, nz = 0, d = 1.7560mm),
+      half_space(nx = 0.969321, ny = -0.245797, nz = 0, d = 7.4360mm),
+      half_space(nx = -0.260036, ny = 0.965599, nz = 0, d = 0mm - 2.6263mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.260036, ny = -0.965599, nz = 0, d = 2.6278mm),
+      half_space(nx = 0.999743, ny = 0.022687, nz = 0, d = 7.4753mm),
+      half_space(nx = -0.385954, ny = 0.922518, nz = 0, d = 0mm - 3.4630mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.829096, ny = -0.559106, nz = 0, d = 0mm - 5.2691mm),
+      half_space(nx = 0.385954, ny = -0.922518, nz = 0, d = 3.4645mm),
+      half_space(nx = -0.263370, ny = 0.964695, nz = 0, d = 0mm - 2.5716mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.973965, ny = -0.226699, nz = 0, d = 0mm - 6.5281mm),
+      half_space(nx = 0.263370, ny = -0.964695, nz = 0, d = 2.5732mm),
+      half_space(nx = -0.135658, ny = 0.990756, nz = 0, d = 0mm - 1.6318mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.999743, ny = -0.022687, nz = 0, d = 0mm - 6.8495mm),
+      half_space(nx = 0.135658, ny = -0.990756, nz = 0, d = 1.6334mm),
+      half_space(nx = -0.004150, ny = 0.999991, nz = 0, d = 0mm - 0.6531mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.004150, ny = -0.999991, nz = 0, d = 0.6547mm),
+      half_space(nx = 0.973965, ny = 0.226699, nz = 0, d = 7.1557mm),
+      half_space(nx = -0.134517, ny = 0.990911, nz = 0, d = 0mm - 1.5432mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.969321, ny = 0.245797, nz = 0, d = 0mm - 6.8089mm),
+      half_space(nx = 0.134517, ny = -0.990911, nz = 0, d = 1.5448mm),
+      half_space(nx = -0.005013, ny = 0.999987, nz = 0, d = 0mm - 0.5811mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.844421, ny = 0.535680, nz = 0, d = 0mm - 6.1076mm),
+      half_space(nx = 0.005013, ny = -0.999987, nz = 0, d = 0.5826mm),
+      half_space(nx = 0.122568, ny = 0.992460, nz = 0, d = 0.3757mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.703466, ny = 0.710729, nz = 0, d = 0mm - 5.2145mm),
+      half_space(nx = -0.122568, ny = -0.992460, nz = 0, d = 0mm - 0.3743mm),
+      half_space(nx = 0.248945, ny = 0.968518, nz = 0, d = 1.3324mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.559106, ny = 0.829096, nz = 0, d = 0mm - 4.2557mm),
+      half_space(nx = -0.248945, ny = -0.968518, nz = 0, d = 0mm - 1.3311mm),
+      half_space(nx = 0.379925, ny = 0.925017, nz = 0, d = 2.3342mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.226699, ny = 0.973965, nz = 0, d = 0mm - 1.9648mm),
+      half_space(nx = -0.379925, ny = -0.925017, nz = 0, d = 0mm - 2.3330mm),
+      half_space(nx = 0.490970, ny = 0.871177, nz = 0, d = 3.1926mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = -0.022687, ny = 0.999743, nz = 0, d = 0mm - 0.5185mm),
+      half_space(nx = -0.490970, ny = -0.871177, nz = 0, d = 0mm - 3.1916mm),
+      half_space(nx = 0.602712, ny = 0.797959, nz = 0, d = 4.0669mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.245797, ny = 0.969321, nz = 0, d = 1.4299mm),
+      half_space(nx = -0.602712, ny = -0.797959, nz = 0, d = 0mm - 4.0660mm),
+      half_space(nx = 0.701679, ny = 0.712493, nz = 0, d = 4.8523mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.535680, ny = 0.844421, nz = 0, d = 3.5915mm),
+      half_space(nx = -0.701679, ny = -0.712493, nz = 0, d = 0mm - 4.8518mm),
+      half_space(nx = 0.773649, ny = 0.633614, nz = 0, d = 5.4326mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
+    intersect(
+      half_space(nx = 0.829096, ny = 0.559106, nz = 0, d = 5.8871mm),
+      half_space(nx = 0.710729, ny = 0.703466, nz = 0, d = 4.9397mm),
+      half_space(nx = -0.773649, ny = -0.633614, nz = 0, d = 0mm - 5.4322mm),
+      box(x = 20mm, y = 20mm, z = 1mm),
+    ),
   )
-  let foot = common.bridge_foot(
-    r = datum.bridge_foot_radius(),
-    h = datum.automatic_seat_z() - datum.plate_train_face_z(),
-    hole_r = 0.24mm,
-  )
-  let foot_dz = 0mm - datum.automatic_framework_thickness() / 2
-    - (datum.automatic_seat_z() - datum.plate_train_face_z()) / 2
-  let feet = union(
-    foot |> at(dx = 9.966mm, dy = -0.289mm, dz = foot_dz),
-    foot |> at(dx = -5.607mm, dy = -4.972mm, dz = foot_dz),
-  )
+
   let screw_hole = common.screw_clearance_hole(
     head_r = 0.46mm,
     head_h = 0.16mm,
@@ -124,175 +2203,296 @@ part eta_pos_25_automatic_framework_envelope() -> Solid<Exact> {
     depth = datum.automatic_framework_thickness(),
   )
   let screw_holes = union(
-    screw_hole |> at(dx = 9.966mm, dy = -0.289mm, dz = 0mm),
-    screw_hole |> at(dx = -5.607mm, dy = -4.972mm, dz = 0mm),
+    screw_hole
+      |> at(
+        dx = datum.automatic_framework_screw_a_x(),
+        dy = datum.automatic_framework_screw_a_y(),
+        dz = 0mm,
+      ),
+    screw_hole
+      |> at(
+        dx = datum.automatic_framework_screw_b_x(),
+        dy = datum.automatic_framework_screw_b_y(),
+        dz = 0mm,
+      ),
   )
 
-  cut(union(blank, feet), union(openings, screw_holes))
-}
-
--- The oscillating weight's pinion, cut around the ball bearing.
-part eta_pos_31_3_rotor_pinion() -> Solid<Exact> {
-  common.toothed_disk(
-    root_r = 2.25mm,
-    tooth_depth = 0.27mm,
-    tooth_width = 0.118mm,
-    h = 0.26mm,
-    bore_r = 1.6mm,
-    teeth = 40,
+  -- The feet the module stands on. Dropped by accident when the blank was
+  -- replaced with the measured outline, which left the framework floating at
+  -- its own level with nothing carrying it down to the main plate.
+  let foot = common.bridge_foot(
+    r = datum.bridge_foot_radius(),
+    h = datum.automatic_framework_seat_z() - datum.plate_train_face_z(),
+    hole_r = 0.24mm,
   )
-}
-
--- Positions 27 and 28 are the same manufactured reversing wheel. The exploded
--- view shows them spoked.
-part eta_pos_27_aux_reversing_wheel_envelope() -> Solid<Exact> {
-  common.spoked_wheel(
-    root_r = 1.89mm,
-    rim_width = 0.3mm,
-    tooth_depth = 0.27mm,
-    tooth_width = 0.118mm,
-    hub_r = 0.62mm,
-    bore_r = 0.22mm,
-    spoke_width = 0.22mm,
-    h = 0.22mm,
-    teeth = 34,
-    spokes = 6,
+  let foot_dz = 0mm - datum.automatic_framework_thickness() / 2
+    - (datum.automatic_framework_seat_z() - datum.plate_train_face_z()) / 2
+  let feet = union(
+    foot
+      |> at(
+        dx = datum.automatic_framework_screw_a_x(),
+        dy = datum.automatic_framework_screw_a_y(),
+        dz = foot_dz,
+      ),
+    foot
+      |> at(
+        dx = datum.automatic_framework_screw_b_x(),
+        dy = datum.automatic_framework_screw_b_y(),
+        dz = foot_dz,
+      ),
   )
-}
 
--- Position 28 is the same manufactured wheel as 27, so it is the same
--- definition and carries the same colour: Cade groups identical definitions by
--- content and refuses two colours on one of them (GAPS.md, GAP-2026-09-05-05).
-part eta_pos_28_reversing_wheel_envelope() -> Solid<Exact> {
-  common.spoked_wheel(
-    root_r = 1.89mm,
-    rim_width = 0.3mm,
-    tooth_depth = 0.27mm,
-    tooth_width = 0.118mm,
-    hub_r = 0.62mm,
-    bore_r = 0.22mm,
-    spoke_width = 0.22mm,
-    h = 0.22mm,
-    teeth = 34,
-    spokes = 6,
-  )
-}
-
-part eta_pos_29_reduction_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
-  -- The exploded view shows 29 as a plain disc. Its 12-leaf pinion hangs below
-  -- it, on the driving wheel's level.
-  union(
-    common.toothed_disk(
-      root_r = 2.97mm,
-      tooth_depth = 0.27mm,
-      tooth_width = 0.118mm,
-      h = 0.22mm,
-      bore_r = 0.22mm,
-      teeth = 52,
+  -- The stack. `blank` is the measured plan and each band trims it in z; the
+  -- foot and the post are round and central, so the outline never reaches them.
+  let roof = intersect(
+    blank,
+    fw_band(
+      r = 12mm,
+      z0 = fw_roof_floor_z(),
+      z1 = datum.automatic_framework_top_z(),
     ),
-    common.toothed_disk(
-      root_r = 0.475mm,
-      tooth_depth = 0.225mm,
-      tooth_width = 0.1mm,
-      h = 0.3mm,
-      bore_r = 0.22mm,
-      teeth = 12,
-    )
-      |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
-      |> at(dx = 0mm, dy = 0mm, dz = 0mm - reduction_pinion_drop()),
+  )
+  -- The rim goes deep, and the wheels are what stop it: 26 and 28 reach 7.55
+  -- and 7.59 of the rotor axis, past step 6's 7.126, so the band is cut back
+  -- where they pass under it. That is the project lead's own sentence about
+  -- this part -- *trimmed so they don't interfere with the gears on the other
+  -- side* -- and it is a cut rather than a bigger radius so the measured step
+  -- survives everywhere the wheels do not reach.
+  let wheel_reliefs = union(
+    union(
+      cylinder(r = 2.280mm + datum.running_clearance(), h = 4mm)
+        |> at(dx = 0.9830mm, dy = 4.6560mm, dz = 0mm),
+      cylinder(r = 2.280mm + datum.running_clearance(), h = 4mm)
+        |> at(dx = 3.8910mm, dy = 3.5790mm, dz = 0mm),
+    ),
+    union(
+      cylinder(r = 2.520mm + datum.running_clearance(), h = 4mm)
+        |> at(dx = 4.3790mm, dy = 0.9000mm, dz = 0mm),
+      cylinder(r = 2.940mm + datum.running_clearance(), h = 4mm)
+        |> at(dx = 3.2190mm, dy = 0mm - 3.2930mm, dz = 0mm),
+    ),
+  )
+  let rim = intersect(
+    blank,
+    cut(
+      cut(
+        fw_band(
+          r = 12mm,
+          z0 = datum.automatic_framework_seat_z(),
+          z1 = datum.automatic_framework_top_z(),
+        ),
+        cylinder(r = 7.126mm, h = 4mm),
+      ),
+      wheel_reliefs,
+    ),
+  )
+  let hub = fw_band(
+    r = fw_foot_radius(),
+    z0 = datum.automatic_seat_z(),
+    z1 = datum.automatic_framework_top_z(),
+  )
+  -- 906 screws into THIS, not into the bearing: the bearing's inner race goes
+  -- over the post and lands in the counterbore. Radius 1.250 is step 1 of the
+  -- measured stack, and it is why the old 2.44 bore left no annulus for a
+  -- central spacer -- there was never meant to be a 2.44 hole here.
+  --
+  -- The post rises from the *counterbore floor*, not from the plate top. Both
+  -- races of the bearing occupy 3.70 to 4.60: the outer one drops into the
+  -- recess and the inner one goes over the post, so they have to start at the
+  -- same height. Written from the plate top instead, the post stood 4.05 to
+  -- 4.26 -- wholly inside the recess the next line cuts -- and the built solid
+  -- topped out at 4.05 with no post at all.
+  let post = fw_band(
+    r = datum.rotor_bearing_bore_radius(),
+    z0 = datum.rotor_bearing_floor_z(),
+    z1 = datum.rotor_bearing_floor_z() + datum.rotor_bearing_height()
+      - datum.rotor_screw_head_depth(),
+  )
+  -- An annulus, not a disc. A disc of this radius reaches the axis, so it
+  -- takes the post with it; what the bearing actually needs is the ring
+  -- between the post and the seat.
+  let counterbore = cut(
+    fw_band(
+      r = datum.rotor_bearing_seat_radius() + datum.running_clearance(),
+      z0 = datum.rotor_bearing_floor_z(),
+      z1 = datum.automatic_framework_top_z() + 0.4mm,
+    ),
+    fw_band(
+      r = datum.rotor_bearing_bore_radius(),
+      z0 = datum.rotor_bearing_floor_z() - 0.2mm,
+      z1 = datum.automatic_framework_top_z() + 0.6mm,
+    ),
+  )
+  -- The tapped hole 906 turns into. It runs the whole depth of the post and
+  -- the hub under it: the screw's shank bottom lands on the automatic seat at
+  -- 3.35, measured off its own placement, so a blind hole above that would
+  -- leave the last of the thread standing in metal.
+  let rotor_screw_tap = fw_band(
+    r = datum.rotor_screw_thread_radius() + datum.running_clearance(),
+    z0 = datum.automatic_seat_z() - 0.2mm,
+    z1 = datum.rotor_bearing_floor_z() + datum.rotor_bearing_height()
+      - datum.rotor_screw_head_depth() + 0.1mm,
+  )
+
+  cut(
+    union(union(roof, rim), union(hub, post), feet),
+    union(counterbore, rotor_screw_tap, openings, screw_holes),
   )
 }
 
-part eta_pos_26_driving_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
-  -- The ratchet-wheel driving wheel: a solid disc with a pinion at its centre,
-  -- as the exploded view shows. The pinion hangs down to the ratchet wheel.
-  union(
-    common.toothed_disk(
-      root_r = 1.975mm,
-      tooth_depth = 0.225mm,
-      tooth_width = 0.1mm,
-      h = 0.22mm,
-      bore_r = 0.22mm,
-      teeth = 42,
-    ),
-    common.toothed_disk(
-      root_r = 0.375mm,
-      tooth_depth = 0.225mm,
-      tooth_width = 0.1mm,
-      h = 0.3mm,
-      bore_r = 0.22mm,
-      teeth = 10,
-    )
-      |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
-      |> at(dx = 0mm, dy = 0mm, dz = 0mm - driving_pinion_drop()),
-  )
-}
+
+
 
 part eta_pos_30_automatic_lower_bridge_envelope() -> Solid<Exact> {
-  -- Carries the upper pivots of the reversers, the reduction wheel and the
-  -- driving wheel, and takes the 905 screw into the framework below.
+  -- DERIVED from its anchors, the same way as position 25 above. This part was
+  -- guessed twice - once as a matchstick two discs wide, once as a fat blob -
+  -- and the project lead could not find it in the render at all the first time.
+  --
+  -- A bridge is material around each pivot it carries, material around each
+  -- screw, and webs between them. Here that is the three wheels at
+  -- reduction_ring_z, an 1.15 boss at each, an 1.05 boss at the 905 screw, and
+  -- 2.0 webs joining them in the order the chain runs. It comes out as the
+  -- slender crescent the identification drawing shows, because that is what
+  -- those anchors describe.
+  --
+  -- It stops short of the driving wheel, which runs a level lower and is
+  -- carried by the framework instead.
   let blank = union(
-    cylinder(r = 1mm, h = datum.automatic_bridge_thickness())
-      |> at(dx = 3.1396mm, dy = 3.1396mm, dz = 0mm),
-    cylinder(r = 1mm, h = datum.automatic_bridge_thickness())
-      |> at(dx = 0.9988mm, dy = -4.3262mm, dz = 0mm),
-    cylinder(r = 1.1mm, h = datum.automatic_bridge_thickness())
-      |> at(dx = 5.3354mm, dy = -1.5299mm, dz = 0mm),
-    cylinder(r = 1mm, h = datum.automatic_bridge_thickness())
-      |> at(dx = 6.9566mm, dy = 0.6292mm, dz = 0mm),
-    cylinder(r = 0.9mm, h = datum.automatic_bridge_thickness())
-      |> at(dx = 8.5mm, dy = -3mm, dz = 0mm),
-    box(x = 5.16mm, y = 1.4mm, z = datum.automatic_bridge_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = -64.814deg)
-      |> at(dx = 4.2375mm, dy = 0.8048mm, dz = 0mm),
-    box(x = 5.16mm, y = 1.4mm, z = datum.automatic_bridge_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = 32.814deg)
-      |> at(dx = 3.1671mm, dy = -2.9281mm, dz = 0mm),
-    box(x = 2.7mm, y = 1.4mm, z = datum.automatic_bridge_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = 53.097deg)
-      |> at(dx = 6.146mm, dy = -0.4504mm, dz = 0mm),
-    box(x = 3.4894mm, y = 1.2mm, z = datum.automatic_bridge_thickness())
-      |> rotate(ax = 0, ay = 0, az = 1, angle = -24.917deg)
-      |> at(dx = 6.9177mm, dy = -2.265mm, dz = 0mm),
+    cylinder(r = 1.15mm, h = datum.automatic_bridge_thickness())
+      |> at(dx = 4.7741mm, dy = 0mm - 0.9096mm, dz = 0mm),
+    cylinder(r = 1.15mm, h = datum.automatic_bridge_thickness())
+      |> at(dx = 5.4663mm, dy = 3.1721mm, dz = 0mm),
+    cylinder(r = 1.15mm, h = datum.automatic_bridge_thickness())
+      |> at(dx = 1.9345mm, dy = 5.7628mm, dz = 0mm),
+    cylinder(r = 1.05mm, h = datum.automatic_bridge_thickness())
+      |> at(
+        dx = datum.automatic_bridge_screw_x(),
+        dy = datum.automatic_bridge_screw_y(),
+        dz = 0mm,
+      ),
+    box(x = 4.14mm, y = 2mm, z = datum.automatic_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = 80.375deg)
+      |> at(dx = 5.1202mm, dy = 1.1313mm, dz = 0mm),
+    box(x = 4.3801mm, y = 2mm, z = datum.automatic_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = 143.739deg)
+      |> at(dx = 3.7004mm, dy = 4.4675mm, dz = 0mm),
+    box(x = 2.1319mm, y = 2mm, z = datum.automatic_bridge_thickness())
+      |> rotate(ax = 0, ay = 0, az = 1, angle = 101.76deg)
+      |> at(dx = 1.7172mm, dy = 6.8064mm, dz = 0mm),
   )
+  let bore = cylinder(r = 0.26mm, h = 0.6mm)
   let bores = union(
-    cylinder(r = 0.26mm, h = 0.6mm) |> at(dx = 3.1396mm, dy = 3.1396mm, dz = 0mm),
-    cylinder(r = 0.26mm, h = 0.6mm) |> at(dx = 0.9988mm, dy = -4.3262mm, dz = 0mm),
-    cylinder(r = 0.26mm, h = 0.6mm) |> at(dx = 5.3354mm, dy = -1.5299mm, dz = 0mm),
-    cylinder(r = 0.26mm, h = 0.6mm) |> at(dx = 6.9566mm, dy = 0.6292mm, dz = 0mm),
-    common.screw_clearance_hole(
-      head_r = 0.48mm,
-      head_h = 0.17mm,
-      shank_r = 0.23mm,
-      depth = datum.automatic_bridge_thickness(),
-    )
-      |> at(dx = 8.5mm, dy = -3mm, dz = 0mm),
+    bore |> at(dx = 4.7741mm, dy = 0mm - 0.9096mm, dz = 0mm),
+    bore |> at(dx = 5.4663mm, dy = 3.1721mm, dz = 0mm),
+    bore |> at(dx = 1.9345mm, dy = 5.7628mm, dz = 0mm),
   )
+  let screw_hole = common.screw_clearance_hole(
+    head_r = 0.48mm,
+    head_h = 0.17mm,
+    shank_r = 0.23mm,
+    depth = datum.automatic_bridge_thickness(),
+  )
+    |> at(
+      dx = datum.automatic_bridge_screw_x(),
+      dy = datum.automatic_bridge_screw_y(),
+      dz = 0mm,
+    )
 
-  cut(blank, bores)
+  cut(blank, union(bores, screw_hole))
+}
+
+
+
+
+-- The weight's outline: a segment of a disc, cut by one chord, with a round hub
+-- boss standing above that chord. Every number is measured -- see
+-- `datum.rotor_chord_drop` and its neighbours.
+fn rotor_segment(r: Len, h: Len) -> Solid<Exact> {
+  intersect(
+    cylinder(r = r, h = h),
+    half_space(nx = 0, ny = 1, nz = 0, d = 0mm - datum.rotor_chord_drop()),
+  )
 }
 
 part eta_pos_31_1_rotor_weight_envelope() -> Solid<Exact> {
-  let half_annulus = cut(
-    cut(
-      cylinder(r = datum.rotor_radius(), h = datum.rotor_rim_thickness()),
-      cylinder(r = 8.6mm, h = datum.rotor_rim_thickness() + 0.2mm),
-    ),
-    box(x = 26mm, y = 13mm, z = 0.8mm) |> at(dx = 0mm, dy = -6.5mm, dz = 0mm),
+  -- MEASURED from page 6, blob 126. Replaces a spoked half-annulus with an 8.6
+  -- bore and two straight arms, none of which the part has. It is a solid
+  -- segment in three thicknesses: a heavy rim outside 9.589, a thin web in to
+  -- 7.198, and the hub platform inside that carrying the bearing.
+  --
+  -- Built with its TOP FACE on local z = 0 and all material hanging below,
+  -- because the weight is flush with the top of the movement and everything
+  -- else about it is measured downward from there.
+  let rim = cut(
+    rotor_segment(r = datum.rotor_radius(), h = datum.rotor_rim_thickness())
+      |> at(dx = 0mm, dy = 0mm, dz = 0mm - datum.rotor_rim_thickness() / 2),
+    cylinder(r = datum.rotor_web_radius(), h = 4mm),
   )
-  let hub = common.bored_disk(r = 3mm, h = 0.38mm, bore_r = 2.1mm)
-  let left_arm = box(x = 9.6mm, y = 1.5mm, z = 0.38mm)
-    |> at(dx = -4.6mm, dy = 2mm, dz = 0mm)
-    |> rotate(ax = 0, ay = 0, az = 1, angle = -24deg)
-  let right_arm = box(x = 9.6mm, y = 1.5mm, z = 0.38mm)
-    |> at(dx = 4.6mm, dy = 2mm, dz = 0mm)
-    |> rotate(ax = 0, ay = 0, az = 1, angle = 24deg)
+  let web = cut(
+    rotor_segment(r = datum.rotor_web_radius(), h = datum.rotor_web_thickness())
+      |> at(dx = 0mm, dy = 0mm, dz = 0mm - datum.rotor_web_thickness() / 2),
+    cylinder(r = datum.rotor_hub_platform_radius(), h = 4mm),
+  )
+  let platform = union(
+    rotor_segment(r = datum.rotor_hub_platform_radius(), h = datum.rotor_hub_thickness()),
+    cylinder(r = datum.rotor_hub_radius(), h = datum.rotor_hub_thickness()),
+  )
+    |> at(dx = 0mm, dy = 0mm, dz = 0mm - datum.rotor_hub_thickness() / 2)
+  -- Written out both sides rather than with `mirror`, because the interference
+  -- audit's own evaluator (tools/cadeval.py) does not implement mirror and the
+  -- whole part drops out of the audit if this uses it.
+  let scallops = union(
+    cylinder(r = datum.rotor_scallop_radius(), h = 4mm)
+      |> at(
+        dx = datum.rotor_scallop_x(),
+        dy = datum.rotor_scallop_y(),
+        dz = 0mm,
+      ),
+    cylinder(r = datum.rotor_scallop_radius(), h = 4mm)
+      |> at(
+        dx = 0mm - datum.rotor_scallop_x(),
+        dy = datum.rotor_scallop_y(),
+        dz = 0mm,
+      ),
+  )
+  let bore = cylinder(r = datum.rotor_bearing_seat_radius(), h = 4mm)
 
-  cut(union(half_annulus, hub, left_arm, right_arm), cylinder(r = 2.1mm, h = 0.9mm))
+  cut(union(rim, web, platform), union(scallops, bore))
 }
 
 part eta_pos_31_2_ball_bearing_envelope() -> Solid<Exact> {
-  common.bored_disk(r = 2.1mm, h = datum.rotor_bearing_height(), bore_r = 0.72mm)
+  -- The races. The bearing presses UP into the weight's hub bore, and because
+  -- it is 0.75 tall against a 0.5 hub it stands proud BELOW the hub -- which is
+  -- where `eta_pos_31_3_rotor_pinion`, bored on the same race, has to sit, since
+  -- at 2.82 over the teeth the ring cannot pass through the bore.
+  --
+  -- The central bore is the THREAD 906 Var screws into, not a clearance hole:
+  -- the exploded view drops that screw straight down the bearing's axis and it
+  -- is what holds the weight on. It was 0.72, which the 0.28 shank rattled in.
+  -- The bore is the INNER RACE, and it goes over position 25's post.
+  --
+  -- It was `rotor_screw_thread_radius` -- 0.28 -- on the reading that 906
+  -- threads into the bearing itself. Corrected 2026-09-07: 906 threads into the
+  -- post, the post is `rotor_bearing_bore_radius` = 1.250, and that number is
+  -- measured (step 1 of `tools/framework_steps.py`). The old reading is what
+  -- made the central spacer impossible to place, because a 2.44 hole through
+  -- the framework left nothing for it to be.
+  let races = common.bored_disk(
+    r = datum.rotor_bearing_seat_radius(),
+    h = datum.rotor_bearing_height(),
+    bore_r = datum.rotor_bearing_bore_radius() + datum.running_clearance(),
+  )
+  let head_recess = cylinder(
+    r = datum.rotor_screw_head_radius() + datum.static_clearance(),
+    h = datum.rotor_screw_head_depth(),
+  )
+    |> at(
+      dx = 0mm,
+      dy = 0mm,
+      dz = datum.rotor_bearing_height() / 2 - datum.rotor_screw_head_depth() / 2,
+    )
+
+  cut(races, head_recess)
 }
 
 part rotor_assembly() -> Assembly {
@@ -300,11 +2500,7 @@ part rotor_assembly() -> Assembly {
     eta_pos_31_1_rotor_weight_envelope()
       |> place(
         frame = frame(
-          origin = point(
-            x = 0mm,
-            y = 0mm,
-            z = datum.rotor_rim_floor_z() + datum.rotor_rim_thickness() / 2,
-          ),
+          origin = point(x = 0mm, y = 0mm, z = datum.rotor_top_z()),
           axis = Z,
           angle = 0deg,
         ),
@@ -326,9 +2522,9 @@ part rotor_assembly() -> Assembly {
     eta_pos_31_3_rotor_pinion()
       |> place(
         frame = frame(
-          origin = point(x = 0mm, y = 0mm, z = reverser_level_z()),
+          origin = point(x = 0mm, y = 0mm, z = rotor_ring_z()),
           axis = Z,
-          angle = 45deg,
+          angle = 111.358deg,
         ),
         color = rgb(r = 150, g = 158, b = 168),
       ),
@@ -343,46 +2539,51 @@ part automatic_winding_assembly() -> Assembly {
           origin = point(
             x = 0mm,
             y = 0mm,
-            z = datum.automatic_seat_z() + datum.automatic_framework_thickness() / 2,
+            z = datum.automatic_framework_seat_z()
+              + datum.automatic_framework_thickness() / 2,
           ),
           axis = Z,
           angle = 0deg,
         ),
-        color = rgb(r = 180, g = 176, b = 168),
+        -- Bright steel. It was rgb(180, 176, 168) against a main plate of
+        -- rgb(190, 184, 168) -- a 0.2 plate in the same cream as the gilt plate
+        -- 1.7 below it, which is why this part could not be SEEN in the viewer
+        -- even when it was correctly placed. The real one is steel on gilt.
+        color = rgb(r = 208, g = 212, b = 217),
       ),
     eta_pos_27_aux_reversing_wheel_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 3.1396mm, y = 3.1396mm, z = reverser_level_z()),
+          origin = point(x = 0.9830mm, y = 4.6560mm, z = reduction_ring_z()),
           axis = Z,
-          angle = 295.186deg,
+          angle = 174.213deg,
         ),
         color = rgb(r = 148, g = 157, b = 167),
       ),
     eta_pos_28_reversing_wheel_envelope()
       |> place(
         frame = frame(
-          origin = point(x = 0.9988mm, y = -4.3262mm, z = reverser_level_z()),
+          origin = point(x = 3.8910mm, y = 3.5790mm, z = reduction_ring_z()),
           axis = Z,
-          angle = 32.814deg,
+          angle = 265.375deg,
         ),
         color = rgb(r = 148, g = 157, b = 167),
       ),
-    eta_pos_29_reduction_wheel_envelope(pinion_phase = 65.55deg)
+    eta_pos_29_reduction_wheel_envelope(pinion_phase = 355.5deg)
       |> place(
         frame = frame(
-          origin = point(x = 5.3354mm, y = -1.5299mm, z = reverser_level_z()),
+          origin = point(x = 4.3790mm, y = 0.9000mm, z = reduction_ring_z()),
           axis = Z,
-          angle = 53.097deg,
+          angle = 328.239deg,
         ),
         color = rgb(r = 204, g = 164, b = 61),
       ),
-    eta_pos_26_driving_wheel_envelope(pinion_phase = 149.011deg)
+    eta_pos_26_driving_wheel_envelope(pinion_phase = 356.17deg)
       |> place(
         frame = frame(
-          origin = point(x = 6.9566mm, y = 0.6292mm, z = driving_wheel_level_z()),
+          origin = point(x = 3.2190mm, y = 0mm - 3.2930mm, z = driving_ring_z()),
           axis = Z,
-          angle = 88.373deg,
+          angle = 8.478deg,
         ),
         color = rgb(r = 194, g = 153, b = 52),
       ),
@@ -398,7 +2599,7 @@ part automatic_winding_assembly() -> Assembly {
           axis = Z,
           angle = 0deg,
         ),
-        color = rgb(r = 175, g = 172, b = 165),
+        color = rgb(r = 150, g = 154, b = 164),
       ),
     rotor_assembly(),
   )

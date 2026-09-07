@@ -239,3 +239,109 @@ fn screw_clearance_hole(
     cylinder(r = shank_r, h = depth + 0.4mm),
   )
 }
+
+-- ---------------------------------------------------------- involute teeth
+-- A real gear tooth is bounded by an involute of its base circle. Cade has no
+-- sweep, no revolve and no polygon, so that curve cannot be drawn directly --
+-- but it does not have to be. Over the working depth a 20-degree involute is
+-- very nearly straight, so each flank is modelled as the CHORD of the true
+-- involute between the root and tip radii, and a chord is a plane.
+--
+-- One tooth is then the wedge between two mirrored planes, closed outward by
+-- the tip cylinder and inward by a third plane that keeps the wedge on its own
+-- side of the axis (two half-planes alone would give a bowtie through the
+-- centre). `polar` repeats it.
+--
+-- The normals are literals because Cade has no trigonometry; they are computed
+-- by `tools/involute.py`, which also states the backlash used.
+--
+-- This replaces square tooth blocks. A block cannot roll through a mesh, so
+-- two blocks always overlap somewhere in the engagement; two of these, phased
+-- with a tooth of one on the line of centres and a space of the other facing
+-- it, intersect at exactly 0.000 mm^3.
+fn involute_teeth(
+  flank_nx: Num,
+  flank_ny: Num,
+  flank_d: Len,
+  inner_x: Len,
+  tip_r: Len,
+  h: Len,
+  teeth: Count,
+) -> Solid<Exact> {
+  intersect(
+    half_space(nx = flank_nx, ny = flank_ny, nz = 0, d = flank_d),
+    half_space(nx = flank_nx, ny = 0 - flank_ny, nz = 0, d = flank_d),
+    half_space(nx = -1, ny = 0, nz = 0, d = 0mm - inner_x),
+    cylinder(r = tip_r, h = h),
+  )
+    |> polar(n = teeth, axis = Z)
+}
+
+fn involute_disk(
+  root_r: Len,
+  bore_r: Len,
+  flank_nx: Num,
+  flank_ny: Num,
+  flank_d: Len,
+  inner_x: Len,
+  tip_r: Len,
+  h: Len,
+  teeth: Count,
+) -> Solid<Exact> {
+  -- The bore is cut from the WHOLE wheel, not just from its disk. A tooth is
+  -- bounded inward by `inner_x`, and on a wheel whose bore is larger than that
+  -- the teeth used to reach across the hole -- which the audit sees as the wheel
+  -- overlapping whatever runs through it.
+  cut(
+    union(
+      bored_disk(r = root_r, h = h, bore_r = bore_r),
+      involute_teeth(
+        flank_nx = flank_nx,
+        flank_ny = flank_ny,
+        flank_d = flank_d,
+        inner_x = inner_x,
+        tip_r = tip_r,
+        h = h,
+        teeth = teeth,
+      ),
+    ),
+    cylinder(r = bore_r, h = h + 0.2mm),
+  )
+}
+
+fn involute_spoked_wheel(
+  root_r: Len,
+  rim_width: Len,
+  hub_r: Len,
+  bore_r: Len,
+  spoke_width: Len,
+  flank_nx: Num,
+  flank_ny: Num,
+  flank_d: Len,
+  inner_x: Len,
+  tip_r: Len,
+  h: Len,
+  teeth: Count,
+  spokes: Count,
+) -> Solid<Exact> {
+  union(
+    spoked_rim(
+      outer_r = root_r,
+      rim_width = rim_width,
+      hub_r = hub_r,
+      bore_r = bore_r,
+      spoke_width = spoke_width,
+      h = h,
+      spokes = spokes,
+    ),
+    involute_teeth(
+      flank_nx = flank_nx,
+      flank_ny = flank_ny,
+      flank_d = flank_d,
+      inner_x = inner_x,
+      tip_r = tip_r,
+      h = h,
+      teeth = teeth,
+    ),
+  )
+}

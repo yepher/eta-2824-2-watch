@@ -18,7 +18,7 @@ import "./datums.cade" as datum
 -- wheel in plan, which is why the balance now sits ABOVE the train bridge
 -- rather than inside the train band -- see `balance_wheel_z`.
 fn balance_radius() -> Len {
-  5.25mm
+  datum.balance_sweep_radius()
 }
 
 fn balance_centre_x() -> Len {
@@ -41,7 +41,7 @@ fn roller_z() -> Len {
 -- real calibre does, and it is why the balance cock stands proud into the
 -- automatic module's band, which is relieved around it.
 fn balance_wheel_z() -> Len {
-  datum.train_bridge_top_z() + 0.115mm
+  datum.train_bridge_top_z() + 0.17mm
 }
 
 fn hairspring_z() -> Len {

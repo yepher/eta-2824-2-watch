@@ -56,31 +56,39 @@ fn module_fourth_escape() -> Len {
 
 part eta_pos_12_second_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
   -- 64 teeth on module 0.10366 driving the third pinion. Its own 12-leaf
-  -- pinion on module 0.16078 is driven by the barrel's great wheel and sits
-  -- one plane below the disc, which is where the barrel is.
+  -- pinion on module 0.16078 is driven by the barrel's great wheel, which is
+  -- not on a train plane: it sits just above the plate's train face to clear
+  -- the crown wheel's underside teeth. The pinion is short and drops to meet
+  -- it, stopping clear of the jewel below.
   union(
-    common.spoked_wheel(
+    common.involute_spoked_wheel(
       root_r = 3.1875mm,
       rim_width = 0.1866mm,
-      tooth_depth = 0.2332mm,
-      tooth_width = 0.1451mm,
       hub_r = 0.72mm,
       bore_r = 0.105mm,
       spoke_width = 0.1451mm,
+      flank_nx = 0.30333,
+      flank_ny = 0.95288,
+      flank_d = 1.07484mm,
+      inner_x = 2.8684mm,
+      tip_r = 3.4203mm,
       h = datum.train_wheel_thickness(),
       teeth = 64,
       spokes = 6,
     ),
-    common.toothed_disk(
+    common.involute_disk(
       root_r = 0.7637mm,
-      tooth_depth = 0.3618mm,
-      tooth_width = 0.2251mm,
-      h = 0.46mm,
       bore_r = 0.105mm,
+      flank_nx = 0.34093,
+      flank_ny = 0.94009,
+      flank_d = 0.42769mm,
+      inner_x = 0.6874mm,
+      tip_r = 1.1256mm,
+      h = 0.16mm,
       teeth = 12,
     )
       |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
-      |> at(dx = 0mm, dy = 0mm, dz = 0mm - 0.19mm),
+      |> at(dx = 0mm, dy = 0mm, dz = datum.barrel_wheel_z() - datum.train_level_2_z()),
   )
 }
 
@@ -88,24 +96,30 @@ part eta_pos_11_third_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
   -- 75 teeth on module 0.08681 driving the fourth pinion; its own 8-leaf
   -- pinion on module 0.10366 is driven by the second wheel, one plane below.
   union(
-    common.spoked_wheel(
+    common.involute_spoked_wheel(
       root_r = 3.1469mm,
       rim_width = 0.16mm,
-      tooth_depth = 0.1953mm,
-      tooth_width = 0.1215mm,
       hub_r = 0.63mm,
       bore_r = 0.105mm,
       spoke_width = 0.1215mm,
+      flank_nx = 0.30975,
+      flank_ny = 0.95082,
+      flank_d = 1.06664mm,
+      inner_x = 2.8319mm,
+      tip_r = 3.3418mm,
       h = datum.train_wheel_thickness(),
       teeth = 75,
       spokes = 6,
     ),
-    common.toothed_disk(
+    common.involute_disk(
       root_r = 0.2851mm,
-      tooth_depth = 0.2332mm,
-      tooth_width = 0.1451mm,
-      h = 0.4mm,
       bore_r = 0.05mm,
+      flank_nx = 0.36933,
+      flank_ny = 0.9293,
+      flank_d = 0.2154mm,
+      inner_x = 0.2565mm,
+      tip_r = 0.5182mm,
+      h = 0.4mm,
       teeth = 8,
     )
       |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
@@ -119,24 +133,30 @@ part eta_pos_10_centre_seconds_wheel_envelope(pinion_phase: Angle) -> Solid<Exac
   -- through the movement centre. Its 10-leaf pinion on module 0.08681 is
   -- driven by the third wheel one plane below.
   union(
-    common.spoked_wheel(
+    common.involute_spoked_wheel(
       root_r = 3.2993mm,
       rim_width = 0.16mm,
-      tooth_depth = 0.1588mm,
-      tooth_width = 0.0988mm,
       hub_r = 0.54mm,
       bore_r = 0.105mm,
       spoke_width = 0.12mm,
+      flank_nx = 0.31745,
+      flank_ny = 0.94827,
+      flank_d = 1.12376mm,
+      inner_x = 2.9696mm,
+      tip_r = 3.4583mm,
       h = datum.train_wheel_thickness(),
       teeth = 96,
       spokes = 5,
     ),
-    common.toothed_disk(
+    common.involute_disk(
       root_r = 0.3255mm,
-      tooth_depth = 0.1953mm,
-      tooth_width = 0.1215mm,
-      h = 0.4mm,
       bore_r = 0.105mm,
+      flank_nx = 0.35346,
+      flank_ny = 0.93545,
+      flank_d = 0.20628mm,
+      inner_x = 0.293mm,
+      tip_r = 0.5208mm,
+      h = 0.4mm,
       teeth = 10,
     )
       |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)
@@ -165,12 +185,15 @@ part eta_pos_9_escape_wheel_envelope(pinion_phase: Angle) -> Solid<Exact> {
       teeth = 15,
       spokes = 5,
     ),
-    common.toothed_disk(
+    common.involute_disk(
       root_r = 0.1235mm,
-      tooth_depth = 0.1588mm,
-      tooth_width = 0.0988mm,
-      h = 0.4mm,
       bore_r = 0.05mm,
+      flank_nx = 0.39013,
+      flank_ny = 0.92076,
+      flank_d = 0.12395mm,
+      inner_x = 0.1112mm,
+      tip_r = 0.2823mm,
+      h = 0.4mm,
       teeth = 6,
     )
       |> rotate(ax = 0, ay = 0, az = 1, angle = pinion_phase)

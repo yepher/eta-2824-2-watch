@@ -19,13 +19,13 @@ project behavior.
 Read these before creating or changing a `.cade` file:
 
 - Authoritative, test-compiled guide:
-  [`docs/AUTHORING.md`](~/src/cade_research/docs/AUTHORING.md)
+  [`docs/AUTHORING.md`]($CADE_REPO/docs/AUTHORING.md)
 - Quick syntax and operation reference:
-  [`manual/syntax-reference.md`](~/src/cade_research/manual/syntax-reference.md)
+  [`manual/syntax-reference.md`]($CADE_REPO/manual/syntax-reference.md)
 - Manual landing page and worked examples:
-  [`manual/README.md`](~/src/cade_research/manual/README.md)
+  [`manual/README.md`]($CADE_REPO/manual/README.md)
 - Normative human-facing language design:
-  [`docs/human-facing-language-spec.md`](~/src/cade_research/docs/human-facing-language-spec.md)
+  [`docs/human-facing-language-spec.md`]($CADE_REPO/docs/human-facing-language-spec.md)
 
 When the quick reference and authoring guide differ, use `docs/AUTHORING.md` and
 the current compiler. Write new models in Tier 1 `.cade`; use `.cade0` only when
@@ -120,7 +120,7 @@ the attachment points belong to the future case design.
 Start with one self-contained Cade source file:
 
 ```text
-~/src/watch/watch.cade
+watch.cade
 ```
 
 It must expose `watch() -> Assembly`. Define the initial part envelopes and
@@ -147,6 +147,27 @@ Use one coordinate convention throughout:
 
 If a source uses another view, handedness, or axial datum, document and perform
 the conversion once at its boundary.
+
+**THOSE THREE AXES ARE LEFT-HANDED AND CANNOT ALL BE HONOURED.** Hold the watch
+dial up. 3 o'clock is east, 12 o'clock is north, and the back is DOWN, so
++X cross +Y = up = MINUS +Z. Cade is right-handed. A model built literally to the
+list above comes out mirrored.
+
+This calibre is built dial down, back up, so +Z up (out of the bench, toward the
+rotor) is the half of the convention worth keeping, and one of the other two has
+to give:
+
+- **What the model actually does:** keeps +X at the stem and keeps the right-
+  handed sense, which silently costs "+Y toward 12" - +Y in this model points at
+  the watch's 6 o'clock. Nothing is mirrored; the plan is turned 180 degrees.
+- **The alternative:** keep +Y toward 12 and put the stem on -X. From above -
+  that is, looking at the BACK, as the movement sits on the bench - 12 is then up
+  and the crown is on the left, which is what you actually see. Getting there is
+  one 180 degree turn about Z: negate every plan x and y.
+
+Reading a view: looking from +Z is looking at the BACK. Looking from -Z is
+looking at the DIAL, and there +X appears on the LEFT, which is the trap. See
+ERRORS.md E15.
 
 ### Phase 2 - Build the complete rough envelope assembly
 
@@ -269,16 +290,16 @@ An iteration is complete only when:
 Use the existing release binary directly:
 
 ```text
-~/src/cade_research/cade/target/release/cade
+$CADE
 ```
 
 For this watch project:
 
 ```sh
-~/src/cade_research/cade/target/release/cade fmt ~/src/watch/watch.cade --check
-~/src/cade_research/cade/target/release/cade view ~/src/watch/watch.cade --raymarch -o /tmp/watch-check.html --part watch
-~/src/cade_research/cade/target/release/cade check ~/src/watch/watch.cade --part movement_envelope
-~/src/cade_research/cade/target/release/cade view ~/src/watch/watch.cade --cell 0.05mm
+$CADE fmt watch.cade --check
+$CADE view watch.cade --raymarch -o /tmp/watch-check.html --part watch
+$CADE check watch.cade --part movement_envelope
+$CADE view watch.cade --cell 0.05mm
 ```
 
 `check`, `validate`, `mesh`, `faces`, and other single-field commands require a
@@ -288,11 +309,11 @@ on the part or diagnostic being refined.
 
 The `view` command creates and opens the interactive Cade view. Add `--watch`
 when the command should rebuild the view as the source changes. Consult
-[`docs/cli.md`](~/src/cade_research/docs/cli.md) rather
+[`docs/cli.md`]($CADE_REPO/docs/cli.md) rather
 than guessing flags.
 
 If the binary is absent or clearly older than the source change being tested,
-build it from `~/src/cade_research/cade/` with
+build it from `$CADE_REPO/cade/` with
 `cargo build --release`, then rerun the direct binary. Do not rebuild merely
 because a model fails; first read the diagnostic and check the model syntax.
 
@@ -302,7 +323,7 @@ manufacturing tolerance.
 
 ## Recording Cade gaps
 
-Keep [`GAPS.md`](~/src/watch/GAPS.md) current whenever
+Keep [`GAPS.md`](GAPS.md) current whenever
 work on this model exposes a possible Cade language, compiler, evaluator,
 diagnostic, viewer, meshing, import, export, performance, or documentation gap.
 
@@ -324,21 +345,21 @@ the validating Cade revision and command; retain the entry as history.
 ## Basic mechanical engineering
 
 Start at
-[`manual/basic_engineering/README.md`](~/src/cade_research/manual/basic_engineering/README.md).
+[`manual/basic_engineering/README.md`]($CADE_REPO/manual/basic_engineering/README.md).
 Consult the topic guide relevant to the feature being designed. For this watch
 project, the most frequently applicable guides are:
 
-- [`units_and_engineering_math.md`](~/src/cade_research/manual/basic_engineering/units_and_engineering_math.md)
-- [`fits_tolerances_and_clearances.md`](~/src/cade_research/manual/basic_engineering/fits_tolerances_and_clearances.md)
-- [`engineering_drawings_and_gdandt.md`](~/src/cade_research/manual/basic_engineering/engineering_drawings_and_gdandt.md)
-- [`gear_design.md`](~/src/cade_research/manual/basic_engineering/gear_design.md)
-- [`shafts_keys_and_couplings.md`](~/src/cade_research/manual/basic_engineering/shafts_keys_and_couplings.md)
-- [`bearings_and_bushings.md`](~/src/cade_research/manual/basic_engineering/bearings_and_bushings.md)
-- [`springs.md`](~/src/cade_research/manual/basic_engineering/springs.md)
-- [`mechanisms_and_kinematics.md`](~/src/cade_research/manual/basic_engineering/mechanisms_and_kinematics.md)
-- [`material_selection.md`](~/src/cade_research/manual/basic_engineering/material_selection.md)
-- [`manufacturing_processes.md`](~/src/cade_research/manual/basic_engineering/manufacturing_processes.md)
-- [`design_review_checklist.md`](~/src/cade_research/manual/basic_engineering/design_review_checklist.md)
+- [`units_and_engineering_math.md`]($CADE_REPO/manual/basic_engineering/units_and_engineering_math.md)
+- [`fits_tolerances_and_clearances.md`]($CADE_REPO/manual/basic_engineering/fits_tolerances_and_clearances.md)
+- [`engineering_drawings_and_gdandt.md`]($CADE_REPO/manual/basic_engineering/engineering_drawings_and_gdandt.md)
+- [`gear_design.md`]($CADE_REPO/manual/basic_engineering/gear_design.md)
+- [`shafts_keys_and_couplings.md`]($CADE_REPO/manual/basic_engineering/shafts_keys_and_couplings.md)
+- [`bearings_and_bushings.md`]($CADE_REPO/manual/basic_engineering/bearings_and_bushings.md)
+- [`springs.md`]($CADE_REPO/manual/basic_engineering/springs.md)
+- [`mechanisms_and_kinematics.md`]($CADE_REPO/manual/basic_engineering/mechanisms_and_kinematics.md)
+- [`material_selection.md`]($CADE_REPO/manual/basic_engineering/material_selection.md)
+- [`manufacturing_processes.md`]($CADE_REPO/manual/basic_engineering/manufacturing_processes.md)
+- [`design_review_checklist.md`]($CADE_REPO/manual/basic_engineering/design_review_checklist.md)
 
 Use standards and supplier-controlled drawings for interfaces whenever available.
 Clearly distinguish published nominal dimensions, tolerances, physical
@@ -350,17 +371,17 @@ or catalog photograph to a manufacturing dimension.
 Use the repository documents according to the question being answered:
 
 - Project purpose and scope:
-  [`docs/PROJECT.md`](~/src/cade_research/docs/PROJECT.md)
+  [`docs/PROJECT.md`]($CADE_REPO/docs/PROJECT.md)
 - Normative core specification:
-  [`docs/cade-spec-v0.1.md`](~/src/cade_research/docs/cade-spec-v0.1.md)
+  [`docs/cade-spec-v0.1.md`]($CADE_REPO/docs/cade-spec-v0.1.md)
 - CLI commands and behavior:
-  [`docs/cli.md`](~/src/cade_research/docs/cli.md)
+  [`docs/cli.md`]($CADE_REPO/docs/cli.md)
 - Terminology:
-  [`docs/terminology.md`](~/src/cade_research/docs/terminology.md)
+  [`docs/terminology.md`]($CADE_REPO/docs/terminology.md)
 - Change narrative and lessons:
-  [`docs/HISTORY.md`](~/src/cade_research/docs/HISTORY.md)
+  [`docs/HISTORY.md`]($CADE_REPO/docs/HISTORY.md)
 - Design and measurement records:
-  [`docs/`](~/src/cade_research/docs/)
+  [`docs/`]($CADE_REPO/docs/)
 
 Read the relevant decision document before relying on a feature's intended
 semantics. Do not cite planned features as implemented; confirm them in

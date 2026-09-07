@@ -21,7 +21,7 @@ The official current download is the [ETA technical document](https://shopb2b.et
 | Overall movement diameter | 26.00 mm | Maximum published radial envelope |
 | Case-fitting diameter | 25.60 mm | Nominal movement-seat interface |
 | Overall movement height | 4.60 mm | Preliminary axial envelope only |
-| Jewels | 25 | BOM/identity |
+| Jewels | **17 in the modelled execution**; 25 in ETA's published one | See *Which execution this model is of* |
 | Frequency | 28,800 vibrations/hour (4 Hz) | Kinematic metadata |
 | Balance lift angle | 50 degrees | Service/test metadata |
 | Minimum power reserve | 38 hours | Performance metadata |
@@ -180,14 +180,14 @@ assembled part without naming which member it describes.
 | Position | Component | Wheel/ring teeth | Pinion leaves or secondary teeth | Evidence status |
 |---:|---|---:|---:|---|
 | 2 | Sliding pinion | Unknown | Unknown | Requires direct count or controlled drawing |
-| 3 | Winding pinion | Unknown | Unknown | Requires direct count or controlled drawing |
+| 3 | Winding pinion | - | **12** | Watchmaker's account, confirmed by the 2.625 ratio check; see *The winding train, resolved* |
 | 9 | Escape wheel | **20** | Unknown | Secondary direct-observation evidence from [The Movement Archive](https://17jewels.info/movements/e/eta/eta-2824-2/); not stated in the ETA service document |
 | 10 | Intermediate wheel, assembled | Unknown | Unknown | Count both toothed members separately |
 | 11 | Third wheel | Unknown | Unknown | Count wheel teeth and pinion leaves separately |
 | 12 | Second wheel | Unknown | Unknown | Count wheel teeth and pinion leaves separately |
 | 14 | Movement barrel, complete | Unknown | Not applicable/unknown | Count the barrel's great-wheel teeth; do not count ratchet teeth as the same member |
-| 19 | Crown wheel | Unknown | Unknown | Requires direct count or controlled drawing |
-| 20 | Ratchet wheel | Unknown | Unknown | Requires direct count or controlled drawing |
+| 19 | Crown wheel | **26** | - | `photo_measured` off `IMG_9577.JPG` (fit score 0.209, harmonics at 53 and 78), and independently confirmed by the 2.625 ratio check |
+| 20 | Ratchet wheel | **63** | - | `photo_measured` off a teardown frame, confirmed by the 2.625 ratio check. The crown wheel engages these on **alternate teeth**, effective 31.5 |
 | 26 | Ratchet-wheel driving wheel | Unknown | Unknown | Count every distinct toothed member |
 | 27 | Auxiliary reversing wheel | Unknown | Unknown | Reversing-wheel internals may not be described by one external count |
 | 28 | Reversing wheel | Unknown | Unknown | Reversing-wheel internals may not be described by one external count |
@@ -485,6 +485,109 @@ outline alone. All values in millimetres.
 | 31-1 Var | 24.87 x 16.45 | - | - |
 | 31-2 | 5.71 x 1.21 | 5.61 x 5.61 | - |
 
+### Stepped elevation profiles: the wheels that are two diameters
+
+Added 2026-09-06, and this is the measurement that corrected the winding
+train's module.
+
+The bounding-box table above records each view's overall size, which hides the
+thing that matters most about a watch wheel: many of them are **two diameters
+on one arbor** -- a wheel and its pinion. Reading the elevation's width row by
+row instead recovers the stepped profile, because in an elevation width IS
+diameter. Reproduce with:
+
+```sh
+python3 tools/scale_materials_page.py "<the technical communication>" --profile
+```
+
+| Pos | Part | Large diameter | Small diameter |
+| --- | --- | --- | --- |
+| 9 | Escape wheel | 4.83 | 0.90 over the pinion, 0.45 arbor |
+| 11 | Second wheel | 7.02 | 1.41 |
+| 12 Var | Centre seconds wheel | 7.00 | 1.06, then a 0.61 arbor 3.77 long |
+| 14 Var | Barrel | 12.27 over the teeth | 11.68 drum |
+| 19 | Crown wheel | 6.41 | *one diameter only* |
+| 20 | Ratchet wheel | 7.54 | *one diameter only* |
+| 23 | Balance | 10.51 rim | 3.48 arms, 1.99 roller |
+| 26 | Automatic driving wheel | 5.87 | **1.43** |
+| 27, 28 | Reversing wheels | 4.60 | **4.24 — a second RING, not a pinion** |
+| 29 | Reduction wheel | 4.99 | **1.16** |
+| 31-2 | Rotor ring on its bearing | 5.69 over the teeth | 5.11 races |
+
+Two things follow.
+
+**The reversing wheels are not wheel-and-pinion.** Their two rings are almost
+the same size, 4.60 and 4.24, which is what a reversing wheel with internal
+pawls looks like: one ring takes the drive from the rotor, the other passes it
+on, and the pawls between them lock one way and slip the other. The model had
+one of them as a 0.72mm pinion.
+
+**The winding train is module 0.12, not 0.23.** Every diameter on the page fits
+both readings, because halving a tooth count and doubling the module leaves the
+diameter unchanged -- which is exactly why the single tooth count that resolved
+on the scan could not settle it. The pinions settle it:
+
+| Part | Measured | at m 0.12 | at m 0.23 |
+| --- | --- | --- | --- |
+| Crown wheel | 6.41 | 51 t | 26 t |
+| Ratchet wheel | 7.54 | 61 t | 31 t |
+| Driving wheel ring | 5.87 | 47 t | 24 t |
+| Driving wheel pinion | 1.43 | **10 t** | **4 t** |
+| Reduction ring | 4.99 | 40 t | 20 t |
+| Reduction pinion | 1.16 | **8 t** | **3 t** |
+| Winding pinion | 1.55 | 11 t | 5 t |
+
+Pinions are not cut below six leaves, so the module 0.23 column is not a real
+gear train. The earlier 26-tooth count for the crown wheel was an aliasing
+artefact: at 150 ppi a 51-tooth wheel of that size is about three pixels per
+tooth, right at the sampling limit, and reading every other tooth is what a
+moire produces.
+
+Two independent checks agree. The automatic chain closes at **34.8 turns of the
+weight per ratchet turn**, the right order for a calibre this size. And solving
+the crown wheel's position from the barrel axis and the plate edge alone puts
+the winding pinion **0.061mm** from the centre of the slot ETA actually cut,
+against 0.14mm on the old module -- the solve is told nothing about the slot.
+
+A caution this exercise also produced: **diameters below about 1mm are not
+trustworthy on this scan.** The escape wheel's pinion measures 0.90, and no
+integer tooth pair reproduces that against the measured 3.599 centre distance
+and 7.00 wheel. Drawn line weight adds roughly 0.2 to 0.4mm to a feature only a
+few pixels across, so small diameters are upper bounds, not dimensions.
+
+### Assembly-order pages, and one correction they force
+
+The technical communication's "Ordre d'assemblage" pages (8, 10, 12, 14, 16)
+show each subsystem's parts in the order they are fitted, which is a second
+independent read on the same geometry. Page 16, the self-winding mechanism, is
+the one that changed the model.
+
+**Position 31-2 is not a plain ball bearing.** It is drawn there as a bearing
+with the rotor's gear ring cut around its outer race, teeth all the way round,
+and the oscillating weight 31-1 Var drops onto it with a plain central bore. So
+the 5.61mm measured for 31-2 on the materials page is that ring's tooth circle,
+and the races are inside it -- the opposite of how this model first read it,
+which had a bearing larger than the ring's own bore and no ring body at all.
+
+5.61mm over the teeth on module 0.12 is 45 teeth, pitch radius 2.700. That
+changes the automatic ratio from 28.45 to **32.24 turns of the weight per
+ratchet turn**, and moves the reversing wheels in to a 4.860 centre distance
+from the rotor axis.
+
+The page also gives the fitting order for the module: framework 25 Var, then
+the driving wheel 26, the two reversing wheels 27 and 28, the reduction wheel
+29, the lower bridge 30, and last the weight on its bearing. Positions 27 and
+28 carry the "do not lubricate" mark, which is the expected call-out for
+reversing wheels with internal pawls and confirms which two they are.
+
+That order puts the reduction wheel above the reversing wheels, where this
+model has it below them. The model's stacking is not arbitrary -- at these
+tooth counts the reduction wheel's pinion would have to pass the reversing
+wheels' rims on its way down, and it is 1.19mm too big to do so -- but the
+difference is recorded here rather than papered over. Resolving it needs the
+reduction pinion and driving wheel re-derived onto a finer module, which is
+tracked in ERRORS.md.
+
 ### What this changes
 
 The crown wheel resolved its own tooth count: 26 teeth at 6.29mm outside
@@ -604,15 +707,28 @@ The modules are then set by the measured centre distances rather than chosen:
 
 ### Winding train placement
 
-The crown wheel is 6.555 from the barrel axis on module 0.23. Solving that
-circle for the position whose pitch circle crosses the stem axis inside the
-measured slot, and which clears every other wheel, gives the crown wheel centre
-at **(+8.788, +2.990)**, with the winding-pinion mesh at **X = +8.799** on the
-stem axis. That mesh point falls 0.16 from the centre of the slot ETA actually
-cut, which nothing in the solve was told about -- the slot was measured
-independently. Plan clearances from the crown wheel's 3.220 tip circle: 2.56 to
-the centre wheel, 5.00 to the third, 6.28 to the balance, and 0.30 to the plate
-edge.
+> Updated 2026-09-06 to the resolved winding train. The module-0.23 solve
+> recorded here was correct all along; it was overturned in error on 2026-09-05
+> and is now restored with the tooth counts that go with it.
+
+The crown wheel sits on a circle about the barrel axis at the centre distance
+its mesh requires, at the position whose pitch circle crosses the stem axis
+inside the measured keyless slot while clearing every other wheel.
+
+| | old (module 0.23 solve, 2026-09-05) | resolved (2026-09-06) |
+|---|---|---|
+| crown-to-barrel centre distance | 6.555 | **6.608** |
+| crown wheel centre | (+8.788, +2.990) | to be re-solved on 6.608 |
+| winding-pinion mesh on the stem axis | X = +8.799 | to be re-solved |
+| offset from the centre of the slot ETA cut | 0.16 | to be re-checked |
+
+The slot was measured independently and nothing in the solve was told about it,
+so that offset remains the check on the whole placement.
+
+Plan clearances recorded from the old solve, from the crown wheel's 3.220 tip
+circle: 2.56 to the centre wheel, 5.00 to the third, 6.28 to the balance, and
+0.30 to the plate edge. These move slightly with the re-solve; the tip circle
+becomes 3.218 at the resolved module, so they change in the fourth decimal.
 
 ## CAD visualization colors
 
@@ -838,10 +954,14 @@ uncertainty, reference temperature, datum, and date. Highest-value interfaces:
 7. Bridge locating features, screw axes, and bearing surfaces.
 8. Wheel pitch geometry, tooth counts, backlash, and endshake.
 
-Items 6 and 8 are now partly served by the drawing-scaled table above:
-outside diameters and overall heights are measured for the whole calibre,
-but tooth counts resolved only for the crown wheel, and no centre distance
-or axial level came from that page. Pitch geometry below module 0.15 and
+Items 6 and 8 are now partly served by the drawing-scaled table above and by the
+photographic and documentary work of 2026-09-06. Outside diameters and overall
+heights are measured for the whole calibre; the **winding train is fully
+resolved** (winding pinion 12, crown wheel 26, ratchet wheel 63 on alternate
+teeth, modules 0.2298 and 0.1149); and the plate view gives measured bearing
+centres. Still open: every going-train and automatic-train tooth count, the
+escape wheel count (15 or 20 - see the note under the resolved winding train),
+and every axial level. Pitch geometry below module 0.15 and
 every axial level still need a real measurement or a dimensioned drawing.
 
 ## Source quality notes
@@ -855,3 +975,387 @@ every axial level still need a real measurement or a dimensioned drawing.
   labeled ETA 2836-2. It may corroborate the order and identity of base-movement
   and automatic-winding parts shared with the 2824 family, but it is not a
   dimensional source and cannot establish ETA 2824-2 tooth counts.
+
+---
+
+# Photographs of the movement itself (2026-09-06)
+
+The project lead disassembled and reassembled a 2824-2 and photographed every
+step, roughly 290 images in two sets with his own written index for each. These
+are the first primary source in the project that is not a drawing: a drawing
+can be mis-scaled or aliased, a part lying on a bench mat cannot.
+
+The photographs are the project lead's own and are **not** in this repository.
+Nothing below reproduces them; each finding cites the image by its file name in
+his set so the measurement can be repeated.
+
+Evidence class for everything in this section: **photo_measured** - a count or a
+ratio read off a photograph of the part itself. It outranks `drawing_scaled`
+for tooth counts, because a count is discrete and either right or wrong, and
+ranks below it for dimensions, because these photographs carry no scale bar.
+
+## Crown wheel tooth count from photographs
+
+Four counts on three different photographs:
+
+| image | what it shows | method | teeth |
+|---|---|---|---|
+| `IMG_9577.JPG` | crown wheel isolated on a bench mat | refined polar fit, score 0.209 | **26** |
+| `B (018).JPG` | crown wheel installed, near face-on | refined polar fit, score 0.090 | 25 |
+| `IMG_9576.JPG` | crown wheel installed, screw removed | refined polar fit, score 0.096 | 24 |
+| `B (017).JPG` | crown wheel isolated, oblique | refined polar fit, score 0.149 | 24 |
+
+The first row is the one to trust. The wheel is isolated, unoccluded and lit
+against a plain mat, the fit score is more than twice any of the others, and the
+recovered spectrum has clean harmonics at 53 and 78 - two and three times the
+fundamental - which a wrong fundamental does not produce. The three lower counts
+all come from views where part of the rim is occluded or blown out, and an
+occluded tooth is a missed tooth, so they are biased low by exactly the amount
+seen.
+
+**26 teeth.** That is the number the page-6 elevation gave, and which this
+project overruled as a moire artefact. The photograph vindicates the drawing.
+
+`IMG_9577.JPG` also settles a structural question: the crown wheel is a flat
+steel annulus of one thickness with **one** toothing. There is no second, finer
+toothing on its underside.
+
+With the measured 6.29-6.41 outside diameter, 26 teeth put the winding module at
+
+    m = 6.35 / (26 + 2) = 0.227
+
+not the 0.12 currently in `datums.cade`. See `ERRORS.md`, E9.
+
+## Ratchet wheel toothing, unresolved
+
+> **SUPERSEDED 2026-09-06.** Resolved in *The winding train, resolved* at the end
+> of this document: 63 teeth, engaged by the crown wheel on alternate teeth. The
+> section below is kept because it records the measurements, which were right,
+> and the inference, which was wrong.
+
+`B (021).JPG` shows the ratchet wheel isolated, nearly face-on, with its screw
+resting on it. The same refined polar fit puts its peripheral toothing at
+**58-61** teeth (best score 0.133 at 58, contour method 61, and an independent
+check from tooth depth against mean radius gives 59). The screw head measures
+about a fifth of the wheel's width, which at a 1.4-1.5 mm screw head puts the
+wheel at 7.0-7.5 mm - agreeing with the drawing's 7.40-7.54 and confirming the
+part's identity.
+
+58-61 teeth on 7.47 mm is module 0.12. The crown wheel is module 0.227. Two
+wheels of different pitch cannot mesh, and `B (022).JPG` - the only photograph
+with both wheels installed - confirms by eye that the crown wheel's teeth are
+about twice the ratchet's.
+
+The teeth themselves say the same thing. The crown wheel's are deep, hooked
+wolf teeth, the form used to transmit winding torque. The ratchet wheel's are
+shallow, fine and asymmetric - the form used to hold a click. They are not the
+same kind of tooth doing the same job.
+
+So the winding drive between them is not the single spur mesh this model has.
+This is recorded as open rather than guessed at.
+
+**The photograph that would settle it does not exist in the set**: the barrel
+bridge from directly above with the crown wheel *and* the ratchet wheel both
+installed. In the assembly sequence the crown wheel goes on at `B (017)`-`B
+(020)` and the ratchet at `B (021)`, so `B (022)` is the only frame with both,
+and it is a low oblique with the mesh out of focus. In the disassembly sequence
+the ratchet was already off before `IMG_9573`.
+
+## Barrel bridge bearing - no jewel
+
+`B (009).JPG` shows the barrel bridge alone, lit from above. The barrel arbor's
+upper bearing is a plain brass hole with a turned countersunk oil sink; there is
+no jewel anywhere on the part. `B (013).jpg` annotates that same bearing, and
+two others on the bridge, with **Moebius HP-1300** - a thick oil. A thick oil is
+what a slow, heavily loaded plain bearing gets; a jewelled train bearing gets a
+thin oil and never HP-1300.
+
+The barrel arbor turns once per six hours under full mainspring torque, which is
+the textbook case for a plain bearing rather than a jewel. The model's
+`eta_pos_16_barrel_bridge_jewel` has been removed. The main plate's lower barrel
+jewel, which is evidenced, stays.
+
+The same photograph shows the crown wheel's seat as a two-diameter boss turned
+into the bridge - a larger lower cylinder with a smaller upper step and a
+central screw hole.
+
+## Crown wheel and ratchet wheel do not mesh directly
+
+> **WRONG, AND SUPERSEDED 2026-09-06.** They do mesh. The crown wheel's circular
+> pitch is twice the ratchet wheel's *by design* and its teeth drop into
+> alternate spaces, so the 1.84 pitch ratio measured below is a correct reading
+> of a 2:1 construction rather than proof that a member is missing. See *The
+> winding train, resolved*. Kept as the record of a measurement that was sound
+> and an inference that was not.
+
+A frame from the TrendWatchLab teardown (youtu.be/IhBtUBl3Chs), taken with the
+automatic module lifted off and the movement flat to the camera, puts both
+wheels in one image at one scale and in one focal plane. The same refined polar
+fit applied to each is therefore directly comparable, which no still in either
+photograph set allows:
+
+| wheel | fit score | tip radius (px) | teeth | circular pitch (px) |
+|---|---:|---:|---:|---:|
+| ratchet | 0.056 | 467 | 63 (cluster 61-65) | 46.6 |
+| crown | 0.135 | 341 | 25, second harmonic present at 49-50 | 85.7 |
+
+The crown wheel's circular pitch is **1.84 times** the ratchet wheel's. Wheels of
+different pitch cannot mesh. The same fit puts the centre distance at 875 px
+against a tip-radius sum of 808, leaving the tooth circles roughly 0.9 mm apart;
+the centres there are eyeballed rather than fitted, so that is the weaker of the
+two observations, but it agrees.
+
+Three independent measurements now say the same thing - this frame, `B (022)`,
+and the pair `B (018)`/`B (021)` - and the tooth forms agree with them. The
+crown wheel's teeth are deep hooked wolf teeth, the form that transmits winding
+torque. The ratchet wheel's are shallow, fine and asymmetric, the form that
+holds a click.
+
+`IMG_9577.JPG` rules out the crown wheel as the place a second toothing could
+hide: it is a flat annulus of one thickness with one toothing. So the member
+that carries hand-winding torque from the crown wheel to the barrel arbor is
+either a second, coarser toothing on the **underside** of the ratchet wheel, or
+a separate intermediate wheel. Either way it is a part with two diameters on two
+levels - the pattern the project lead noticed across this movement, and which
+already corrected the automatic train earlier in the reconstruction.
+
+This is a topology question, not a counting question, and the model will not be
+rebuilt until it is answered. What answers it: one photograph of the ratchet
+wheel's **underside**, off the movement.
+
+## The ETA parts chart: a fifth confirmation, and one branch closed
+
+> **PARTLY SUPERSEDED 2026-09-06.** The observation stands - the chart does draw
+> the two wheels at nearly the same diameter with very different tooth counts -
+> but the conclusion drawn from it does not. That is what a 2:1 alternate-tooth
+> engagement looks like, not evidence of a missing part. The chart's numbering
+> running straight from 19 to 20 with nothing between them is now a *positive*
+> result: there is no intermediate because none is needed.
+
+The project lead supplied a dealer's ETA 2824-2 parts chart - a line drawing of
+every component, keyed to the same Pos. numbers as the technical communication.
+It is third-party artwork and is not in this repository. It is an illustration,
+not a dimensioned drawing, so nothing here is promoted above `photo_estimate`.
+Two things in it are still worth having.
+
+**It draws the two wheels side by side, and they disagree the same way.** Pos 19
+is a thin annulus with a large central bore and a small number of coarse,
+hooked teeth. Pos 20 is a solid disc with a **square** central hole - the barrel
+arbor square - and a large number of fine teeth. The two are drawn at almost the
+same outside diameter. Same diameter, roughly two and a half times the tooth
+count: different modules, drawn by ETA's own illustrator.
+
+Checking the chart's scale against known parts confirms it is drawn roughly to
+scale rather than cell-by-cell: taking the main plate at 25.60 mm gives the
+barrel 12.8 (published 12.29), the second wheel 7.0, Pos 19 about 6.9 and Pos 20
+about 7.2 - both within the drawing-scaled measurements already in this
+document.
+
+**It closes the "separate intermediate wheel" branch.** The chart runs 1, 1-1,
+1-2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+23, 24 with sub-numbers, 25, 26, 27, 28, 29, 30, 31-1, 31-2. **Nothing sits
+between 19 and 20**, and no part anywhere in it looks like a small two-level
+winding intermediate. The base movement has no such component.
+
+Combined with `IMG_9577.JPG`, which shows the crown wheel is a flat annulus of
+one thickness with one toothing, that leaves one place for the missing toothing
+to be: **the underside of the ratchet wheel, Pos 20**. The chart draws Pos 20
+from above only, so it cannot confirm or deny it.
+
+The prediction is therefore specific and falsifiable: the ratchet wheel carries a
+second, coarser toothing on its underside, of the crown wheel's module (about
+0.23), with roughly 31 teeth - the count that satisfies the measured 6.72 mm
+centre distance against the crown wheel's 26. One photograph of that wheel
+turned over confirms or kills it.
+
+## Part-number cross-reference, and what the trade listings do not contain
+
+Dealer listings supplied by the project lead pin the two numbering systems
+together. One lists the ratchet wheel as **part 415** with **"Article Number:
+20"** - the classical Swiss number and ETA's Pos. number for the same component,
+stated side by side. With the parts plate drawing 415 as the square-holed
+fine-toothed disc and 420 as the coarse-toothed annulus, the mapping is:
+
+| classical | ETA Pos. | part |
+|---|---|---|
+| 415 | 20 | ratchet wheel |
+| 420 | 19 | crown wheel |
+
+**None of these listings gives a dimension for either wheel.** Every millimetre
+figure on them - 25.6, 26.00, 4.60 - is the *movement*: 11.5 lignes is 25.6 mm,
+which is the number this project has calibrated on since the first page-6
+measurement. A listing that says a ratchet wheel "is designed for a movement
+with a total diameter of 25.6 mm" is describing the calibre, not the part, and
+reading it as a part dimension would silently corrupt the whole winding train.
+Recorded here because it is an easy misread and the numbers look authoritative.
+
+Searched without success for a published crown-wheel diameter or a winding-train
+tooth count: the Ranfft caliber database, 17jewels.info, watch-spare, and
+several parts dealers. All carry movement-level data only. Ranfft's 2824 entry
+gives 11.5 lignes, 26 mm, 4.6 mm height, 25 jewels, 28,800 A/h, 53 degrees lift,
+and no gear train at all.
+
+One claim seen in passing: 17jewels.info states the escape wheel "has got 20
+teeth". **An earlier note here rejected that on the grounds that 20 teeth would
+not give the fourth wheel one turn per minute. That rejection was wrong** and is
+withdrawn. Both counts close against 28,800 A/h, with different intermediates:
+
+    15 teeth at 960 escape rev/h  ->  960 x 15 x 2 = 28,800   (the model's train)
+    20 teeth at 720 escape rev/h  ->  720 x 20 x 2 = 28,800   (this document's
+                                       2026-09-05 derived train, fourth 84 /
+                                       escape pinion 7 gives 60 rev/h = 1 rev/min)
+
+The model uses 15, the standard Swiss count. The 17jewels figure is secondary
+direct observation of a specimen. The two are not reconciled and the escape
+wheel count is still open - it is in the measurement backlog.
+
+**The crown wheel's outside diameter is not published anywhere reachable.** It
+has to be measured off the part.
+
+# THE WINDING TRAIN, RESOLVED (2026-09-06)
+
+A 2013 watchuseek post by a watchmaker states the winding train outright:
+*"The winding pinion has 12 teeth, the crown wheel has 26 (which only engage
+every other tooth on the ratchet wheel) and the ratchet wheel has 63 teeth."*
+
+**Every other tooth.** The crown wheel's circular pitch is twice the ratchet
+wheel's by design, and its teeth drop into alternate spaces. That is why this
+project spent four rounds hunting a member that does not exist: it applied "two
+wheels of different pitch cannot mesh", which governs conventional involute
+gearing and not a wolf-tooth winding drive.
+
+## Why this is trusted
+
+One person on a forum is not a source. This is adopted because it is
+arithmetically self-confirming and because six independently measured quantities
+agree with it.
+
+The author separately states the crown must be turned 2.625 times per ratchet
+revolution. From the three tooth counts alone:
+
+    12/26 x 26/(63/2) = 0.380952 ...   1/0.380952 = 2.6250
+
+exactly. Change any one count and it breaks.
+
+| quantity | how this project got it | value | derived from the above |
+|---|---|---|---|
+| crown wheel teeth | `IMG_9577.JPG`, polar fit score 0.209, harmonics at 53 and 78 | 26 | 26 |
+| ratchet wheel teeth | teardown frame, polar fit | 63 | 63 |
+| crown : ratchet circular pitch | one frame, one scale | 1.84 | 2.00 |
+| crown wheel outside diameter | page 6, drawing-scaled | 6.29 - 6.41 | 6.436 |
+| ratchet wheel outside diameter | page 6, drawing-scaled | 7.40 - 7.54 | 7.470 (input) |
+| crown-to-barrel centre distance | measured plate layout | 6.72 | 6.608 |
+
+Evidence class: **derived**, resting on `drawing_scaled` diameters and
+`photo_measured` counts, with the tooth counts themselves now confirmed three
+ways.
+
+## The resolved parameters
+
+Taking the ratchet wheel's measured 7.47 outside diameter as the input:
+
+| | teeth | module | pitch diameter | outside diameter |
+|---|---:|---:|---:|---:|
+| winding pinion | 12 | 0.2298 | 2.758 | - |
+| crown wheel | 26 | 0.2298 | 5.976 | 6.436 |
+| ratchet wheel | 63 | 0.1149 | 7.238 | 7.470 |
+
+- The crown wheel engages the ratchet wheel on **alternate teeth**: effective 31.5.
+- Crown-to-barrel centre distance **6.608**.
+- Crown turns per ratchet turn **2.625**.
+- The ratchet wheel's fine teeth are cut for the click; the crown wheel engages
+  them two at a time. One toothing, two duties, two effective modules.
+
+## Also from the same post, not yet adopted
+
+Unverified, and recorded only as leads: barrel arbor nominal diameter 3.36;
+mainspring 0.125 thick and a little over 400 long; barrel inside diameter about
+11; six equidistant bridle notches in the barrel wall; about 22 arbor
+revolutions for a full wind. The model currently carries a 12.29 barrel outside
+diameter, so an 11 inside diameter is consistent with a 0.6 wall.
+
+# Reading order, 2026-09-06
+
+This document has grown by accretion across several sessions and now contains
+superseded material on purpose - the project is the subject of a video, and how
+a wrong answer was reached and corrected is part of the record. To read it for
+current facts rather than for the history:
+
+1. **Movement-level facts** and the **part ledger** - unchanged throughout, safe.
+2. **Drawing-scaled dimensions from the ETA materials page** - the measured
+   table, the stepped elevation profiles, the plate layout and bearing centres.
+   Still the dimensional backbone.
+3. **THE WINDING TRAIN, RESOLVED** at the end - the current answer for the crown
+   wheel, ratchet wheel and winding pinion. Overrides everything earlier in the
+   document on those three parts.
+4. **Photographs of the movement itself** - the barrel bridge having no jewel,
+   and the crown wheel's 26 teeth, both stand. The three sections carrying
+   SUPERSEDED banners record measurements that were sound and an inference that
+   was not; read them for method, not for facts.
+
+The going train, the automatic train and every axial level are still
+`expert_estimate` constrained by chains that close. Only the winding train, the
+date indicator's 31 teeth and the drawing-scaled diameters are better than that.
+
+## What is still unmeasured
+
+- Every going-train tooth count. The escape wheel is 15 or 20 and unreconciled.
+- Every automatic-train tooth count. One lead worth testing: a watchmaker's
+  claim that ETA data sheets put a full automatic wind at 1250 rotor rotations.
+  This model derives 34.8 rotor turns per ratchet turn, which puts a full wind
+  near 260, so if 1250 is right the automatic reduction is out by nearly five
+  times.
+- Every axial level. The 3.35 base movement height is still an expert estimate
+  and is the weakest input in the model.
+- The crown wheel's position needs re-solving on the 6.608 centre distance.
+
+# Which execution this model is of (2026-09-06)
+
+**This reconstruction is of the 17-jewel execution.** The specimen in the
+teardown is a Hamilton-cased ETA 2824-2 whose caseback reads *17 JEWELS*, and
+its rotor is stamped *17 JEWELS SWISS MADE*. The ETA technical communication
+this project has used throughout describes a **25-jewel** execution. Both are
+the same calibre; ETA built it in several grades.
+
+Recording it explicitly because the two disagree on exactly one thing, and
+because leaving it implicit is how a model ends up half one movement and half
+another.
+
+## What the difference does and does not touch
+
+A lower jewel count is jewels replaced by plain bearings at the lighter-loaded
+pivots. It is not a different calibre, a different plate or a different train.
+So almost everything already measured stands:
+
+| Evidence | Still valid? | Why |
+|---|---|---|
+| Every `drawing_scaled` dimension off page 6 | **Yes** | Part envelopes are shared across executions |
+| The measured plate layout and bearing centres | **Yes** | The holes are in the same places; some carry brass instead of ruby |
+| Tooth counts, modules, centre distances | **Yes** | The gear trains are identical |
+| 25.60 diameter, 4.60 height, 28,800 A/h, 50 degree lift, power reserve | **Yes** | Calibre-level, not execution-level |
+| **Jewel count, and which bearings are jewelled** | **No** | This is the one thing that differs |
+
+So the technical communication remains the primary source for identity, parts
+list, service order, lubrication and dimensions. It is not the source for
+jewels, and this document should not quote its 25 as though it described the
+movement being modelled.
+
+## How the jewel map gets built
+
+Not by inference. A jewel is red and unmistakable in a photograph, and the
+project lead's stills index has a frame for every part, so each one can simply
+be looked at as the walkthrough reaches it. Two data points already:
+
+- **Barrel bridge, position 16: no jewel.** Photographed alone it shows a plain
+  brass countersunk oil sink at the barrel arbor, and the lubrication frame
+  annotates that bearing with Moebius HP-1300, a thick oil - a plain-bearing
+  lubricant. The model's jewel there was removed before this was understood as
+  an execution difference; it now looks like the first instance of the pattern.
+- **Automatic lower bridge, position 30: jewelled.** The flat frame of the
+  module shows three red stones in the steel bridge. So the difference is *not*
+  simply "the automatic module loses its jewels", and guessing which eight
+  differ would be exactly the kind of inference this project has already been
+  burned by twice.
+
+The model currently places four jewel parts. Building the real map is a
+walkthrough task, not a derivation.
