@@ -36,7 +36,19 @@ an educational/reference model, not a manufacturing drawing package.
 > [`output/EXPORTS-2026-09-07.md`](output/EXPORTS-2026-09-07.md) for what each
 > format does and does not carry.
 
-[<img src="rendered/thumbs/watch_render_hero.jpg" width="820" alt="the movement, exploded"/>](rendered/watch_render.jpeg)
+## Session one — watch it being built
+
+[<img src="https://i.ytimg.com/vi/DhmN8472T4A/hqdefault.jpg" width="420" alt="ChatGPT designed this parametric watch movement in Cade. — Yeph Werks"/>](https://www.youtube.com/watch?v=DhmN8472T4A)
+
+**[ChatGPT designed this parametric watch movement in Cade.](https://www.youtube.com/watch?v=DhmN8472T4A)**
+— Yeph Werks. The first session, start to finish.
+
+The written record of that session is in this repository as
+[`chatgpt_session_one.md`](chatgpt_session_one.md). What the model has become
+since is in [`MODEL_STATUS.md`](MODEL_STATUS.md), which grades every ETA
+position as `placeholder`, `estimated` or `supported`, and in
+[`ASSUMPTIONS.md`](ASSUMPTIONS.md), which says which numbers are published and
+which are estimates.
 
 ## Renders
 
